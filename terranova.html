@@ -216,6 +216,67 @@ html, body { height: 100%; overflow: hidden; background: var(--ink); }
   opacity: 0; transition: opacity 0.4s; pointer-events: none;
 }
 #export-confirm.show { opacity: 1; }
+
+/* UNIT TOGGLE */
+#unit-toggle {
+  display: flex; align-items: center; justify-content: center; gap: 0;
+  margin-bottom: 20px; border: 1px solid rgba(201,146,10,0.3); border-radius: 6px; overflow: hidden;
+}
+.unit-opt {
+  flex: 1; padding: 8px 0; text-align: center; cursor: pointer; touch-action: manipulation;
+  font-family: var(--font-body); font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+  text-transform: uppercase; color: rgba(242,232,204,0.45);
+  background: transparent; border: none; transition: all 0.18s;
+}
+.unit-opt.active { background: rgba(201,146,10,0.2); color: var(--gold-lt); }
+.unit-opt + .unit-opt { border-left: 1px solid rgba(201,146,10,0.3); }
+
+/* SESSION TIMER in HUD */
+#hud-time { display: none; }
+#hud-sep-time { display: none; }
+#hud-time.visible { display: block; }
+
+/* CONQUEST LOG */
+#log-section { margin-top: 28px; }
+#log-section h3 { font-family:var(--font-body); font-weight:700; font-size:13px; letter-spacing:0.12em; text-transform:uppercase; color:#8b6914; margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+#log-section h3::after { content:''; flex:1; height:1px; background:rgba(139,105,20,0.25); }
+.log-entry {
+  border: 1px solid rgba(201,146,10,0.12); border-radius: 8px;
+  padding: 13px 16px; margin-bottom: 10px;
+  background: rgba(14,10,4,0.5);
+  position: relative;
+}
+.log-entry-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 6px;
+}
+.log-date {
+  font-family: var(--font-body); font-size: 11px; font-weight: 600;
+  color: var(--gold-lt); letter-spacing: 0.04em;
+}
+.log-claimed {
+  font-family: var(--font-body); font-size: 10px; font-weight: 600;
+  color: #a8d890; letter-spacing: 0.04em;
+}
+.log-no-claim {
+  font-family: var(--font-text); font-style: italic;
+  font-size: 10px; color: rgba(242,232,204,0.35);
+}
+.log-stats {
+  display: flex; gap: 16px; flex-wrap: wrap;
+}
+.log-stat {
+  font-family: var(--font-text); font-style: italic;
+  font-size: 11px; color: rgba(242,232,204,0.55);
+}
+.log-stat span { color: var(--parchment-dk); font-style: normal; }
+.log-del {
+  position: absolute; top: 10px; right: 12px;
+  background: none; border: none; color: rgba(200,100,100,0.3);
+  font-size: 12px; cursor: pointer; touch-action: manipulation; padding: 2px 4px;
+}
+.log-del:active { color: rgba(200,100,100,0.7); }
+#log-empty { font-family:var(--font-text); font-style:italic; font-size:11px; color:rgba(242,232,204,0.25); text-align:center; padding:16px 0; }
 .kingdom-territory { background:rgba(20,14,5,0.7); border:1px solid rgba(201,146,10,0.15); border-radius:8px; padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:border-color 0.2s; }
 .kingdom-territory:active { border-color:rgba(201,146,10,0.4); }
 .kt-crest { width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; border:1px solid rgba(255,255,255,0.1); }
@@ -260,6 +321,8 @@ html, body { height: 100%; overflow: hidden; background: var(--ink); }
 <div id="trail-hud">
   <div class="hud-item"><div class="hud-val" id="hud-dist">0m</div><div class="hud-lbl">Distance</div></div>
   <div class="hud-sep"></div>
+  <div class="hud-item" id="hud-time"><div class="hud-val" id="hud-elapsed">0:00</div><div class="hud-lbl">Elapsed</div></div>
+  <div class="hud-sep" id="hud-sep-time"></div>
   <div class="hud-item"><div class="hud-val" id="hud-pts">0</div><div class="hud-lbl">Waypoints</div></div>
   <div class="hud-sep"></div>
   <div class="hud-item"><div class="hud-val" id="hud-loop">—</div><div class="hud-lbl">To Start</div></div>
@@ -319,12 +382,21 @@ html, body { height: 100%; overflow: hidden; background: var(--ink); }
     </div>
     <div id="territories-section">
       <h3>Conquered Territories</h3>
+      <div id="unit-toggle">
+        <button class="unit-opt active" id="unit-mi" onclick="setUnits('mi')">Miles</button>
+        <button class="unit-opt" id="unit-km" onclick="setUnits('km')">Kilometres</button>
+      </div>
       <button id="export-btn" onclick="exportGeoJSON()" title="Download as GeoJSON for ArcGIS, QGIS, etc.">
         <span id="export-icon">⬇</span>
         Export territories to GeoJSON
       </button>
       <div id="export-confirm">✦ Scroll saved — open in ArcGIS or QGIS ✦</div>
       <div id="kingdom-list"></div>
+    </div>
+
+    <div id="log-section">
+      <h3>Expedition Chronicle</h3>
+      <div id="conquest-log"></div>
     </div>
   </div>
 </div>
@@ -681,6 +753,7 @@ function onPos(pos) {
       document.getElementById('seal-inner').textContent = '◼';
       document.getElementById('btn-stop').style.display = '';
       showHUD();
+      startTimer();
       acquireWL();
       setStatus(`Trail recovered — ${trail.length} waypoints restored.`,'alert');
     }
@@ -707,7 +780,7 @@ function onPos(pos) {
     const ds = dist(trail[0],[lat,lng]);
     const canClose = ds < 65;
     document.getElementById('btn-claim').style.display = canClose ? '' : 'none';
-    document.getElementById('hud-loop').textContent = ds<1000 ? Math.round(ds)+'m' : (ds/1000).toFixed(1)+'km';
+    document.getElementById('hud-loop').textContent = fmtDist(ds);
     const dot = startMarker?.getElement()?.querySelector('.start-dot');
     if (dot) dot.classList.toggle('pulsing', canClose);
   }
@@ -716,11 +789,19 @@ function onPos(pos) {
 // ══════════════════════════════════════════════════════════
 //  LIVE TRAIL HUD
 // ══════════════════════════════════════════════════════════
-function showHUD() { document.getElementById('trail-hud').classList.add('visible'); }
-function hideHUD() { document.getElementById('trail-hud').classList.remove('visible'); }
+function showHUD() {
+  document.getElementById('trail-hud').classList.add('visible');
+  document.getElementById('hud-time').style.display = 'block';
+  document.getElementById('hud-sep-time').style.display = '';
+}
+function hideHUD() {
+  document.getElementById('trail-hud').classList.remove('visible');
+  document.getElementById('hud-time').style.display = 'none';
+  document.getElementById('hud-sep-time').style.display = 'none';
+}
 function updateHUD(lat,lng) {
   const d = trailDist();
-  document.getElementById('hud-dist').textContent = d>=1000 ? (d/1000).toFixed(2)+'km' : Math.round(d)+'m';
+  document.getElementById('hud-dist').textContent = fmtDist(d);
   document.getElementById('hud-pts').textContent  = trail.length;
   if (trail.length < 6) document.getElementById('hud-loop').textContent = '—';
 }
@@ -756,12 +837,15 @@ function startRecording() {
   document.getElementById('btn-claim').style.display = 'none';
   showHUD();
   acquireWL();
+  startTimer();
   localStorage.setItem('tv-active-trail', JSON.stringify(trail));
   setStatus('The expedition has begun. Mark your trail.','alert');
 }
 
 function stopRecording() {
-  recording = false; releaseWL(); removeStartDot(); hideHUD();
+  // Log the expedition before resetting state
+  if (trail.length >= 3) logExpedition(null);
+  recording = false; releaseWL(); removeStartDot(); hideHUD(); stopTimer();
   document.getElementById('seal-btn').classList.remove('recording');
   document.getElementById('seal-inner').textContent = '⚑';
   document.getElementById('btn-stop').style.display = 'none';
@@ -798,10 +882,12 @@ function saveClaim() {
   territories.push(t);
   saveTerritories();
   drawPoly(t,true);
+  // Log before resetting trail/timer
+  logExpedition(t);
   if(trailLine){map.removeLayer(trailLine);trailLine=null;}
   removeStartDot();
   trail=[]; pendingPoints=null; recording=false;
-  releaseWL(); hideHUD();
+  releaseWL(); hideHUD(); stopTimer();
   localStorage.removeItem('tv-active-trail');
   localStorage.setItem('tv-total-dist',totalDistKm.toFixed(3));
   document.getElementById('seal-btn').classList.remove('recording');
@@ -829,18 +915,29 @@ function openKingdom()  { renderKingdom(); document.getElementById('kingdom-scre
 function closeKingdom() { document.getElementById('kingdom-screen').classList.remove('open'); }
 
 function renderKingdom() {
+  // Sync unit toggle buttons
+  document.getElementById('unit-mi').classList.toggle('active', !useMetric);
+  document.getElementById('unit-km').classList.toggle('active',  useMetric);
+
   document.getElementById('realm-name-display').textContent = realmName;
   document.getElementById('k-zones').textContent = territories.length;
   document.getElementById('k-area').textContent  = formatArea(territories.reduce((s,t)=>s+(t.area||0),0));
-  document.getElementById('k-dist').textContent  = totalDistKm.toFixed(1);
+  document.getElementById('k-dist').textContent  = fmtDistLong(totalDistKm);
+  document.getElementById('k-dist').closest('.empire-stat').querySelector('.empire-stat-lbl').textContent =
+    useMetric ? 'Km Walked' : 'Miles Walked';
+
   const list = document.getElementById('kingdom-list');
-  if (!territories.length) { list.innerHTML=`<div id="empty-realm"><span class="big">🗺</span>No territories claimed.<br>Venture forth and conquer the unknown.</div>`; return; }
-  list.innerHTML = territories.map((t,i)=>`
-    <div class="kingdom-territory" onclick="flyTo(${i})">
-      <div class="kt-crest" style="background:${t.color.fill};border-color:${t.color.stroke}">${t.emoji}</div>
-      <div class="kt-info"><div class="kt-name" style="color:${t.color.text}">${t.name}</div><div class="kt-details">${t.date} · ${formatArea(t.area||0)}</div></div>
-      <button class="kt-del" onclick="event.stopPropagation();delT(${i})">Cede</button>
-    </div>`).join('');
+  if (!territories.length) { list.innerHTML=`<div id="empty-realm"><span class="big">🗺</span>No territories claimed.<br>Venture forth and conquer the unknown.</div>`; }
+  else {
+    list.innerHTML = territories.map((t,i)=>`
+      <div class="kingdom-territory" onclick="flyTo(${i})">
+        <div class="kt-crest" style="background:${t.color.fill};border-color:${t.color.stroke}">${t.emoji}</div>
+        <div class="kt-info"><div class="kt-name" style="color:${t.color.text}">${t.name}</div><div class="kt-details">${t.date} · ${formatArea(t.area||0)}</div></div>
+        <button class="kt-del" onclick="event.stopPropagation();delT(${i})">Cede</button>
+      </div>`).join('');
+  }
+
+  renderLog();
 }
 
 function flyTo(i) { const t=territories[i]; if(!t?.points.length) return; closeKingdom(); map.fitBounds(L.latLngBounds(t.points),{padding:[60,60],animate:true}); }
@@ -878,7 +975,7 @@ function polyArea(pts) {
   for(let i=0;i<pts.length;i++){const j=(i+1)%pts.length;const xi=pts[i][1]*Math.PI/180*R*Math.cos(pts[i][0]*Math.PI/180),yi=pts[i][0]*Math.PI/180*R,xj=pts[j][1]*Math.PI/180*R*Math.cos(pts[j][0]*Math.PI/180),yj=pts[j][0]*Math.PI/180*R;a+=xi*yj-xj*yi;}
   return Math.abs(a/2);
 }
-function formatArea(m2) { if(m2>=1e6) return (m2/1e6).toFixed(2)+' km²'; if(m2>=1e4) return (m2/1e4).toFixed(2)+' ha'; return Math.round(m2)+' m²'; }
+function formatArea(m2) { return fmtArea(m2); }
 function setStatus(msg,type='') { document.getElementById('status-text').textContent=msg; document.getElementById('status-scroll').className=type; }
 function centerOnUser() { if(currentPos)map.setView(currentPos,17,{animate:true}); else setStatus('No position fix yet. Patience…','danger'); }
 function updateHeader() { document.getElementById('stat-zones').textContent=territories.length; const t=territories.reduce((s,t)=>s+(t.area||0),0); document.getElementById('stat-area').textContent=t>0?formatArea(t):'—'; }
@@ -938,12 +1035,13 @@ function exportGeoJSON() {
     name: `${realmName} — Terranova Export`,
     crs: { type: 'name', properties: { name: 'urn:ogc:def:crs:OGC:1.3:CRS84' } },
     metadata: {
-      realm:          realmName,
-      exported:       new Date().toISOString(),
+      realm:           realmName,
+      exported:        new Date().toISOString(),
       total_provinces: territories.length,
-      total_area_m2:  Math.round(territories.reduce((s,t)=>s+(t.area||0),0)),
-      km_walked:      parseFloat(totalDistKm.toFixed(2)),
-      app:            'Terranova — Age of Exploration',
+      total_area_m2:   Math.round(territories.reduce((s,t)=>s+(t.area||0),0)),
+      distance_km:     parseFloat(totalDistKm.toFixed(2)),
+      distance_mi:     parseFloat((totalDistKm / 1.609344).toFixed(2)),
+      app:             'Terranova — Age of Exploration',
     },
     features,
     exploration_points: fogFeatures,
@@ -969,6 +1067,157 @@ function exportGeoJSON() {
 }
 
 // ══════════════════════════════════════════════════════════
+//  UNIT SYSTEM  (miles / km)
+// ══════════════════════════════════════════════════════════
+let useMetric = localStorage.getItem('tv-units') !== 'mi'; // default miles
+
+function setUnits(u) {
+  useMetric = (u === 'km');
+  localStorage.setItem('tv-units', u);
+  document.getElementById('unit-mi').classList.toggle('active', !useMetric);
+  document.getElementById('unit-km').classList.toggle('active',  useMetric);
+  // Refresh all displayed distances
+  renderKingdom();
+  updateHeader();
+  if (recording) updateHUD(currentPos?.[0], currentPos?.[1]);
+}
+
+function fmtDist(meters) {
+  if (useMetric) {
+    return meters >= 1000
+      ? (meters / 1000).toFixed(2) + ' km'
+      : Math.round(meters) + ' m';
+  } else {
+    const miles = meters / 1609.344;
+    return miles >= 0.1
+      ? miles.toFixed(2) + ' mi'
+      : Math.round(meters * 3.28084) + ' ft';
+  }
+}
+
+function fmtDistLong(km) {
+  // km stored, display in chosen unit — for lifetime totals
+  return useMetric
+    ? km.toFixed(2) + ' km'
+    : (km / 1.609344).toFixed(2) + ' mi';
+}
+
+function fmtArea(m2) {
+  if (useMetric) {
+    if (m2 >= 1e6) return (m2/1e6).toFixed(2)+' km²';
+    if (m2 >= 1e4) return (m2/1e4).toFixed(2)+' ha';
+    return Math.round(m2)+' m²';
+  } else {
+    const acres = m2 / 4046.856;
+    if (acres >= 640) return (acres/640).toFixed(2)+' sq mi';
+    if (acres >= 1)   return acres.toFixed(2)+' ac';
+    return Math.round(m2 * 10.7639)+' ft²';
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  SESSION TIMER
+// ══════════════════════════════════════════════════════════
+let sessionStart  = null;   // Date.now() ms when recording began
+let timerInterval = null;
+
+function startTimer() {
+  sessionStart = Date.now();
+  // Show elapsed HUD items
+  document.getElementById('hud-time').classList.add('visible');
+  document.getElementById('hud-sep-time').style.display = '';
+  timerInterval = setInterval(tickTimer, 1000);
+  tickTimer();
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  document.getElementById('hud-time').classList.remove('visible');
+  document.getElementById('hud-sep-time').style.display = 'none';
+}
+
+function tickTimer() {
+  if (!sessionStart) return;
+  const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+  const h = Math.floor(elapsed / 3600);
+  const m = Math.floor((elapsed % 3600) / 60);
+  const s = elapsed % 60;
+  document.getElementById('hud-elapsed').textContent =
+    h > 0
+      ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+      : `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function sessionElapsedMs() {
+  return sessionStart ? Date.now() - sessionStart : 0;
+}
+
+function fmtDuration(ms) {
+  const total = Math.floor(ms / 1000);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m ${total % 60}s`;
+}
+
+// ══════════════════════════════════════════════════════════
+//  CONQUEST LOG
+// ══════════════════════════════════════════════════════════
+let conquestLog = JSON.parse(localStorage.getItem('tv-conquest-log') || '[]');
+
+function logExpedition(claimedTerritory) {
+  // claimedTerritory is the full territory object, or null if abandoned
+  const distKm = trailDist() / 1000;
+  const entry = {
+    id:        Date.now(),
+    date:      new Date().toLocaleDateString('en-US', {weekday:'short', year:'numeric', month:'short', day:'numeric'}),
+    time:      new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}),
+    durationMs: sessionElapsedMs(),
+    distKm,
+    claimed:   claimedTerritory ? {
+      name:  claimedTerritory.name,
+      emoji: claimedTerritory.emoji,
+      area:  claimedTerritory.area,
+    } : null,
+  };
+  // Prepend so newest is first
+  conquestLog.unshift(entry);
+  // Keep last 100 entries
+  if (conquestLog.length > 100) conquestLog = conquestLog.slice(0, 100);
+  localStorage.setItem('tv-conquest-log', JSON.stringify(conquestLog));
+}
+
+function renderLog() {
+  const el = document.getElementById('conquest-log');
+  if (!conquestLog.length) {
+    el.innerHTML = '<div id="log-empty">No expeditions recorded yet.<br>Begin your first march.</div>';
+    return;
+  }
+  el.innerHTML = conquestLog.map((e, i) => `
+    <div class="log-entry">
+      <button class="log-del" onclick="deleteLogEntry(${i})" title="Remove">✕</button>
+      <div class="log-entry-header">
+        <div class="log-date">${e.date} · ${e.time}</div>
+        ${e.claimed
+          ? `<div class="log-claimed">${e.claimed.emoji} ${e.claimed.name}</div>`
+          : `<div class="log-no-claim">No claim</div>`}
+      </div>
+      <div class="log-stats">
+        <div class="log-stat">⏱ <span>${fmtDuration(e.durationMs)}</span></div>
+        <div class="log-stat">📍 <span>${fmtDistLong(e.distKm)}</span></div>
+        ${e.claimed ? `<div class="log-stat">⚜ <span>${fmtArea(e.claimed.area || 0)}</span></div>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function deleteLogEntry(i) {
+  conquestLog.splice(i, 1);
+  localStorage.setItem('tv-conquest-log', JSON.stringify(conquestLog));
+  renderLog();
+}
+
+// ══════════════════════════════════════════════════════════
 //  KEYBOARD
 // ══════════════════════════════════════════════════════════
 document.getElementById('territory-input').addEventListener('keydown',e=>{if(e.key==='Enter')saveClaim();if(e.key==='Escape')cancelClaim();});
@@ -979,6 +1228,8 @@ document.getElementById('kingdom-screen').addEventListener('keydown',e=>{if(e.ke
 // ══════════════════════════════════════════════════════════
 territories.forEach(t=>drawPoly(t,false));
 updateHeader(); renderDrawer(); drawFog();
+// Sync unit toggle to saved preference
+setUnits(useMetric ? 'km' : 'mi');
 setTimeout(()=>{ fogCircles.forEach((c,i)=>{ if(!waterPts.has(i)) sampleWater(c.lat,c.lng,i); }); },2500);
 startGPS();
 setStatus('Consulting the stars for your position…');
