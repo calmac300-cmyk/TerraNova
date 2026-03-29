@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Terranova — Age of Exploration</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --parchment:    #f2e8cc;
+  --parchment-dk: #d4c49a;
+  --ink:          #2a1f0e;
+  --gold:         #c9920a;
+  --gold-lt:      #e8b84b;
+  --font-body:    'Cinzel', serif;
+  --font-text:    'IM Fell English', serif;
+  --font-gothic:  'UnifrakturMaguntia', cursive;
+}
+html, body { height: 100%; overflow: hidden; background: var(--ink); }
+
+/* MAP */
+#map { position: absolute; inset: 0; z-index: 0; filter: saturate(0.85) brightness(0.92) contrast(1.04); }
+#map-vignette {
+  position: absolute; inset: 0; z-index: 10; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 38%, rgba(20,13,5,0.5) 100%);
+}
+.leaflet-control-attribution {
+  background: rgba(42,31,14,0.8) !important; color: rgba(242,232,204,0.5) !important;
+  font-family: var(--font-text) !important; font-size: 9px !important; border-top-left-radius: 6px;
+}
+.leaflet-control-attribution a { color: rgba(242,232,204,0.6) !important; }
+.leaflet-bottom.leaflet-right { bottom: 220px; }
+.leaflet-control-zoom { display: none; }
+
+/* LAYERS */
+#fog-canvas { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
+#creatures-layer { position: absolute; inset: 0; z-index: 25; pointer-events: none; overflow: hidden; }
+
+/* HEADER */
+#header {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 200; pointer-events: none;
+  background: linear-gradient(180deg, rgba(20,13,5,0.97) 0%, rgba(20,13,5,0) 100%);
+  padding: 14px 18px 40px; display: flex; align-items: flex-start; justify-content: space-between;
+}
+#logo-block { pointer-events: all; cursor: pointer; }
+#logo-sub { font-family: var(--font-gothic); font-size: 28px; color: var(--gold-lt); line-height: 1; text-shadow: 0 2px 8px rgba(0,0,0,0.6); letter-spacing: 2px; }
+#logo-tagline { font-family: var(--font-text); font-style: italic; font-size: 11px; color: var(--parchment-dk); opacity: 0.7; letter-spacing: 0.04em; margin-top: 2px; }
+#header-stats { display: flex; gap: 20px; padding-top: 4px; }
+.hstat { text-align: right; }
+.hstat-label { font-family: var(--font-text); font-style: italic; font-size: 9px; color: var(--parchment-dk); opacity: 0.6; text-transform: uppercase; letter-spacing: 0.1em; }
+.hstat-value { font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--gold-lt); line-height: 1.1; }
+
+/* STATUS */
+#status-scroll {
+  position: absolute; top: 76px; left: 50%; transform: translateX(-50%); z-index: 200;
+  background: rgba(20,13,5,0.88); border: 1px solid rgba(201,146,10,0.35); border-radius: 4px;
+  padding: 6px 20px 7px; font-family: var(--font-text); font-style: italic; font-size: 12px;
+  color: var(--parchment-dk); white-space: nowrap; pointer-events: none;
+  transition: color 0.4s; box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+#status-scroll::before, #status-scroll::after { content:'✦'; color:var(--gold); margin:0 6px; font-style:normal; font-size:8px; vertical-align:middle; }
+#status-scroll.alert  { color: var(--gold-lt); }
+#status-scroll.danger { color: #e07070; }
+
+/* LIVE TRAIL HUD */
+#trail-hud {
+  position: absolute; top: 110px; left: 50%; transform: translateX(-50%); z-index: 200;
+  pointer-events: none; background: rgba(20,13,5,0.82); border: 1px solid rgba(201,146,10,0.25);
+  border-radius: 20px; padding: 5px 16px; display: none; gap: 18px; align-items: center;
+}
+#trail-hud.visible { display: flex; }
+.hud-item { text-align: center; }
+.hud-val { font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--gold-lt); }
+.hud-lbl { font-family: var(--font-text); font-style: italic; font-size: 9px; color: rgba(242,232,204,0.45); }
+.hud-sep { width: 1px; height: 24px; background: rgba(201,146,10,0.2); }
+
+/* LAYER TOGGLE */
+#layer-toggle {
+  position: absolute; top: 78px; right: 14px; z-index: 200;
+  background: rgba(20,13,5,0.88); border: 1px solid rgba(201,146,10,0.3); border-radius: 8px;
+  padding: 6px 12px; font-family: var(--font-text); font-style: italic; font-size: 11px;
+  color: var(--parchment-dk); cursor: pointer; touch-action: manipulation; transition: border-color 0.2s;
+}
+#layer-toggle:active { border-color: rgba(201,146,10,0.6); }
+
+/* WAKE LOCK BANNER */
+#wake-banner {
+  position: absolute; top: 112px; left: 50%; transform: translateX(-50%); z-index: 210;
+  background: rgba(80,30,10,0.96); border: 1px solid rgba(220,140,40,0.55); border-radius: 6px;
+  padding: 9px 16px 10px; display: flex; align-items: flex-start; gap: 10px;
+  max-width: calc(100vw - 32px); box-shadow: 0 3px 16px rgba(0,0,0,0.6);
+  opacity: 0; pointer-events: none; transition: opacity 0.35s ease;
+}
+#wake-banner.visible { opacity: 1; pointer-events: all; }
+#wake-banner-icon { font-size: 18px; flex-shrink: 0; line-height: 1; margin-top: 1px; }
+#wake-banner-text { font-family: var(--font-text); font-style: italic; font-size: 11.5px; color: var(--parchment-dk); line-height: 1.55; }
+#wake-banner-text strong { font-style: normal; color: var(--gold-lt); font-weight: 600; }
+#wake-banner-dismiss { flex-shrink: 0; background: none; border: 1px solid rgba(220,140,40,0.35); border-radius: 4px; color: rgba(242,232,204,0.5); font-family: var(--font-body); font-size: 10px; padding: 4px 8px; cursor: pointer; touch-action: manipulation; align-self: center; white-space: nowrap; }
+
+/* BOTTOM PANEL */
+#bottom-panel {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 200;
+  background: linear-gradient(0deg, rgba(20,13,5,0.98) 0%, rgba(20,13,5,0) 100%);
+  padding: 0 14px 28px;
+}
+#control-parchment {
+  background: rgba(30,20,8,0.92); border: 1px solid rgba(201,146,10,0.3); border-radius: 12px;
+  padding: 14px 16px 16px; position: relative;
+  box-shadow: inset 0 1px 0 rgba(201,146,10,0.15), inset 0 -1px 0 rgba(201,146,10,0.1), 0 -4px 20px rgba(0,0,0,0.5);
+}
+#control-parchment::before {
+  content:'⸻ ✦ ⸻'; position:absolute; top:-1px; left:50%; transform:translateX(-50%);
+  font-family:var(--font-body); font-size:10px; color:var(--gold);
+  background:rgba(30,20,8,0.92); padding:0 8px; letter-spacing:4px;
+}
+#gps-line { font-family:var(--font-text); font-style:italic; font-size:10px; color:rgba(242,232,204,0.4); text-align:center; margin-bottom:12px; min-height:14px; }
+#main-controls { display:grid; grid-template-columns:1fr 64px 1fr; gap:10px; align-items:center; margin-bottom:12px; }
+.scroll-btn {
+  font-family:var(--font-body); font-weight:600; font-size:11px; letter-spacing:0.06em; text-transform:uppercase;
+  border-radius:6px; border:1px solid rgba(201,146,10,0.35); background:rgba(201,146,10,0.08);
+  color:var(--parchment-dk); padding:10px 8px; cursor:pointer; transition:all 0.18s; touch-action:manipulation;
+}
+.scroll-btn:active { background:rgba(201,146,10,0.2); transform:scale(0.97); }
+.scroll-btn.claim-btn { background:rgba(45,90,39,0.3); border-color:rgba(90,128,56,0.55); color:#a8d890; }
+
+#seal-btn {
+  width:64px; height:64px; border-radius:50%; border:2px solid rgba(201,146,10,0.5);
+  background:rgba(30,20,8,0.95); cursor:pointer; position:relative; display:flex;
+  align-items:center; justify-content:center; touch-action:manipulation; transition:border-color 0.2s;
+  box-shadow:0 0 0 4px rgba(201,146,10,0.08);
+}
+#seal-btn:active { transform:scale(0.94); }
+#seal-btn.recording { border-color:rgba(180,60,60,0.7); box-shadow:0 0 0 4px rgba(180,60,60,0.12); }
+#seal-inner { width:38px; height:38px; border-radius:50%; background:var(--gold); display:flex; align-items:center; justify-content:center; font-size:18px; transition:background 0.2s, border-radius 0.25s; }
+#seal-btn.recording #seal-inner { background:#b03030; border-radius:6px; width:24px; height:24px; }
+#seal-pulse { position:absolute; inset:-6px; border-radius:50%; border:1px solid rgba(180,60,60,0.4); opacity:0; pointer-events:none; }
+#seal-btn.recording #seal-pulse { animation:seal-ring 1.8s ease-out infinite; }
+@keyframes seal-ring { 0%{transform:scale(0.85);opacity:0.7;} 100%{transform:scale(1.3);opacity:0;} }
+
+#territories-toggle { background:none; border:none; color:rgba(242,232,204,0.45); font-family:var(--font-text); font-style:italic; font-size:11px; cursor:pointer; width:100%; text-align:center; padding:4px; touch-action:manipulation; }
+#territories-drawer { max-height:0; overflow:hidden; transition:max-height 0.4s cubic-bezier(0.4,0,0.2,1); }
+#territories-drawer.open { max-height:260px; overflow-y:auto; }
+.t-entry { display:flex; align-items:center; justify-content:space-between; padding:8px 2px; border-bottom:1px solid rgba(201,146,10,0.12); }
+.t-entry:last-child { border-bottom:none; }
+.t-name { font-family:var(--font-body); font-size:12px; font-weight:600; margin-bottom:2px; }
+.t-meta { font-family:var(--font-text); font-style:italic; font-size:10px; color:rgba(242,232,204,0.4); }
+.t-del { background:none; border:1px solid rgba(160,80,80,0.3); color:rgba(200,120,120,0.6); border-radius:4px; padding:3px 8px; font-size:10px; cursor:pointer; font-family:var(--font-text); touch-action:manipulation; flex-shrink:0; }
+
+/* USER MARKER */
+.explorer-marker { width:24px; height:24px; }
+.explorer-compass { width:24px; height:24px; animation:compass-wobble 8s ease-in-out infinite; }
+@keyframes compass-wobble { 0%,85%,100%{transform:rotate(0deg);} 92%{transform:rotate(6deg);} 96%{transform:rotate(-3deg);} }
+
+/* LOOP START INDICATOR */
+.start-dot { width:14px; height:14px; border-radius:50%; background:rgba(230,180,40,0.9); border:2px solid rgba(255,220,80,0.6); }
+.start-dot.pulsing { animation:loop-pulse 1.2s ease-out infinite; }
+@keyframes loop-pulse { 0%{box-shadow:0 0 0 0 rgba(230,180,40,0.7);} 70%{box-shadow:0 0 0 10px rgba(230,180,40,0);} 100%{box-shadow:0 0 0 0 rgba(230,180,40,0);} }
+
+/* NAME MODAL */
+#name-modal { position:absolute; inset:0; z-index:500; display:flex; align-items:center; justify-content:center; background:rgba(10,7,3,0.82); backdrop-filter:blur(3px); opacity:0; pointer-events:none; transition:opacity 0.25s; }
+#name-modal.open { opacity:1; pointer-events:all; }
+#scroll-card { background:#1e1408; border:1px solid rgba(201,146,10,0.4); border-radius:10px; padding:30px 26px 24px; width:min(360px,calc(100vw - 32px)); box-shadow:0 8px 40px rgba(0,0,0,0.7); }
+#scroll-card::before { content:'❧  Claim Your Territory  ❧'; display:block; font-family:var(--font-body); font-size:13px; font-weight:700; color:var(--gold); text-align:center; letter-spacing:0.06em; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid rgba(201,146,10,0.25); }
+#scroll-card p { font-family:var(--font-text); font-style:italic; font-size:12px; color:rgba(242,232,204,0.55); line-height:1.7; margin-bottom:16px; text-align:center; }
+#territory-input { width:100%; background:rgba(242,232,204,0.06); border:1px solid rgba(201,146,10,0.3); border-radius:6px; padding:12px 14px; font-family:var(--font-body); font-size:16px; font-weight:600; color:var(--parchment); outline:none; margin-bottom:16px; }
+#territory-input:focus { border-color:rgba(201,146,10,0.6); }
+#territory-input::placeholder { color:rgba(242,232,204,0.25); font-weight:400; }
+#modal-btns { display:flex; gap:10px; }
+.modal-btn { flex:1; padding:11px; border-radius:6px; font-family:var(--font-body); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.06em; cursor:pointer; touch-action:manipulation; border:1px solid rgba(201,146,10,0.3); }
+#modal-cancel { background:transparent; color:rgba(242,232,204,0.4); }
+#modal-save { background:rgba(45,90,39,0.4); border-color:rgba(90,128,56,0.6); color:#a8d890; }
+
+/* KINGDOM SCREEN */
+#kingdom-screen { position:absolute; inset:0; z-index:400; background:#0e0a04; overflow-y:auto; opacity:0; pointer-events:none; transition:opacity 0.35s; }
+#kingdom-screen.open { opacity:1; pointer-events:all; }
+#kingdom-inner { min-height:100%; padding:24px 18px 40px; max-width:480px; margin:0 auto; }
+#kingdom-header { text-align:center; padding-bottom:22px; border-bottom:1px solid rgba(201,146,10,0.2); margin-bottom:24px; position:relative; }
+#kingdom-header::before { content:''; display:block; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin-bottom:20px; opacity:0.4; }
+#kingdom-close { position:absolute; top:0; right:0; background:none; border:1px solid rgba(201,146,10,0.3); border-radius:6px; padding:6px 12px; font-family:var(--font-body); font-size:11px; color:var(--parchment-dk); cursor:pointer; touch-action:manipulation; opacity:0.7; }
+#kingdom-title-text { font-family:var(--font-gothic); font-size:36px; color:var(--gold-lt); line-height:1; margin-bottom:4px; }
+#realm-name-row { display:flex; align-items:center; gap:8px; margin-bottom:4px; justify-content:center; }
+#realm-name-display { font-family:var(--font-body); font-weight:700; font-size:18px; color:var(--parchment); letter-spacing:0.08em; text-transform:uppercase; }
+#edit-realm-btn { background:none; border:none; font-size:12px; cursor:pointer; opacity:0.5; padding:2px 4px; touch-action:manipulation; }
+#kingdom-subtitle { font-family:var(--font-text); font-style:italic; font-size:12px; color:rgba(242,232,204,0.45); }
+#empire-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:28px; }
+.empire-stat { background:rgba(201,146,10,0.07); border:1px solid rgba(201,146,10,0.2); border-radius:8px; padding:14px 10px; text-align:center; }
+.empire-stat-icon { font-size:20px; margin-bottom:4px; }
+.empire-stat-val { font-family:var(--font-body); font-weight:700; font-size:18px; color:var(--gold-lt); line-height:1; margin-bottom:3px; }
+.empire-stat-lbl { font-family:var(--font-text); font-style:italic; font-size:9px; color:rgba(242,232,204,0.45); text-transform:uppercase; letter-spacing:0.08em; }
+#territories-section h3 { font-family:var(--font-body); font-weight:700; font-size:13px; letter-spacing:0.12em; text-transform:uppercase; color:#8b6914; margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+#territories-section h3::after { content:''; flex:1; height:1px; background:rgba(139,105,20,0.25); }
+.kingdom-territory { background:rgba(20,14,5,0.7); border:1px solid rgba(201,146,10,0.15); border-radius:8px; padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:border-color 0.2s; }
+.kingdom-territory:active { border-color:rgba(201,146,10,0.4); }
+.kt-crest { width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; border:1px solid rgba(255,255,255,0.1); }
+.kt-info { flex:1; min-width:0; }
+.kt-name { font-family:var(--font-body); font-weight:600; font-size:14px; color:var(--parchment); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.kt-details { font-family:var(--font-text); font-style:italic; font-size:10px; color:rgba(242,232,204,0.4); margin-top:2px; }
+.kt-del { background:none; border:1px solid rgba(160,60,60,0.3); color:rgba(200,100,100,0.5); border-radius:5px; padding:5px 10px; font-family:var(--font-text); font-size:10px; cursor:pointer; touch-action:manipulation; flex-shrink:0; }
+#empty-realm { text-align:center; padding:40px 20px; font-family:var(--font-text); font-style:italic; color:rgba(242,232,204,0.3); font-size:14px; line-height:1.8; }
+#empty-realm .big { font-size:40px; display:block; margin-bottom:12px; opacity:0.4; }
+
+/* CASTLE / SHIELD MARKERS */
+.town-shield-wrap { display:flex; flex-direction:column; align-items:center; pointer-events:all; cursor:pointer; }
+.town-shield { filter:drop-shadow(0 2px 6px rgba(0,0,0,0.75)); transition:transform 0.18s; }
+.town-shield:active { transform:scale(0.9); }
+.town-label { font-family:var(--font-body); font-weight:600; letter-spacing:0.04em; color:var(--parchment); text-shadow:0 1px 4px rgba(0,0,0,0.95),0 0 10px rgba(0,0,0,0.9); margin-top:2px; max-width:80px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; pointer-events:none; line-height:1.2; }
+
+/* TOOLTIP */
+.territory-tooltip { font-family:var(--font-body) !important; font-size:11px !important; background:rgba(20,13,5,0.9) !important; border:1px solid rgba(201,146,10,0.4) !important; color:var(--gold-lt) !important; border-radius:4px !important; padding:4px 10px !important; box-shadow:none !important; }
+.territory-tooltip::before { display:none !important; }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+<div id="map-vignette"></div>
+<canvas id="fog-canvas"></canvas>
+<div id="creatures-layer"></div>
+
+<div id="header">
+  <div id="logo-block" onclick="openKingdom()">
+    <div id="logo-sub">Terranova</div>
+    <div id="logo-tagline">✦ Tap to view your realm ✦</div>
+  </div>
+  <div id="header-stats">
+    <div class="hstat"><div class="hstat-label">Provinces</div><div class="hstat-value" id="stat-zones">0</div></div>
+    <div class="hstat"><div class="hstat-label">Domain</div><div class="hstat-value" id="stat-area">—</div></div>
+  </div>
+</div>
+
+<div id="status-scroll"><span id="status-text">Acquiring position from the stars…</span></div>
+
+<div id="trail-hud">
+  <div class="hud-item"><div class="hud-val" id="hud-dist">0m</div><div class="hud-lbl">Distance</div></div>
+  <div class="hud-sep"></div>
+  <div class="hud-item"><div class="hud-val" id="hud-pts">0</div><div class="hud-lbl">Waypoints</div></div>
+  <div class="hud-sep"></div>
+  <div class="hud-item"><div class="hud-val" id="hud-loop">—</div><div class="hud-lbl">To Start</div></div>
+</div>
+
+<button id="layer-toggle" onclick="cycleLayer()">🎨 Watercolor</button>
+
+<div id="wake-banner">
+  <div id="wake-banner-icon">🕯</div>
+  <div id="wake-banner-text"><strong>Keep the lantern lit —</strong> your screen must stay on while charting. Do not press the side button or your trail will be lost.</div>
+  <button id="wake-banner-dismiss" onclick="dismissWakeBanner()">Understood</button>
+</div>
+
+<div id="bottom-panel">
+  <div id="control-parchment">
+    <div id="gps-line">Awaiting celestial fix…</div>
+    <div id="main-controls">
+      <button class="scroll-btn" onclick="centerOnUser()">Find Me</button>
+      <button id="seal-btn" onclick="toggleRecording()">
+        <div id="seal-pulse"></div>
+        <div id="seal-inner">⚑</div>
+      </button>
+      <button class="scroll-btn claim-btn" id="btn-claim" style="display:none" onclick="claimTerritory()">Claim Land</button>
+      <button class="scroll-btn" id="btn-stop" style="display:none" onclick="stopRecording()">Abandon</button>
+    </div>
+    <button id="territories-toggle" onclick="toggleDrawer()">⚜ My Provinces (0) ⚜</button>
+    <div id="territories-drawer"><div id="drawer-list"></div></div>
+  </div>
+</div>
+
+<div id="name-modal">
+  <div id="scroll-card">
+    <p>Bestow a name upon these lands, that they may be known throughout the realm.</p>
+    <input type="text" id="territory-input" placeholder="e.g. The Whispering Pines" maxlength="48">
+    <div id="modal-btns">
+      <button class="modal-btn" id="modal-cancel" onclick="cancelClaim()">Forsake</button>
+      <button class="modal-btn" id="modal-save" onclick="saveClaim()">Proclaim!</button>
+    </div>
+  </div>
+</div>
+
+<div id="kingdom-screen">
+  <div id="kingdom-inner">
+    <div id="kingdom-header">
+      <button id="kingdom-close" onclick="closeKingdom()">✕ Close</button>
+      <div id="kingdom-title-text">The Kingdom of</div>
+      <div id="realm-name-row">
+        <div id="realm-name-display">My Realm</div>
+        <button id="edit-realm-btn" onclick="editRealmName()">✎</button>
+      </div>
+      <div id="kingdom-subtitle">A chronicle of conquered lands</div>
+    </div>
+    <div id="empire-stats">
+      <div class="empire-stat"><div class="empire-stat-icon">⚑</div><div class="empire-stat-val" id="k-zones">0</div><div class="empire-stat-lbl">Provinces</div></div>
+      <div class="empire-stat"><div class="empire-stat-icon">⚜</div><div class="empire-stat-val" id="k-area">0</div><div class="empire-stat-lbl">Total Domain</div></div>
+      <div class="empire-stat"><div class="empire-stat-icon">🗺</div><div class="empire-stat-val" id="k-dist">0</div><div class="empire-stat-lbl">Km Walked</div></div>
+    </div>
+    <div id="territories-section">
+      <h3>Conquered Territories</h3>
+      <div id="kingdom-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  CONFIG — replace YOUR_API_KEY with your Stadia Maps key
+//  Domain to whitelist: calmac300-cmyk.github.io
+// ══════════════════════════════════════════════════════════
+const STADIA_KEY = '30f4c480-41bb-42c2-8231-c58ca4b763e3';
+
+// ══════════════════════════════════════════════════════════
+//  TILE LAYERS
+// ══════════════════════════════════════════════════════════
+const TILE_LAYERS = [
+  {
+    name: 'Watercolor', icon: '🎨',
+    url:  `https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg?api_key=${STADIA_KEY}`,
+    opts: { maxZoom:16, attribution:'© <a href="https://stadiamaps.com">Stadia Maps</a> © <a href="https://stamen.com">Stamen Design</a> © <a href="https://openstreetmap.org">OpenStreetMap</a>' },
+    // Terrain labels on top so roads/place names are legible through the painterly wash
+    labelsUrl:  `https://tiles.stadiamaps.com/tiles/stamen_terrain_labels/{z}/{x}/{y}{r}.png?api_key=${STADIA_KEY}`,
+    labelsOpts: { maxZoom:20, attribution:'', opacity:0.85, pane:'overlayPane' },
+    filter: 'saturate(0.78) brightness(0.90) sepia(0.18)',
+  },
+  {
+    name: 'Terrain', icon: '⛰',
+    url:  `https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png?api_key=${STADIA_KEY}`,
+    opts: { maxZoom:18, attribution:'© <a href="https://stadiamaps.com">Stadia Maps</a> © <a href="https://stamen.com">Stamen Design</a> © <a href="https://openstreetmap.org">OpenStreetMap</a>' },
+    labelsUrl: null, labelsOpts: null,
+    filter: 'sepia(0.35) saturate(0.7) brightness(0.88)',
+  },
+  {
+    name: 'Classic', icon: '🗺',
+    url:  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    opts: { maxZoom:19, attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a> contributors' },
+    labelsUrl: null, labelsOpts: null,
+    filter: 'sepia(0.55) saturate(0.6) brightness(0.88) contrast(1.08)',
+  },
+];
+
+let layerIdx   = 0;
+let tileLayer  = null;
+let lblLayer   = null;
+
+function applyTileLayer(idx) {
+  const def = TILE_LAYERS[idx];
+  if (tileLayer) { map.removeLayer(tileLayer); tileLayer = null; }
+  if (lblLayer)  { map.removeLayer(lblLayer);  lblLayer  = null; }
+  tileLayer = L.tileLayer(def.url, def.opts).addTo(map);
+  if (def.labelsUrl) lblLayer = L.tileLayer(def.labelsUrl, def.labelsOpts).addTo(map);
+  document.getElementById('map').style.filter = def.filter;
+  document.getElementById('layer-toggle').textContent = `${def.icon} ${def.name}`;
+}
+
+function cycleLayer() {
+  layerIdx = (layerIdx + 1) % TILE_LAYERS.length;
+  applyTileLayer(layerIdx);
+}
+
+// ══════════════════════════════════════════════════════════
+//  MAP
+// ══════════════════════════════════════════════════════════
+const map = L.map('map', { center:[43.2,-71.5], zoom:15, zoomControl:false, attributionControl:true });
+applyTileLayer(0);
+
+// ══════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════
+let recording        = false;
+let trail            = [];
+let trailLine        = null;
+let startMarker      = null;
+let userMarker       = null;
+let currentPos       = null;
+let pendingPoints    = null;
+let wakeLock         = null;
+let wakeLockDismissed = false;
+
+let territories   = JSON.parse(localStorage.getItem('tv-territories')  || '[]');
+let realmName     = localStorage.getItem('tv-realm-name') || 'My Realm';
+let totalDistKm   = parseFloat(localStorage.getItem('tv-total-dist')   || '0');
+let polygonLayers = [];
+
+// Crash recovery
+const _saved = JSON.parse(localStorage.getItem('tv-active-trail') || 'null');
+if (_saved && _saved.length >= 2) trail = _saved;
+
+const CREATURES = [
+  {emoji:'🐉'},{emoji:'🦑'},{emoji:'🐋'},{emoji:'🦈'},
+  {emoji:'🗺'},{emoji:'⚓'},{emoji:'☠'},{emoji:'🦅'},
+];
+let creatureMarkers = [];
+
+const HERALDIC = [
+  {fill:'#2d5a27',stroke:'#4a8a38',text:'#a8e890'},
+  {fill:'#1a3a5c',stroke:'#2d6090',text:'#88c0e8'},
+  {fill:'#5a2800',stroke:'#8a4010',text:'#e8a070'},
+  {fill:'#4a2060',stroke:'#7040a0',text:'#c890f0'},
+  {fill:'#3a3a00',stroke:'#686800',text:'#d8d860'},
+  {fill:'#4a0a1a',stroke:'#8a1a3a',text:'#e890b0'},
+];
+const T_EMOJIS = ['🏰','🗼','⚔','🛡','👑','🏯','⚜','🎌'];
+
+// ══════════════════════════════════════════════════════════
+//  FOG OF WAR
+// ══════════════════════════════════════════════════════════
+const fogCanvas = document.getElementById('fog-canvas');
+const fogCtx    = fogCanvas.getContext('2d');
+let fogCircles  = JSON.parse(localStorage.getItem('tv-fog-circles')  || '[]');
+let waterPts    = new Set(JSON.parse(localStorage.getItem('tv-water-points') || '[]'));
+
+function resizeFog() { fogCanvas.width = window.innerWidth; fogCanvas.height = window.innerHeight; drawFog(); }
+
+function drawFog() {
+  const W = fogCanvas.width, H = fogCanvas.height;
+  fogCtx.clearRect(0, 0, W, H);
+  fogCtx.fillStyle = 'rgba(18,11,4,0.80)';
+  fogCtx.fillRect(0, 0, W, H);
+
+  fogCtx.globalCompositeOperation = 'destination-out';
+  fogCircles.forEach(c => {
+    const pt = map.latLngToContainerPoint([c.lat, c.lng]);
+    const r  = c.r || 130;
+    const g  = fogCtx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, r);
+    g.addColorStop(0,    'rgba(0,0,0,1)');
+    g.addColorStop(0.55, 'rgba(0,0,0,0.9)');
+    g.addColorStop(1,    'rgba(0,0,0,0)');
+    fogCtx.fillStyle = g;
+    fogCtx.beginPath(); fogCtx.arc(pt.x, pt.y, r, 0, Math.PI*2); fogCtx.fill();
+  });
+  fogCtx.globalCompositeOperation = 'source-over';
+
+  // Blue shimmer at water reveal edges
+  fogCircles.forEach((c, i) => {
+    if (!waterPts.has(i)) return;
+    const pt = map.latLngToContainerPoint([c.lat, c.lng]);
+    const r  = (c.r || 130);
+    const h  = fogCtx.createRadialGradient(pt.x, pt.y, r*0.5, pt.x, pt.y, r*1.15);
+    h.addColorStop(0,   'rgba(20,60,100,0)');
+    h.addColorStop(0.6, 'rgba(20,60,100,0.18)');
+    h.addColorStop(1,   'rgba(20,60,100,0)');
+    fogCtx.fillStyle = h;
+    fogCtx.beginPath(); fogCtx.arc(pt.x, pt.y, r*1.15, 0, Math.PI*2); fogCtx.fill();
+  });
+
+  updateCreatureVis();
+}
+
+function addReveal(lat, lng) {
+  if (fogCircles.some(c => dist([c.lat,c.lng],[lat,lng]) < 40)) return;
+  const idx = fogCircles.length;
+  fogCircles.push({lat, lng, r:130});
+  sampleWater(lat, lng, idx);
+  if (!addReveal._t) addReveal._t = setTimeout(() => {
+    localStorage.setItem('tv-fog-circles', JSON.stringify(fogCircles));
+    addReveal._t = null;
+  }, 3000);
+  clearTimeout(castleTimer);
+  castleTimer = setTimeout(() => fetchCastles(lat, lng), 1200);
+  drawFog();
+}
+
+map.on('move zoom', drawFog);
+window.addEventListener('resize', resizeFog);
+resizeFog();
+
+// ══════════════════════════════════════════════════════════
+//  WATER DETECTION
+// ══════════════════════════════════════════════════════════
+function sampleWater(lat, lng, idx) {
+  const z = 15, tx = lon2t(lng,z), ty = lat2t(lat,z);
+  const img = new Image(); img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    const c = document.createElement('canvas'); c.width = c.height = 256;
+    c.getContext('2d').drawImage(img,0,0);
+    const px = Math.floor(((lng/360+0.5)*Math.pow(2,z))%1*256);
+    const s  = Math.sin(lat*Math.PI/180);
+    const py = Math.floor(((0.5-Math.log((1+s)/(1-s))/(4*Math.PI))*Math.pow(2,z))%1*256);
+    try {
+      const [r,g,b] = c.getContext('2d').getImageData(Math.max(0,Math.min(255,px)),Math.max(0,Math.min(255,py)),1,1).data;
+      if (b>180 && g>170 && r<200 && b>r) {
+        waterPts.add(idx);
+        localStorage.setItem('tv-water-points', JSON.stringify([...waterPts]));
+        drawFog();
+      }
+    } catch(_){}
+  };
+  img.onerror = ()=>{};
+  img.src = `https://tile.openstreetmap.org/${z}/${tx}/${ty}.png`;
+}
+function lon2t(lon,z){ return Math.floor((lon+180)/360*Math.pow(2,z)); }
+function lat2t(lat,z){ return Math.floor((1-Math.log(Math.tan(lat*Math.PI/180)+1/Math.cos(lat*Math.PI/180))/Math.PI)/2*Math.pow(2,z)); }
+
+// ══════════════════════════════════════════════════════════
+//  CREATURES
+// ══════════════════════════════════════════════════════════
+function spawnAround(lat, lng) {
+  if (creatureMarkers.length > 50) return;
+  [[0.008,0.012],[-0.007,0.015],[0.011,-0.009],[-0.012,-0.008],[0.005,0.018],[-0.015,0.006],[0.018,0.003],[-0.004,-0.016]]
+  .forEach(([dl,dn]) => {
+    const cl = lat+dl+(Math.random()-.5)*.006, cn = lng+dn+(Math.random()-.5)*.006;
+    if (creatureMarkers.some(c=>dist([c.lat,c.lng],[cl,cn])<250)) return;
+    const el = document.createElement('div');
+    el.style.cssText='position:absolute;font-size:26px;opacity:0.65;transition:opacity 2.5s ease;pointer-events:none;text-shadow:0 2px 8px rgba(0,0,0,0.8);filter:sepia(0.3);transform:translate(-50%,-50%);user-select:none;';
+    el.textContent = CREATURES[Math.floor(Math.random()*CREATURES.length)].emoji;
+    document.getElementById('creatures-layer').appendChild(el);
+    const m = {el,lat:cl,lng:cn,done:false};
+    creatureMarkers.push(m);
+    posC(m);
+  });
+}
+function posC(m){ const p=map.latLngToContainerPoint([m.lat,m.lng]); m.el.style.left=p.x+'px'; m.el.style.top=p.y+'px'; }
+function updateCreatureVis() {
+  creatureMarkers.forEach(m => {
+    posC(m);
+    if (m.done) return;
+    const p = map.latLngToContainerPoint([m.lat,m.lng]);
+    const hit = fogCircles.some(c => { const cp=map.latLngToContainerPoint([c.lat,c.lng]); return Math.hypot(p.x-cp.x,p.y-cp.y) < (c.r||130)*.7; });
+    if (hit) { m.done=true; m.el.style.opacity='0'; setTimeout(()=>m.el.parentNode?.removeChild(m.el),2600); }
+  });
+}
+map.on('move zoom', ()=>{ creatureMarkers.forEach(posC); updateCreatureVis(); });
+
+// ══════════════════════════════════════════════════════════
+//  CASTLE / TOWN-HALL MARKERS
+// ══════════════════════════════════════════════════════════
+let castleMarkers = {}, castleTimer = null, lastCastlePos = null;
+
+const CASTLE_STYLES = {
+  townhall:{glyph:'🏰',ft:'#3a1a08',fb:'#6a2a0a',fs:'#c9920a',fg:'#f0d060',w:42,ls:'10px',lc:'#e8b84b'},
+  city:    {glyph:'♛', ft:'#4a1a0a',fb:'#8b2010',fs:'#c9920a',fg:'#f0d060',w:38,ls:'10px',lc:'#e8b84b'},
+  town:    {glyph:'⚑', ft:'#0a1a3a',fb:'#1a3a6a',fs:'#8090c0',fg:'#c0d8f0',w:32,ls:'9px', lc:'#d4c49a'},
+  village: {glyph:'✦', ft:'#1a2a0a',fb:'#2a4a10',fs:'#608040',fg:'#a0c870',w:26,ls:'8px', lc:'#a8b890'},
+};
+
+function castleSVG(s) {
+  const cp = s.glyph.codePointAt(0);
+  return `<svg viewBox="0 0 40 46" xmlns="http://www.w3.org/2000/svg">
+    <defs><clipPath id="cp${cp}"><path d="M2,2L38,2L38,24Q38,42 20,44Q2,42 2,24Z"/></clipPath></defs>
+    <path d="M2,2L38,2L38,24Q38,42 20,44Q2,42 2,24Z" fill="${s.fb}" stroke="${s.fs}" stroke-width="1.5"/>
+    <rect x="2" y="2" width="36" height="16" fill="${s.ft}" clip-path="url(#cp${cp})"/>
+    <line x1="2" y1="18" x2="38" y2="18" stroke="${s.fs}" stroke-width="1"/>
+    <text x="20" y="33" text-anchor="middle" dominant-baseline="central" font-size="15" fill="${s.fg}" font-family="serif">${s.glyph}</text>
+  </svg>`;
+}
+
+function makeCastleIcon(label, styleKey) {
+  const s = CASTLE_STYLES[styleKey];
+  const h = Math.round(s.w*1.15);
+  const html = `<div class="town-shield-wrap">
+    <div class="town-shield" style="width:${s.w}px;height:${h}px">${castleSVG(s)}</div>
+    <div class="town-label" style="font-size:${s.ls};color:${s.lc}">${label}</div>
+  </div>`;
+  return L.divIcon({className:'',html,iconSize:[s.w,h+18],iconAnchor:[s.w/2,h+18]});
+}
+
+function fetchCastles(lat, lng) {
+  if (lastCastlePos && dist(lastCastlePos,[lat,lng]) < 800) return;
+  lastCastlePos = [lat,lng];
+  const r = 6000;
+  const q = `[out:json][timeout:10];
+(
+  node["amenity"="town_hall"](around:${r},${lat},${lng});
+  way["amenity"="town_hall"](around:${r},${lat},${lng});
+  node["place"~"^(city|town|village|borough|hamlet)$"](around:${r},${lat},${lng});
+);
+out center;`;
+  fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)})
+  .then(r=>r.json())
+  .then(data=>{
+    (data.elements||[]).forEach(el=>{
+      const id = el.id+'_'+el.type;
+      if (castleMarkers[id]) return;
+      const name = el.tags?.name || el.tags?.['name:en'];
+      if (!name) return;
+      const isTH  = el.tags.amenity === 'town_hall';
+      let sk = 'village';
+      if (isTH) sk = 'townhall';
+      else if (el.tags.place==='city') sk='city';
+      else if (el.tags.place==='town'||el.tags.place==='borough') sk='town';
+      const label = name.replace(/\s+town\s+hall$/i,'').trim();
+      const la = el.lat ?? el.center?.lat, lo = el.lon ?? el.center?.lon;
+      if (!la||!lo) return;
+      const mk = L.marker([la,lo],{icon:makeCastleIcon(label,sk),zIndexOffset:600}).addTo(map);
+      mk.bindTooltip(label,{className:'territory-tooltip',direction:'top',offset:[0,-4]});
+      castleMarkers[id] = mk;
+    });
+  }).catch(()=>{});
+}
+
+// ══════════════════════════════════════════════════════════
+//  WAKE LOCK
+// ══════════════════════════════════════════════════════════
+async function acquireWL() {
+  await releaseWL();
+  if (!('wakeLock' in navigator)) { showBanner(false); return; }
+  try { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release',onWLRelease); showBanner(true); }
+  catch(_){ wakeLock=null; showBanner(false); }
+}
+async function releaseWL() { if(wakeLock){try{await wakeLock.release();}catch(_){}wakeLock=null;} hideBanner(); }
+function onWLRelease() {
+  wakeLock=null;
+  if(recording){ document.addEventListener('visibilitychange',reacquire,{once:true}); showBanner(false); }
+}
+function reacquire() { if(document.visibilityState==='visible'&&recording){acquireWL();setStatus('Screen restored — expedition continues.','alert');} }
+function showBanner(active) {
+  if(wakeLockDismissed) return;
+  document.getElementById('wake-banner-text').innerHTML = active
+    ? `<strong>Screen held open by Terranova.</strong> Pressing the side button still overrides this — your trail will pause until you return.`
+    : `<strong>Keep the lantern lit —</strong> do not press the side button or your trail will be lost to the fog.`;
+  document.getElementById('wake-banner').classList.add('visible');
+}
+function hideBanner() { document.getElementById('wake-banner').classList.remove('visible'); }
+function dismissWakeBanner() { wakeLockDismissed=true; hideBanner(); }
+
+// ══════════════════════════════════════════════════════════
+//  GPS
+// ══════════════════════════════════════════════════════════
+function startGPS() {
+  if(!navigator.geolocation){setStatus('GPS unavailable.','danger');return;}
+  navigator.geolocation.watchPosition(onPos, e=>setStatus('GPS: '+e.message,'danger'),
+    {enableHighAccuracy:true,maximumAge:2000,timeout:15000});
+}
+
+function onPos(pos) {
+  const {latitude:lat,longitude:lng,accuracy:acc} = pos.coords;
+  currentPos = [lat,lng];
+  document.getElementById('gps-line').textContent = `${lat.toFixed(5)}° N, ${Math.abs(lng).toFixed(5)}° W  ·  ±${Math.round(acc)}m`;
+
+  addReveal(lat,lng);
+  spawnAround(lat,lng);
+
+  // User marker
+  const svg=`<svg class="explorer-compass" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="11" fill="rgba(20,13,5,0.88)" stroke="rgba(201,146,10,0.75)" stroke-width="1.5"/>
+    <circle cx="12" cy="12" r="2" fill="#e8b84b"/>
+    <polygon points="12,3 13.2,11 12,13 10.8,11" fill="#e8b84b"/>
+    <polygon points="12,21 13.2,13 12,11 10.8,13" fill="rgba(242,232,204,0.5)"/>
+    <polygon points="3,12 11,10.8 13,12 11,13.2"  fill="rgba(242,232,204,0.5)"/>
+    <polygon points="21,12 13,10.8 11,12 13,13.2" fill="rgba(242,232,204,0.5)"/>
+  </svg>`;
+  const icon = L.divIcon({className:'',html:`<div class="explorer-marker">${svg}</div>`,iconSize:[24,24],iconAnchor:[12,12]});
+
+  if (!userMarker) {
+    userMarker = L.marker([lat,lng],{icon,zIndexOffset:2000}).addTo(map);
+    map.setView([lat,lng],16);
+    setStatus('Position fixed. The expedition begins.','alert');
+    // Restore crash-recovered trail
+    if (trail.length >= 2) {
+      trailLine = L.polyline(trail,{color:'#c9920a',weight:3,opacity:0.9,dashArray:'8 5'}).addTo(map);
+      placeStartDot(trail[0]);
+      recording = true;
+      document.getElementById('seal-btn').classList.add('recording');
+      document.getElementById('seal-inner').textContent = '◼';
+      document.getElementById('btn-stop').style.display = '';
+      showHUD();
+      acquireWL();
+      setStatus(`Trail recovered — ${trail.length} waypoints restored.`,'alert');
+    }
+  } else {
+    userMarker.setLatLng([lat,lng]);
+  }
+
+  if (!recording) return;
+
+  const last = trail[trail.length-1];
+  if (last && dist(last,[lat,lng]) < 4) return;
+  if (last) totalDistKm += dist(last,[lat,lng])/1000;
+  trail.push([lat,lng]);
+  if (trailLine) trailLine.setLatLngs(trail);
+
+  // Persist active trail
+  if (!onPos._t) onPos._t = setTimeout(()=>{ localStorage.setItem('tv-active-trail',JSON.stringify(trail)); onPos._t=null; },5000);
+
+  // HUD
+  updateHUD(lat,lng);
+
+  // Loop detection
+  if (trail.length >= 6) {
+    const ds = dist(trail[0],[lat,lng]);
+    const canClose = ds < 65;
+    document.getElementById('btn-claim').style.display = canClose ? '' : 'none';
+    document.getElementById('hud-loop').textContent = ds<1000 ? Math.round(ds)+'m' : (ds/1000).toFixed(1)+'km';
+    const dot = startMarker?.getElement()?.querySelector('.start-dot');
+    if (dot) dot.classList.toggle('pulsing', canClose);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  LIVE TRAIL HUD
+// ══════════════════════════════════════════════════════════
+function showHUD() { document.getElementById('trail-hud').classList.add('visible'); }
+function hideHUD() { document.getElementById('trail-hud').classList.remove('visible'); }
+function updateHUD(lat,lng) {
+  const d = trailDist();
+  document.getElementById('hud-dist').textContent = d>=1000 ? (d/1000).toFixed(2)+'km' : Math.round(d)+'m';
+  document.getElementById('hud-pts').textContent  = trail.length;
+  if (trail.length < 6) document.getElementById('hud-loop').textContent = '—';
+}
+function trailDist() { let d=0; for(let i=1;i<trail.length;i++) d+=dist(trail[i-1],trail[i]); return d; }
+
+// ══════════════════════════════════════════════════════════
+//  LOOP START DOT
+// ══════════════════════════════════════════════════════════
+function placeStartDot(latlng) {
+  if (startMarker) { map.removeLayer(startMarker); startMarker=null; }
+  startMarker = L.marker(latlng,{
+    icon: L.divIcon({className:'',html:'<div class="start-dot"></div>',iconSize:[14,14],iconAnchor:[7,7]}),
+    zIndexOffset:1500, interactive:false,
+  }).addTo(map);
+}
+function removeStartDot() { if(startMarker){map.removeLayer(startMarker);startMarker=null;} }
+
+// ══════════════════════════════════════════════════════════
+//  RECORDING
+// ══════════════════════════════════════════════════════════
+function toggleRecording() { recording ? stopRecording() : startRecording(); }
+
+function startRecording() {
+  if (!currentPos) { setStatus('Awaiting position fix…','danger'); return; }
+  recording = true; wakeLockDismissed = false;
+  trail = [currentPos.slice()];
+  if (trailLine) { map.removeLayer(trailLine); trailLine=null; }
+  trailLine = L.polyline(trail,{color:'#c9920a',weight:3,opacity:0.9,dashArray:'8 5'}).addTo(map);
+  placeStartDot(currentPos);
+  document.getElementById('seal-btn').classList.add('recording');
+  document.getElementById('seal-inner').textContent = '◼';
+  document.getElementById('btn-stop').style.display = '';
+  document.getElementById('btn-claim').style.display = 'none';
+  showHUD();
+  acquireWL();
+  localStorage.setItem('tv-active-trail', JSON.stringify(trail));
+  setStatus('The expedition has begun. Mark your trail.','alert');
+}
+
+function stopRecording() {
+  recording = false; releaseWL(); removeStartDot(); hideHUD();
+  document.getElementById('seal-btn').classList.remove('recording');
+  document.getElementById('seal-inner').textContent = '⚑';
+  document.getElementById('btn-stop').style.display = 'none';
+  if (trail.length >= 3) {
+    document.getElementById('btn-claim').style.display = '';
+    setStatus('Expedition halted. Claim your territory or continue.','');
+  } else {
+    document.getElementById('btn-claim').style.display = 'none';
+    setStatus('Too little ground covered. Explore more.','danger');
+    localStorage.removeItem('tv-active-trail');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  CLAIM
+// ══════════════════════════════════════════════════════════
+function claimTerritory() {
+  if (trail.length<3){setStatus('Chart more territory first.','danger');return;}
+  pendingPoints = [...trail];
+  document.getElementById('territory-input').value = '';
+  document.getElementById('name-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('territory-input').focus(),150);
+}
+function cancelClaim() { pendingPoints=null; document.getElementById('name-modal').classList.remove('open'); }
+
+function saveClaim() {
+  const name = document.getElementById('territory-input').value.trim() || 'Unknown Lands';
+  document.getElementById('name-modal').classList.remove('open');
+  const color = HERALDIC[territories.length % HERALDIC.length];
+  const emoji = T_EMOJIS[territories.length % T_EMOJIS.length];
+  const t = { id:Date.now(), name, emoji, points:pendingPoints, color,
+    area:polyArea(pendingPoints),
+    date:new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) };
+  territories.push(t);
+  saveTerritories();
+  drawPoly(t,true);
+  if(trailLine){map.removeLayer(trailLine);trailLine=null;}
+  removeStartDot();
+  trail=[]; pendingPoints=null; recording=false;
+  releaseWL(); hideHUD();
+  localStorage.removeItem('tv-active-trail');
+  localStorage.setItem('tv-total-dist',totalDistKm.toFixed(3));
+  document.getElementById('seal-btn').classList.remove('recording');
+  document.getElementById('seal-inner').textContent='⚑';
+  document.getElementById('btn-claim').style.display='none';
+  document.getElementById('btn-stop').style.display='none';
+  updateHeader(); renderDrawer();
+  setStatus(`"${name}" — claimed for the realm! ✦`,'alert');
+}
+
+// ══════════════════════════════════════════════════════════
+//  DRAW POLYGON
+// ══════════════════════════════════════════════════════════
+function drawPoly(t, animate) {
+  const p = L.polygon(t.points,{color:t.color.stroke,weight:2,opacity:0.9,fillColor:t.color.fill,fillOpacity:animate?0:0.22,dashArray:'6 3'}).addTo(map);
+  p.bindTooltip(t.emoji+' '+t.name,{permanent:false,sticky:true,className:'territory-tooltip'});
+  if (animate) { let op=0; const tk=setInterval(()=>{op=Math.min(op+0.015,0.22);p.setStyle({fillOpacity:op});if(op>=0.22)clearInterval(tk);},16); }
+  polygonLayers.push({id:t.id,poly:p});
+}
+
+// ══════════════════════════════════════════════════════════
+//  KINGDOM
+// ══════════════════════════════════════════════════════════
+function openKingdom()  { renderKingdom(); document.getElementById('kingdom-screen').classList.add('open'); }
+function closeKingdom() { document.getElementById('kingdom-screen').classList.remove('open'); }
+
+function renderKingdom() {
+  document.getElementById('realm-name-display').textContent = realmName;
+  document.getElementById('k-zones').textContent = territories.length;
+  document.getElementById('k-area').textContent  = formatArea(territories.reduce((s,t)=>s+(t.area||0),0));
+  document.getElementById('k-dist').textContent  = totalDistKm.toFixed(1);
+  const list = document.getElementById('kingdom-list');
+  if (!territories.length) { list.innerHTML=`<div id="empty-realm"><span class="big">🗺</span>No territories claimed.<br>Venture forth and conquer the unknown.</div>`; return; }
+  list.innerHTML = territories.map((t,i)=>`
+    <div class="kingdom-territory" onclick="flyTo(${i})">
+      <div class="kt-crest" style="background:${t.color.fill};border-color:${t.color.stroke}">${t.emoji}</div>
+      <div class="kt-info"><div class="kt-name" style="color:${t.color.text}">${t.name}</div><div class="kt-details">${t.date} · ${formatArea(t.area||0)}</div></div>
+      <button class="kt-del" onclick="event.stopPropagation();delT(${i})">Cede</button>
+    </div>`).join('');
+}
+
+function flyTo(i) { const t=territories[i]; if(!t?.points.length) return; closeKingdom(); map.fitBounds(L.latLngBounds(t.points),{padding:[60,60],animate:true}); }
+function editRealmName() { const n=prompt('Name your realm:',realmName); if(n?.trim()){realmName=n.trim();localStorage.setItem('tv-realm-name',realmName);document.getElementById('realm-name-display').textContent=realmName;} }
+
+function toggleDrawer() { document.getElementById('territories-drawer').classList.toggle('open'); }
+function renderDrawer() {
+  document.getElementById('territories-toggle').textContent=`⚜ My Provinces (${territories.length}) ⚜`;
+  const list=document.getElementById('drawer-list');
+  if(!territories.length){list.innerHTML=`<div style="font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.3);padding:12px 0;text-align:center">No lands claimed yet…</div>`;return;}
+  list.innerHTML=territories.map((t,i)=>`
+    <div class="t-entry">
+      <div><div class="t-name" style="color:${t.color.text}">${t.emoji} ${t.name}</div><div class="t-meta">${t.date} · ${formatArea(t.area||0)}</div></div>
+      <button class="t-del" onclick="delT(${i})">Cede</button>
+    </div>`).join('');
+}
+
+function delT(i) {
+  const id=territories[i].id; territories.splice(i,1); saveTerritories();
+  const li=polygonLayers.findIndex(l=>l.id===id);
+  if(li>=0){map.removeLayer(polygonLayers[li].poly);polygonLayers.splice(li,1);}
+  updateHeader(); renderDrawer(); renderKingdom();
+}
+function saveTerritories() { localStorage.setItem('tv-territories',JSON.stringify(territories)); }
+
+// ══════════════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════════════
+function dist(a,b) {
+  const R=6371000,f1=a[0]*Math.PI/180,f2=b[0]*Math.PI/180,df=(b[0]-a[0])*Math.PI/180,dl=(b[1]-a[1])*Math.PI/180;
+  return R*2*Math.atan2(Math.sqrt(Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2),Math.sqrt(1-(Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2)));
+}
+function polyArea(pts) {
+  if(pts.length<3) return 0; const R=6371000; let a=0;
+  for(let i=0;i<pts.length;i++){const j=(i+1)%pts.length;const xi=pts[i][1]*Math.PI/180*R*Math.cos(pts[i][0]*Math.PI/180),yi=pts[i][0]*Math.PI/180*R,xj=pts[j][1]*Math.PI/180*R*Math.cos(pts[j][0]*Math.PI/180),yj=pts[j][0]*Math.PI/180*R;a+=xi*yj-xj*yi;}
+  return Math.abs(a/2);
+}
+function formatArea(m2) { if(m2>=1e6) return (m2/1e6).toFixed(2)+' km²'; if(m2>=1e4) return (m2/1e4).toFixed(2)+' ha'; return Math.round(m2)+' m²'; }
+function setStatus(msg,type='') { document.getElementById('status-text').textContent=msg; document.getElementById('status-scroll').className=type; }
+function centerOnUser() { if(currentPos)map.setView(currentPos,17,{animate:true}); else setStatus('No position fix yet. Patience…','danger'); }
+function updateHeader() { document.getElementById('stat-zones').textContent=territories.length; const t=territories.reduce((s,t)=>s+(t.area||0),0); document.getElementById('stat-area').textContent=t>0?formatArea(t):'—'; }
+
+// ══════════════════════════════════════════════════════════
+//  KEYBOARD
+// ══════════════════════════════════════════════════════════
+document.getElementById('territory-input').addEventListener('keydown',e=>{if(e.key==='Enter')saveClaim();if(e.key==='Escape')cancelClaim();});
+document.getElementById('kingdom-screen').addEventListener('keydown',e=>{if(e.key==='Escape')closeKingdom();});
+
+// ══════════════════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════════════════
+territories.forEach(t=>drawPoly(t,false));
+updateHeader(); renderDrawer(); drawFog();
+setTimeout(()=>{ fogCircles.forEach((c,i)=>{ if(!waterPts.has(i)) sampleWater(c.lat,c.lng,i); }); },2500);
+startGPS();
+setStatus('Consulting the stars for your position…');
+setTimeout(()=>{ if(!currentPos) setStatus('Grant location access to begin your expedition.','danger'); },5000);
+</script>
+</body>
+</html>
