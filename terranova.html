@@ -17,35 +17,20 @@
   --font-body:'Cinzel',serif;--font-text:'IM Fell English',serif;--font-gothic:'UnifrakturMaguntia',cursive;
 }
 html,body{height:100%;overflow:hidden;background:var(--ink);}
-
-/* MAP */
 #map{position:absolute;inset:0;z-index:0;filter:saturate(0.85) brightness(0.92) contrast(1.04);}
 #map-vignette{position:absolute;inset:0;z-index:10;pointer-events:none;background:radial-gradient(ellipse at center,transparent 38%,rgba(20,13,5,0.5) 100%);}
 .leaflet-control-attribution{background:rgba(42,31,14,0.8)!important;color:rgba(242,232,204,0.5)!important;font-family:var(--font-text)!important;font-size:9px!important;border-top-left-radius:6px;}
 .leaflet-control-attribution a{color:rgba(242,232,204,0.6)!important;}
 .leaflet-bottom.leaflet-right{bottom:220px;}
 .leaflet-control-zoom{display:none;}
-/* Castle markers always render above territory polygons */
 .leaflet-marker-pane{z-index:650!important;}
-
-/* Province map labels */
-.province-label{
-  background:none!important;border:none!important;box-shadow:none!important;
-  font-family:var(--font-body)!important;font-size:11px!important;font-weight:600!important;
-  color:rgba(242,232,204,0.85)!important;
-  text-shadow:0 1px 4px rgba(0,0,0,0.95),0 0 10px rgba(0,0,0,0.8)!important;
-  white-space:nowrap!important;pointer-events:none!important;letter-spacing:0.05em!important;
-}
+/* Province labels */
+.province-label{background:none!important;border:none!important;box-shadow:none!important;font-family:var(--font-body)!important;font-size:10px!important;font-weight:600!important;color:rgba(242,232,204,0.85)!important;text-shadow:0 1px 4px rgba(0,0,0,0.95),0 0 10px rgba(0,0,0,0.8)!important;white-space:nowrap!important;pointer-events:none!important;letter-spacing:0.05em!important;}
 .province-label::before{display:none!important;}
-
-/* FOG + CREATURES */
 #fog-canvas{position:absolute;inset:0;z-index:20;pointer-events:none;}
 #creatures-layer{position:absolute;inset:0;z-index:25;pointer-events:none;overflow:hidden;}
-
 /* HEADER */
-#header{position:absolute;top:0;left:0;right:0;z-index:200;pointer-events:none;
-  background:linear-gradient(180deg,rgba(20,13,5,0.97) 0%,rgba(20,13,5,0) 100%);
-  padding:14px 18px 40px;display:flex;align-items:flex-start;justify-content:space-between;}
+#header{position:absolute;top:0;left:0;right:0;z-index:200;pointer-events:none;background:linear-gradient(180deg,rgba(20,13,5,0.97) 0%,rgba(20,13,5,0) 100%);padding:14px 18px 40px;display:flex;align-items:flex-start;justify-content:space-between;}
 #logo-block{pointer-events:all;cursor:pointer;}
 #logo-sub{font-family:var(--font-gothic);font-size:28px;color:var(--gold-lt);line-height:1;text-shadow:0 2px 8px rgba(0,0,0,0.6);letter-spacing:2px;}
 #logo-tagline{font-family:var(--font-text);font-style:italic;font-size:11px;color:var(--parchment-dk);opacity:0.7;letter-spacing:0.04em;margin-top:2px;}
@@ -53,89 +38,45 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 .hstat{text-align:right;}
 .hstat-label{font-family:var(--font-text);font-style:italic;font-size:9px;color:var(--parchment-dk);opacity:0.6;text-transform:uppercase;letter-spacing:0.1em;}
 .hstat-value{font-family:var(--font-body);font-size:15px;font-weight:600;color:var(--gold-lt);line-height:1.1;}
-
-/* STATUS — pushed left to avoid layer toggle */
-#status-scroll{
-  position:absolute;top:76px;left:14px;right:120px;z-index:200;
-  background:rgba(20,13,5,0.88);border:1px solid rgba(201,146,10,0.35);border-radius:4px;
-  padding:6px 14px 7px;font-family:var(--font-text);font-style:italic;font-size:12px;
-  color:var(--parchment-dk);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  pointer-events:none;transition:color 0.4s;box-shadow:0 2px 12px rgba(0,0,0,0.4);
-}
+/* STATUS */
+#status-scroll{position:absolute;top:76px;left:14px;right:120px;z-index:200;background:rgba(20,13,5,0.88);border:1px solid rgba(201,146,10,0.35);border-radius:4px;padding:6px 14px 7px;font-family:var(--font-text);font-style:italic;font-size:12px;color:var(--parchment-dk);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;transition:color 0.4s;box-shadow:0 2px 12px rgba(0,0,0,0.4);}
 #status-scroll::before{content:'✦';color:var(--gold);margin:0 6px 0 0;font-style:normal;font-size:8px;vertical-align:middle;}
 #status-scroll.alert{color:var(--gold-lt);}
 #status-scroll.danger{color:#e07070;}
-
-/* TRAIL HUD */
-#trail-hud{
-  position:absolute;top:110px;left:50%;transform:translateX(-50%);z-index:200;
-  pointer-events:none;background:rgba(20,13,5,0.82);border:1px solid rgba(201,146,10,0.25);
-  border-radius:20px;padding:5px 16px;display:none;gap:18px;align-items:center;
-}
+/* HUD */
+#trail-hud{position:absolute;top:110px;left:50%;transform:translateX(-50%);z-index:200;pointer-events:none;background:rgba(20,13,5,0.82);border:1px solid rgba(201,146,10,0.25);border-radius:20px;padding:5px 16px;display:none;gap:18px;align-items:center;}
 #trail-hud.visible{display:flex;}
 .hud-item{text-align:center;}
 .hud-val{font-family:var(--font-body);font-size:15px;font-weight:600;color:var(--gold-lt);}
 .hud-lbl{font-family:var(--font-text);font-style:italic;font-size:9px;color:rgba(242,232,204,0.45);}
 .hud-sep{width:1px;height:24px;background:rgba(201,146,10,0.2);}
-#hud-time{display:none;}
-#hud-sep-time{display:none;}
-
+#hud-time{display:none;}#hud-sep-time{display:none;}
 /* LAYER TOGGLE */
-#layer-toggle{
-  position:absolute;top:76px;right:14px;z-index:200;
-  background:rgba(20,13,5,0.88);border:1px solid rgba(201,146,10,0.3);border-radius:8px;
-  padding:6px 12px;font-family:var(--font-text);font-style:italic;font-size:11px;
-  color:var(--parchment-dk);cursor:pointer;touch-action:manipulation;transition:border-color 0.2s;
-}
+#layer-toggle{position:absolute;top:76px;right:14px;z-index:200;background:rgba(20,13,5,0.88);border:1px solid rgba(201,146,10,0.3);border-radius:8px;padding:6px 12px;font-family:var(--font-text);font-style:italic;font-size:11px;color:var(--parchment-dk);cursor:pointer;touch-action:manipulation;transition:border-color 0.2s;}
 #layer-toggle:active{border-color:rgba(201,146,10,0.6);}
-
-/* TERRITORY ENTRY LABEL (right slot, bottom controls) */
-#territory-label{
-  font-family:var(--font-text);font-style:italic;font-size:10px;
-  color:var(--gold-lt);text-align:center;line-height:1.35;
-  padding:8px 4px;opacity:0;transition:opacity 0.6s;
-}
+/* TERRITORY ENTRY LABEL */
+#territory-label{font-family:var(--font-text);font-style:italic;font-size:10px;color:var(--gold-lt);text-align:center;line-height:1.35;padding:8px 4px;opacity:0;transition:opacity 0.6s;}
 #territory-label.visible{opacity:1;}
 #territory-label-top{font-size:9px;color:rgba(242,232,204,0.5);display:block;}
 #territory-label-name{font-size:11px;font-weight:600;color:var(--gold-lt);font-style:normal;display:block;font-family:var(--font-body);}
-
-/* WAKE LOCK BANNER */
-#wake-banner{
-  position:absolute;top:112px;left:50%;transform:translateX(-50%);z-index:210;
-  background:rgba(80,30,10,0.96);border:1px solid rgba(220,140,40,0.55);border-radius:6px;
-  padding:9px 16px 10px;display:flex;align-items:flex-start;gap:10px;
-  max-width:calc(100vw - 32px);box-shadow:0 3px 16px rgba(0,0,0,0.6);
-  opacity:0;pointer-events:none;transition:opacity 0.35s ease;
-}
+/* WAKE BANNER */
+#wake-banner{position:absolute;top:112px;left:50%;transform:translateX(-50%);z-index:210;background:rgba(80,30,10,0.96);border:1px solid rgba(220,140,40,0.55);border-radius:6px;padding:9px 16px 10px;display:flex;align-items:flex-start;gap:10px;max-width:calc(100vw - 32px);box-shadow:0 3px 16px rgba(0,0,0,0.6);opacity:0;pointer-events:none;transition:opacity 0.35s ease;}
 #wake-banner.visible{opacity:1;pointer-events:all;}
 #wake-banner-icon{font-size:18px;flex-shrink:0;line-height:1;margin-top:1px;}
 #wake-banner-text{font-family:var(--font-text);font-style:italic;font-size:11.5px;color:var(--parchment-dk);line-height:1.55;}
 #wake-banner-text strong{font-style:normal;color:var(--gold-lt);font-weight:600;}
 #wake-banner-dismiss{flex-shrink:0;background:none;border:1px solid rgba(220,140,40,0.35);border-radius:4px;color:rgba(242,232,204,0.5);font-family:var(--font-body);font-size:10px;padding:4px 8px;cursor:pointer;touch-action:manipulation;align-self:center;white-space:nowrap;}
-
 /* BOTTOM PANEL */
-#bottom-panel{position:absolute;bottom:0;left:0;right:0;z-index:200;
-  background:linear-gradient(0deg,rgba(20,13,5,0.98) 0%,rgba(20,13,5,0) 100%);padding:0 14px 28px;}
-#control-parchment{
-  background:rgba(30,20,8,0.92);border:1px solid rgba(201,146,10,0.3);border-radius:12px;
-  padding:14px 16px 16px;position:relative;
-  box-shadow:inset 0 1px 0 rgba(201,146,10,0.15),inset 0 -1px 0 rgba(201,146,10,0.1),0 -4px 20px rgba(0,0,0,0.5);
-}
-#control-parchment::before{content:'⸻ ✦ ⸻';position:absolute;top:-1px;left:50%;transform:translateX(-50%);
-  font-family:var(--font-body);font-size:10px;color:var(--gold);background:rgba(30,20,8,0.92);padding:0 8px;letter-spacing:4px;}
+#bottom-panel{position:absolute;bottom:0;left:0;right:0;z-index:200;background:linear-gradient(0deg,rgba(20,13,5,0.98) 0%,rgba(20,13,5,0) 100%);padding:0 14px 28px;}
+#control-parchment{background:rgba(30,20,8,0.92);border:1px solid rgba(201,146,10,0.3);border-radius:12px;padding:14px 16px 16px;position:relative;box-shadow:inset 0 1px 0 rgba(201,146,10,0.15),inset 0 -1px 0 rgba(201,146,10,0.1),0 -4px 20px rgba(0,0,0,0.5);}
+#control-parchment::before{content:'⸻ ✦ ⸻';position:absolute;top:-1px;left:50%;transform:translateX(-50%);font-family:var(--font-body);font-size:10px;color:var(--gold);background:rgba(30,20,8,0.92);padding:0 8px;letter-spacing:4px;}
 #gps-line{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.4);text-align:center;margin-bottom:12px;min-height:14px;}
 #main-controls{display:grid;grid-template-columns:1fr 64px 1fr;gap:10px;align-items:center;margin-bottom:12px;}
-.scroll-btn{font-family:var(--font-body);font-weight:600;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;
-  border-radius:6px;border:1px solid rgba(201,146,10,0.35);background:rgba(201,146,10,0.08);
-  color:var(--parchment-dk);padding:10px 8px;cursor:pointer;transition:all 0.18s;touch-action:manipulation;}
+.scroll-btn{font-family:var(--font-body);font-weight:600;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;border-radius:6px;border:1px solid rgba(201,146,10,0.35);background:rgba(201,146,10,0.08);color:var(--parchment-dk);padding:10px 8px;cursor:pointer;transition:all 0.18s;touch-action:manipulation;}
 .scroll-btn:active{background:rgba(201,146,10,0.2);transform:scale(0.97);}
 .scroll-btn.claim-btn{background:rgba(45,90,39,0.3);border-color:rgba(90,128,56,0.55);color:#a8d890;}
 .scroll-btn.stop-btn{background:rgba(100,30,30,0.3);border-color:rgba(160,60,60,0.4);color:#e8a0a0;}
-
-#seal-btn{width:64px;height:64px;border-radius:50%;border:2px solid rgba(201,146,10,0.5);
-  background:rgba(30,20,8,0.95);cursor:pointer;position:relative;display:flex;
-  align-items:center;justify-content:center;touch-action:manipulation;transition:border-color 0.2s;
-  box-shadow:0 0 0 4px rgba(201,146,10,0.08);}
+#seal-btn{width:64px;height:64px;border-radius:50%;border:2px solid rgba(201,146,10,0.5);background:rgba(30,20,8,0.95);cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;touch-action:manipulation;transition:border-color 0.2s;box-shadow:0 0 0 4px rgba(201,146,10,0.08);}
 #seal-btn:active{transform:scale(0.94);}
 #seal-btn.recording{border-color:rgba(180,60,60,0.7);box-shadow:0 0 0 4px rgba(180,60,60,0.12);}
 #seal-inner{width:38px;height:38px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:18px;transition:background 0.2s,border-radius 0.25s;}
@@ -143,7 +84,6 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 #seal-pulse{position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(180,60,60,0.4);opacity:0;pointer-events:none;}
 #seal-btn.recording #seal-pulse{animation:seal-ring 1.8s ease-out infinite;}
 @keyframes seal-ring{0%{transform:scale(0.85);opacity:0.7;}100%{transform:scale(1.3);opacity:0;}}
-
 #territories-toggle{background:none;border:none;color:rgba(242,232,204,0.45);font-family:var(--font-text);font-style:italic;font-size:11px;cursor:pointer;width:100%;text-align:center;padding:4px;touch-action:manipulation;}
 #territories-drawer{max-height:0;overflow:hidden;transition:max-height 0.4s cubic-bezier(0.4,0,0.2,1);}
 #territories-drawer.open{max-height:260px;overflow-y:auto;}
@@ -152,123 +92,125 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 .t-name{font-family:var(--font-body);font-size:12px;font-weight:600;margin-bottom:2px;}
 .t-meta{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.4);}
 .t-del{background:none;border:1px solid rgba(160,80,80,0.3);color:rgba(200,120,120,0.6);border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:var(--font-text);touch-action:manipulation;flex-shrink:0;}
-
-/* USER / START MARKERS */
+/* MARKERS */
 .explorer-marker{width:24px;height:24px;}
 .explorer-compass{width:24px;height:24px;animation:compass-wobble 8s ease-in-out infinite;}
 @keyframes compass-wobble{0%,85%,100%{transform:rotate(0deg);}92%{transform:rotate(6deg);}96%{transform:rotate(-3deg);}}
 .start-dot{width:14px;height:14px;border-radius:50%;background:rgba(230,180,40,0.9);border:2px solid rgba(255,220,80,0.6);}
 .start-dot.pulsing{animation:loop-pulse 1.2s ease-out infinite;}
 @keyframes loop-pulse{0%{box-shadow:0 0 0 0 rgba(230,180,40,0.7);}70%{box-shadow:0 0 0 10px rgba(230,180,40,0);}100%{box-shadow:0 0 0 0 rgba(230,180,40,0);}}
-
-/* CLAIM MODAL — two-step flow */
+/* CLAIM MODAL */
 #name-modal{position:absolute;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(10,7,3,0.82);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity 0.25s;}
 #name-modal.open{opacity:1;pointer-events:all;}
 #scroll-card{background:#1e1408;border:1px solid rgba(201,146,10,0.4);border-radius:10px;padding:28px 24px 22px;width:min(380px,calc(100vw - 28px));box-shadow:0 8px 40px rgba(0,0,0,0.7);}
 .card-title{font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--gold);text-align:center;letter-spacing:0.06em;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(201,146,10,0.25);}
 .card-sub{font-family:var(--font-text);font-style:italic;font-size:12px;color:rgba(242,232,204,0.55);line-height:1.7;margin-bottom:14px;text-align:center;}
-
-/* Step 1 — New vs Expand */
-#claim-step1{display:block;}
-#claim-step2{display:none;}
-.province-choice-btn{
-  width:100%;margin-bottom:10px;padding:14px 16px;border-radius:8px;
-  font-family:var(--font-body);font-weight:600;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;
-  cursor:pointer;touch-action:manipulation;transition:all 0.18s;text-align:left;display:flex;align-items:center;gap:12px;
-}
+.province-choice-btn{width:100%;margin-bottom:10px;padding:14px 16px;border-radius:8px;font-family:var(--font-body);font-weight:600;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;touch-action:manipulation;transition:all 0.18s;text-align:left;display:flex;align-items:center;gap:12px;}
 #btn-new-province{background:rgba(45,90,39,0.3);border:1px solid rgba(90,128,56,0.5);color:#a8d890;}
 #btn-new-province:active{background:rgba(45,90,39,0.5);}
 #btn-expand-province{background:rgba(30,60,100,0.3);border:1px solid rgba(60,100,160,0.5);color:#88c0e8;}
 #btn-expand-province:active{background:rgba(30,60,100,0.5);}
 .choice-icon{font-size:20px;flex-shrink:0;}
-.choice-text{}
 .choice-title{display:block;font-size:12px;}
 .choice-hint{display:block;font-family:var(--font-text);font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;margin-top:2px;opacity:0.65;}
-
-/* Province picker list */
 #province-picker{max-height:160px;overflow-y:auto;margin-bottom:12px;border:1px solid rgba(201,146,10,0.2);border-radius:6px;}
-.province-pick-item{
-  display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;touch-action:manipulation;
-  border-bottom:1px solid rgba(201,146,10,0.1);transition:background 0.15s;
-}
+.province-pick-item{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;touch-action:manipulation;border-bottom:1px solid rgba(201,146,10,0.1);transition:background 0.15s;}
 .province-pick-item:last-child{border-bottom:none;}
 .province-pick-item:active,.province-pick-item.selected{background:rgba(201,146,10,0.12);}
 .pick-swatch{width:14px;height:14px;border-radius:50%;flex-shrink:0;}
 .pick-name{font-family:var(--font-body);font-size:12px;font-weight:600;}
 .pick-area{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.4);margin-left:auto;}
-
-/* Step 2 — name + color */
 #territory-input{width:100%;background:rgba(242,232,204,0.06);border:1px solid rgba(201,146,10,0.3);border-radius:6px;padding:12px 14px;font-family:var(--font-body);font-size:16px;font-weight:600;color:var(--parchment);outline:none;margin-bottom:14px;}
 #territory-input:focus{border-color:rgba(201,146,10,0.6);}
 #territory-input::placeholder{color:rgba(242,232,204,0.25);font-weight:400;}
-
-/* Color picker */
-#color-picker{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-.color-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.15s;touch-action:manipulation;}
-.color-swatch.selected{border-color:rgba(255,255,255,0.7);transform:scale(1.15);}
-
 #modal-btns{display:flex;gap:10px;}
 .modal-btn{flex:1;padding:11px;border-radius:6px;font-family:var(--font-body);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;touch-action:manipulation;border:1px solid rgba(201,146,10,0.3);}
 #modal-cancel{background:transparent;color:rgba(242,232,204,0.4);}
 #modal-back{background:transparent;color:rgba(242,232,204,0.4);}
 #modal-save{background:rgba(45,90,39,0.4);border-color:rgba(90,128,56,0.6);color:#a8d890;}
 #modal-merge{background:rgba(30,60,100,0.4);border-color:rgba(60,100,160,0.6);color:#88c0e8;}
-
-/* MultiPolygon gap warning */
 #gap-warning{font-family:var(--font-text);font-style:italic;font-size:11px;color:#e8b84b;text-align:center;margin-bottom:10px;display:none;}
 
-/* KINGDOM SCREEN */
+/* ═══════════════════════════════════
+   CREST DESIGNER MODAL
+═══════════════════════════════════ */
+#crest-modal{position:absolute;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;background:rgba(10,7,3,0.88);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity 0.25s;}
+#crest-modal.open{opacity:1;pointer-events:all;}
+#crest-card{background:#1a1006;border:1px solid rgba(201,146,10,0.45);border-radius:12px;padding:24px 20px 20px;width:min(400px,calc(100vw - 24px));box-shadow:0 10px 50px rgba(0,0,0,0.8);max-height:90vh;overflow-y:auto;}
+.crest-section-label{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(201,146,10,0.7);margin-bottom:8px;margin-top:16px;}
+.crest-section-label:first-child{margin-top:0;}
+
+/* Live crest preview */
+#crest-preview{display:flex;justify-content:center;margin-bottom:20px;}
+#crest-preview svg{filter:drop-shadow(0 4px 16px rgba(0,0,0,0.8));}
+
+/* Color row */
+#crest-color-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:4px;}
+.cc-swatch{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.15s;touch-action:manipulation;flex-shrink:0;}
+.cc-swatch.selected{border-color:rgba(255,255,255,0.75);transform:scale(1.18);}
+
+/* Division row */
+#crest-div-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;}
+.div-btn{width:44px;height:36px;border-radius:6px;cursor:pointer;border:1px solid rgba(201,146,10,0.25);background:rgba(201,146,10,0.06);display:flex;align-items:center;justify-content:center;touch-action:manipulation;transition:all 0.15s;}
+.div-btn svg{width:28px;height:22px;}
+.div-btn.selected{border-color:rgba(201,146,10,0.7);background:rgba(201,146,10,0.18);}
+.div-btn:active{transform:scale(0.95);}
+
+/* Charge grid */
+#crest-charge-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:4px;}
+.charge-btn{height:40px;border-radius:6px;cursor:pointer;border:1px solid rgba(201,146,10,0.2);background:rgba(201,146,10,0.05);display:flex;align-items:center;justify-content:center;touch-action:manipulation;transition:all 0.15s;}
+.charge-btn svg{width:22px;height:22px;}
+.charge-btn.selected{border-color:rgba(201,146,10,0.7);background:rgba(201,146,10,0.18);}
+.charge-btn:active{transform:scale(0.92);}
+
+#crest-save-row{display:flex;gap:10px;margin-top:18px;}
+.crest-action-btn{flex:1;padding:12px;border-radius:7px;font-family:var(--font-body);font-weight:600;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;touch-action:manipulation;transition:all 0.15s;}
+#crest-cancel{background:transparent;border:1px solid rgba(201,146,10,0.25);color:rgba(242,232,204,0.4);}
+#crest-save{background:rgba(45,90,39,0.4);border:1px solid rgba(90,128,56,0.6);color:#a8d890;}
+#crest-save:active{background:rgba(45,90,39,0.6);}
+
+/* KINGDOM */
 #kingdom-screen{position:absolute;inset:0;z-index:400;background:#0e0a04;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity 0.35s;}
 #kingdom-screen.open{opacity:1;pointer-events:all;}
 #kingdom-inner{min-height:100%;padding:24px 18px 40px;max-width:480px;margin:0 auto;}
 #kingdom-header{text-align:center;padding-bottom:22px;border-bottom:1px solid rgba(201,146,10,0.2);margin-bottom:24px;position:relative;}
 #kingdom-header::before{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin-bottom:20px;opacity:0.4;}
 #kingdom-close{position:absolute;top:0;right:0;background:none;border:1px solid rgba(201,146,10,0.3);border-radius:6px;padding:6px 12px;font-family:var(--font-body);font-size:11px;color:var(--parchment-dk);cursor:pointer;touch-action:manipulation;opacity:0.7;}
-
-/* Player name row */
+/* Player crest in kingdom header */
+#kingdom-crest-wrap{display:flex;justify-content:center;margin-bottom:10px;cursor:pointer;position:relative;}
+#kingdom-crest-wrap:hover::after{content:'Edit Crest';position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-family:var(--font-text);font-style:italic;font-size:10px;color:var(--gold);white-space:nowrap;}
 #player-name-row{display:flex;align-items:center;gap:6px;justify-content:center;margin-bottom:6px;}
 #player-name-display{font-family:var(--font-text);font-style:italic;font-size:13px;color:rgba(242,232,204,0.6);}
 #edit-player-btn{background:none;border:none;font-size:11px;cursor:pointer;opacity:0.4;padding:1px 3px;touch-action:manipulation;}
-
 #kingdom-title-text{font-family:var(--font-gothic);font-size:36px;color:var(--gold-lt);line-height:1;margin-bottom:4px;}
 #realm-name-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;justify-content:center;}
 #realm-name-display{font-family:var(--font-body);font-weight:700;font-size:18px;color:var(--parchment);letter-spacing:0.08em;text-transform:uppercase;}
 #edit-realm-btn{background:none;border:none;font-size:12px;cursor:pointer;opacity:0.5;padding:2px 4px;touch-action:manipulation;}
 #kingdom-subtitle{font-family:var(--font-text);font-style:italic;font-size:12px;color:rgba(242,232,204,0.45);}
-
 #empire-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px;}
 .empire-stat{background:rgba(201,146,10,0.07);border:1px solid rgba(201,146,10,0.2);border-radius:8px;padding:14px 10px;text-align:center;}
 .empire-stat-icon{font-size:20px;margin-bottom:4px;}
 .empire-stat-val{font-family:var(--font-body);font-weight:700;font-size:18px;color:var(--gold-lt);line-height:1;margin-bottom:3px;}
 .empire-stat-lbl{font-family:var(--font-text);font-style:italic;font-size:9px;color:rgba(242,232,204,0.45);text-transform:uppercase;letter-spacing:0.08em;}
-
 #territories-section h3,#log-section h3{font-family:var(--font-body);font-weight:700;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#8b6914;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
 #territories-section h3::after,#log-section h3::after{content:'';flex:1;height:1px;background:rgba(139,105,20,0.25);}
-
-/* UNIT TOGGLE */
-#unit-toggle{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:16px;border:1px solid rgba(201,146,10,0.3);border-radius:6px;overflow:hidden;}
+#unit-toggle{display:flex;margin-bottom:16px;border:1px solid rgba(201,146,10,0.3);border-radius:6px;overflow:hidden;}
 .unit-opt{flex:1;padding:8px 0;text-align:center;cursor:pointer;touch-action:manipulation;font-family:var(--font-body);font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:rgba(242,232,204,0.45);background:transparent;border:none;transition:all 0.18s;}
 .unit-opt.active{background:rgba(201,146,10,0.2);color:var(--gold-lt);}
 .unit-opt+.unit-opt{border-left:1px solid rgba(201,146,10,0.3);}
-
-/* EXPORT */
 #export-btn{width:100%;margin-bottom:20px;background:rgba(139,105,20,0.12);border:1px solid rgba(201,146,10,0.35);border-radius:8px;padding:13px 16px;display:flex;align-items:center;justify-content:center;gap:10px;font-family:var(--font-body);font-weight:600;font-size:12px;letter-spacing:0.07em;text-transform:uppercase;color:var(--gold-lt);cursor:pointer;touch-action:manipulation;transition:background 0.18s,border-color 0.18s;}
 #export-btn:active{background:rgba(139,105,20,0.3);transform:scale(0.98);}
 #export-confirm{text-align:center;font-family:var(--font-text);font-style:italic;font-size:11px;color:#6fcf97;margin-top:-12px;margin-bottom:16px;opacity:0;transition:opacity 0.4s;pointer-events:none;}
 #export-confirm.show{opacity:1;}
-
-/* KINGDOM LIST */
 .kingdom-territory{background:rgba(20,14,5,0.7);border:1px solid rgba(201,146,10,0.15);border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color 0.2s;}
 .kingdom-territory:active{border-color:rgba(201,146,10,0.4);}
-.kt-crest{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;border:1px solid rgba(255,255,255,0.1);}
+.kt-crest-wrap{width:42px;height:49px;flex-shrink:0;}
 .kt-info{flex:1;min-width:0;}
 .kt-name{font-family:var(--font-body);font-weight:600;font-size:14px;color:var(--parchment);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .kt-details{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.4);margin-top:2px;}
 .kt-del{background:none;border:1px solid rgba(160,60,60,0.3);color:rgba(200,100,100,0.5);border-radius:5px;padding:5px 10px;font-family:var(--font-text);font-size:10px;cursor:pointer;touch-action:manipulation;flex-shrink:0;}
 #empty-realm{text-align:center;padding:40px 20px;font-family:var(--font-text);font-style:italic;color:rgba(242,232,204,0.3);font-size:14px;line-height:1.8;}
 #empty-realm .big{font-size:40px;display:block;margin-bottom:12px;opacity:0.4;}
-
-/* CONQUEST LOG */
 #log-section{margin-top:28px;}
 .log-entry{border:1px solid rgba(201,146,10,0.12);border-radius:8px;padding:13px 16px;margin-bottom:10px;background:rgba(14,10,4,0.5);position:relative;}
 .log-entry-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
@@ -281,26 +223,21 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 .log-del{position:absolute;top:10px;right:12px;background:none;border:none;color:rgba(200,100,100,0.3);font-size:12px;cursor:pointer;touch-action:manipulation;padding:2px 4px;}
 .log-del:active{color:rgba(200,100,100,0.7);}
 #log-empty{font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.25);text-align:center;padding:16px 0;}
-
-/* TOWN SHIELDS */
+/* Castle shields */
 .town-shield-wrap{display:flex;flex-direction:column;align-items:center;pointer-events:all;cursor:pointer;}
 .town-shield{filter:drop-shadow(0 2px 6px rgba(0,0,0,0.75));transition:transform 0.18s;}
 .town-shield:active{transform:scale(0.9);}
 .town-label{font-family:var(--font-body);font-weight:600;letter-spacing:0.04em;color:var(--parchment);text-shadow:0 1px 4px rgba(0,0,0,0.95),0 0 10px rgba(0,0,0,0.9);margin-top:2px;max-width:80px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;line-height:1.2;}
-
-/* TOOLTIPS */
 .territory-tooltip{font-family:var(--font-body)!important;font-size:11px!important;background:rgba(20,13,5,0.9)!important;border:1px solid rgba(201,146,10,0.4)!important;color:var(--gold-lt)!important;border-radius:4px!important;padding:4px 10px!important;box-shadow:none!important;}
 .territory-tooltip::before{display:none!important;}
 </style>
 </head>
 <body>
-
 <div id="map"></div>
 <div id="map-vignette"></div>
 <canvas id="fog-canvas"></canvas>
 <div id="creatures-layer"></div>
 
-<!-- HEADER -->
 <div id="header">
   <div id="logo-block" onclick="openKingdom()">
     <div id="logo-sub">Terranova</div>
@@ -332,7 +269,6 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
   <button id="wake-banner-dismiss" onclick="dismissWakeBanner()">Understood</button>
 </div>
 
-<!-- BOTTOM PANEL -->
 <div id="bottom-panel">
   <div id="control-parchment">
     <div id="gps-line">Awaiting celestial fix…</div>
@@ -342,7 +278,6 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
         <div id="seal-pulse"></div>
         <div id="seal-inner">⚑</div>
       </button>
-      <!-- Right slot: territory label (idle/walking), claim btn (loop closeable), stop btn (recording) -->
       <div id="territory-label">
         <span id="territory-label-top"></span>
         <span id="territory-label-name"></span>
@@ -355,57 +290,59 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
   </div>
 </div>
 
-<!-- CLAIM MODAL — two-step -->
+<!-- CLAIM MODAL -->
 <div id="name-modal">
   <div id="scroll-card">
-
-    <!-- STEP 1: New or Expand -->
     <div id="claim-step1">
       <div class="card-title">❧ Claim Your Territory ❧</div>
       <div class="card-sub">These lands have been charted. How shall they be recorded?</div>
       <button class="province-choice-btn" id="btn-new-province" onclick="chooseNew()">
         <span class="choice-icon">🏰</span>
-        <span class="choice-text">
-          <span class="choice-title">Found a New Province</span>
-          <span class="choice-hint">Create a new named territory</span>
-        </span>
+        <span class="choice-text"><span class="choice-title">Found a New Province</span><span class="choice-hint">Create a new named territory</span></span>
       </button>
       <button class="province-choice-btn" id="btn-expand-province" onclick="chooseExpand()">
         <span class="choice-icon">⚜</span>
-        <span class="choice-text">
-          <span class="choice-title">Expand Existing Province</span>
-          <span class="choice-hint">Merge into a province you already hold</span>
-        </span>
+        <span class="choice-text"><span class="choice-title">Expand Existing Province</span><span class="choice-hint">Merge into a province you already hold</span></span>
       </button>
-      <div id="modal-btns">
-        <button class="modal-btn" id="modal-cancel" onclick="cancelClaim()">Forsake</button>
-      </div>
+      <div id="modal-btns"><button class="modal-btn" id="modal-cancel" onclick="cancelClaim()">Forsake</button></div>
     </div>
-
-    <!-- STEP 2a: New province — name + color -->
     <div id="claim-step2-new" style="display:none">
       <div class="card-title">❧ Found a New Province ❧</div>
-      <div class="card-sub">Bestow a name upon these lands, that they may be known throughout the realm.</div>
+      <div class="card-sub">Bestow a name upon these lands.</div>
       <input type="text" id="territory-input" placeholder="e.g. The Whispering Pines" maxlength="48">
-      <div id="color-picker"></div>
       <div id="modal-btns">
         <button class="modal-btn" id="modal-back-new" onclick="backToStep1()">← Back</button>
         <button class="modal-btn" id="modal-save" onclick="saveClaim()">Proclaim!</button>
       </div>
     </div>
-
-    <!-- STEP 2b: Expand province — pick which one -->
     <div id="claim-step2-expand" style="display:none">
       <div class="card-title">❧ Expand a Province ❧</div>
-      <div class="card-sub">Choose the province these lands shall be joined unto.</div>
+      <div class="card-sub">Choose which province to join unto.</div>
       <div id="province-picker"></div>
-      <div id="gap-warning">⚠ These lands do not touch the chosen province. Merge anyway?</div>
+      <div id="gap-warning">⚠ These lands do not touch the chosen province.</div>
       <div id="modal-btns">
         <button class="modal-btn" id="modal-back-expand" onclick="backToStep1()">← Back</button>
         <button class="modal-btn" id="modal-merge" onclick="saveMerge()">Unite!</button>
       </div>
     </div>
+  </div>
+</div>
 
+<!-- CREST DESIGNER MODAL -->
+<div id="crest-modal">
+  <div id="crest-card">
+    <div class="card-title">⚜ Design Your Crest ⚜</div>
+    <div id="crest-preview"></div>
+    <div class="crest-section-label">Heraldic Color</div>
+    <div id="crest-color-row"></div>
+    <div class="crest-section-label">Division</div>
+    <div id="crest-div-row"></div>
+    <div class="crest-section-label">Charge</div>
+    <div id="crest-charge-grid"></div>
+    <div id="crest-save-row">
+      <button class="crest-action-btn" id="crest-cancel" onclick="closeCrestModal()">Cancel</button>
+      <button class="crest-action-btn" id="crest-save" onclick="saveCrest()">Seal It</button>
+    </div>
   </div>
 </div>
 
@@ -414,6 +351,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
   <div id="kingdom-inner">
     <div id="kingdom-header">
       <button id="kingdom-close" onclick="closeKingdom()">✕ Close</button>
+      <div id="kingdom-crest-wrap" onclick="openCrestModal()" title="Edit your crest"></div>
       <div id="player-name-row">
         <div id="player-name-display">Explorer</div>
         <button id="edit-player-btn" onclick="editPlayerName()">✎</button>
@@ -436,9 +374,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
         <button class="unit-opt active" id="unit-mi" onclick="setUnits('mi')">Miles</button>
         <button class="unit-opt" id="unit-km" onclick="setUnits('km')">Kilometres</button>
       </div>
-      <button id="export-btn" onclick="exportGeoJSON()">
-        <span>⬇</span> Export territories to GeoJSON
-      </button>
+      <button id="export-btn" onclick="exportGeoJSON()"><span>⬇</span> Export to GeoJSON</button>
       <div id="export-confirm">✦ Scroll saved — open in ArcGIS or QGIS ✦</div>
       <div id="kingdom-list"></div>
     </div>
@@ -450,98 +386,273 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
-//  CONFIG
-// ═══════════════════════════════════════════════
-const STADIA_KEY = '30f4c480-41bb-42c2-8231-c58ca4b763e3';
+// ═══════════════════ CONFIG ═══════════════════
+const STADIA_KEY='30f4c480-41bb-42c2-8231-c58ca4b763e3';
 
-// ═══════════════════════════════════════════════
-//  TILE LAYERS
-// ═══════════════════════════════════════════════
-const TILE_LAYERS = [
-  { name:'Watercolor', icon:'🎨',
-    url:`https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg?api_key=${STADIA_KEY}`,
-    opts:{maxZoom:16,attribution:'© <a href="https://stadiamaps.com">Stadia</a> © <a href="https://stamen.com">Stamen</a> © <a href="https://openstreetmap.org">OSM</a>'},
-    labelsUrl:`https://tiles.stadiamaps.com/tiles/stamen_terrain_labels/{z}/{x}/{y}{r}.png?api_key=${STADIA_KEY}`,
-    labelsOpts:{maxZoom:20,attribution:'',opacity:0.85,pane:'overlayPane'},
-    filter:'saturate(0.78) brightness(0.90) sepia(0.18)' },
-  { name:'Terrain', icon:'⛰',
-    url:`https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png?api_key=${STADIA_KEY}`,
-    opts:{maxZoom:18,attribution:'© <a href="https://stadiamaps.com">Stadia</a> © <a href="https://stamen.com">Stamen</a> © <a href="https://openstreetmap.org">OSM</a>'},
-    labelsUrl:null,labelsOpts:null,filter:'sepia(0.35) saturate(0.7) brightness(0.88)' },
-  { name:'Classic', icon:'🗺',
-    url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    opts:{maxZoom:19,attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>'},
-    labelsUrl:null,labelsOpts:null,filter:'sepia(0.55) saturate(0.6) brightness(0.88) contrast(1.08)' },
+// ═══════════════════ TILE LAYERS ═══════════════════
+const TILE_LAYERS=[
+  {name:'Watercolor',icon:'🎨',
+   url:`https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg?api_key=${STADIA_KEY}`,
+   opts:{maxZoom:16,attribution:'© <a href="https://stadiamaps.com">Stadia</a> © <a href="https://stamen.com">Stamen</a> © <a href="https://openstreetmap.org">OSM</a>'},
+   labelsUrl:`https://tiles.stadiamaps.com/tiles/stamen_terrain_labels/{z}/{x}/{y}{r}.png?api_key=${STADIA_KEY}`,
+   labelsOpts:{maxZoom:20,attribution:'',opacity:0.85,pane:'overlayPane'},
+   filter:'saturate(0.78) brightness(0.90) sepia(0.18)'},
+  {name:'Terrain',icon:'⛰',
+   url:`https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png?api_key=${STADIA_KEY}`,
+   opts:{maxZoom:18,attribution:'© <a href="https://stadiamaps.com">Stadia</a> © <a href="https://stamen.com">Stamen</a> © <a href="https://openstreetmap.org">OSM</a>'},
+   labelsUrl:null,labelsOpts:null,filter:'sepia(0.35) saturate(0.7) brightness(0.88)'},
+  {name:'Classic',icon:'🗺',
+   url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+   opts:{maxZoom:19,attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>'},
+   labelsUrl:null,labelsOpts:null,filter:'sepia(0.55) saturate(0.6) brightness(0.88) contrast(1.08)'},
 ];
 let layerIdx=0,tileLayer=null,lblLayer=null;
-
-function applyTileLayer(idx){
-  const d=TILE_LAYERS[idx];
+function applyTileLayer(i){
+  const d=TILE_LAYERS[i];
   if(tileLayer){map.removeLayer(tileLayer);tileLayer=null;}
   if(lblLayer){map.removeLayer(lblLayer);lblLayer=null;}
   tileLayer=L.tileLayer(d.url,d.opts).addTo(map);
-  if(d.labelsUrl) lblLayer=L.tileLayer(d.labelsUrl,d.labelsOpts).addTo(map);
+  if(d.labelsUrl)lblLayer=L.tileLayer(d.labelsUrl,d.labelsOpts).addTo(map);
   document.getElementById('map').style.filter=d.filter;
   document.getElementById('layer-toggle').textContent=`${d.icon} ${d.name}`;
 }
-function cycleLayer(){ layerIdx=(layerIdx+1)%TILE_LAYERS.length; applyTileLayer(layerIdx); }
+function cycleLayer(){layerIdx=(layerIdx+1)%TILE_LAYERS.length;applyTileLayer(layerIdx);}
 
-// ═══════════════════════════════════════════════
-//  MAP
-// ═══════════════════════════════════════════════
+// ═══════════════════ MAP ═══════════════════
 const map=L.map('map',{center:[43.2,-71.5],zoom:15,zoomControl:false,attributionControl:true});
 applyTileLayer(0);
 
-// ═══════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════
-let recording=false, trail=[], trailLine=null, startMarker=null;
-let userMarker=null, currentPos=null, pendingPoints=null;
-let wakeLock=null, wakeLockDismissed=false;
+// ═══════════════════ CREST SYSTEM ═══════════════════
+// Heraldic palette: {fill, stroke, text, complement}
+const PALETTE=[
+  {fill:'#2d5a27',stroke:'#4a8a38',text:'#a8e890',comp:'#1a3a5c'},
+  {fill:'#1a3a5c',stroke:'#2d6090',text:'#88c0e8',comp:'#2d5a27'},
+  {fill:'#5a2800',stroke:'#8a4010',text:'#e8a070',comp:'#1a3a5c'},
+  {fill:'#4a2060',stroke:'#7040a0',text:'#c890f0',comp:'#3a3a00'},
+  {fill:'#3a3a00',stroke:'#686800',text:'#d8d860',comp:'#4a2060'},
+  {fill:'#4a0a1a',stroke:'#8a1a3a',text:'#e890b0',comp:'#2d5a27'},
+  {fill:'#1a3a3a',stroke:'#2a6060',text:'#88e0e0',comp:'#5a2800'},
+  {fill:'#3a1a00',stroke:'#704020',text:'#e0b080',comp:'#1a3a3a'},
+];
 
-let territories   = JSON.parse(localStorage.getItem('tv-territories') ||'[]');
-let realmName     = localStorage.getItem('tv-realm-name')  || 'My Realm';
-let playerName    = localStorage.getItem('tv-player-name') || 'Explorer';
-let totalDistKm   = parseFloat(localStorage.getItem('tv-total-dist') ||'0');
-let polygonLayers = []; // {id, poly, label}
+// Divisions: id, label, SVG clip/fill builder
+const DIVISIONS=[
+  {id:'solid',    label:'Solid'},
+  {id:'pale',     label:'Per Pale'},    // vertical split
+  {id:'fess',     label:'Per Fess'},    // horizontal split
+  {id:'bend',     label:'Per Bend'},    // diagonal \
+  {id:'bend-sin', label:'Per Bend S.'}, // diagonal /
+  {id:'quarterly',label:'Quarterly'},
+];
+
+// Charges: id + SVG path (all designed to fit in a ~24x24 viewBox, centered)
+const CHARGES=[
+  {id:'none',   label:'None',    path:''},
+  {id:'sword',  label:'Sword',   path:'<line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><line x1="9" y1="7" x2="15" y2="7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polygon points="12,19 10,22 14,22" fill="currentColor"/>'},
+  {id:'star',   label:'Star',    path:'<polygon points="12,3 14.5,9.5 21,9.5 16,13.5 18,20 12,16 6,20 8,13.5 3,9.5 9.5,9.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>'},
+  {id:'cross',  label:'Cross',   path:'<rect x="10" y="4" width="4" height="16" fill="currentColor" rx="1"/><rect x="4" y="10" width="16" height="4" fill="currentColor" rx="1"/>'},
+  {id:'tower',  label:'Tower',   path:'<rect x="7" y="8" width="10" height="13" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="5" y="5" width="4" height="5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="10" y="5" width="4" height="5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="15" y="5" width="4" height="5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="10" y="15" width="4" height="6" fill="currentColor"/>'},
+  {id:'lion',   label:'Lion',    path:'<path d="M8,18 Q7,14 9,12 Q8,10 10,9 Q9,7 11,7 Q12,5 13,7 Q15,7 14,9 Q16,10 15,12 Q17,14 16,18 Q14,20 12,20 Q10,20 8,18Z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="11" cy="9" r="1" fill="currentColor"/><line x1="12" y1="18" x2="12" y2="22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'},
+  {id:'eagle',  label:'Eagle',   path:'<path d="M12,5 L8,10 L4,9 L8,13 L7,18 L12,15 L17,18 L16,13 L20,9 L16,10Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="8" r="1.5" fill="currentColor"/>'},
+  {id:'anchor', label:'Anchor',  path:'<circle cx="12" cy="7" r="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="9.5" x2="12" y2="19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M7,14 Q12,19 17,14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="9" y1="6.5" x2="15" y2="6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'},
+  {id:'moon',   label:'Moon',    path:'<path d="M16,12 A6,6 0 1,1 10,7 A4,4 0 0,0 16,12Z" fill="currentColor"/>'},
+  {id:'sun',    label:'Sun',     path:'<circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="4" x2="12" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="12" y1="18" x2="12" y2="20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="4" y1="12" x2="6" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="18" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="6.3" y1="6.3" x2="7.8" y2="7.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="16.2" y1="16.2" x2="17.7" y2="17.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="17.7" y1="6.3" x2="16.2" y2="7.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="7.8" y1="16.2" x2="6.3" y2="17.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'},
+  {id:'tree',   label:'Tree',    path:'<polygon points="12,4 6,12 9,12 7,18 17,18 15,12 18,12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="12" y1="18" x2="12" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'},
+  {id:'wave',   label:'Wave',    path:'<path d="M3,10 Q6,7 9,10 Q12,13 15,10 Q18,7 21,10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3,15 Q6,12 9,15 Q12,18 15,15 Q18,12 21,15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'},
+  {id:'arrow',  label:'Arrow',   path:'<line x1="12" y1="4" x2="12" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polyline points="8,8 12,4 16,8" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'},
+  {id:'fleur',  label:'Fleur',   path:'<path d="M12,20 Q12,14 12,12 Q10,11 8,12 Q7,10 9,9 Q10,8 12,9 Q12,8 11,5 Q12,3 13,5 Q12,8 12,9 Q14,8 15,9 Q17,10 16,12 Q14,11 12,12 Q12,14 12,20Z" fill="currentColor"/>'},
+];
+
+// Player crest state
+let playerCrest = JSON.parse(localStorage.getItem('tv-crest') || 'null') || {colorIdx:0, divisionId:'solid', chargeId:'none'};
+// Working copy while designer is open
+let draftCrest = {...playerCrest};
+
+// Generate shield SVG at given size
+function buildCrestSVG(crest, size=60){
+  const pal = PALETTE[crest.colorIdx] || PALETTE[0];
+  const fillA = pal.fill;
+  const fillB = pal.comp; // complementary color for divisions
+  const strokeC = pal.stroke;
+  const chargeColor = pal.text;
+  const charge = CHARGES.find(c=>c.id===crest.chargeId)||CHARGES[0];
+  const div = crest.divisionId||'solid';
+  const W=size, H=Math.round(size*1.15);
+  const uid = Math.random().toString(36).slice(2,7);
+
+  // Shield path (heater shape)
+  const shieldPath=`M2,2 L${W-2},2 L${W-2},${H*0.52} Q${W-2},${H-2} ${W/2},${H-2} Q2,${H-2} 2,${H*0.52} Z`;
+
+  // Division fill layer
+  let divLayer='';
+  if(div==='pale'){
+    divLayer=`<clipPath id="sh${uid}"><path d="${shieldPath}"/></clipPath>
+      <rect x="${W/2}" y="0" width="${W/2}" height="${H}" fill="${fillB}" clip-path="url(#sh${uid})"/>`;
+  } else if(div==='fess'){
+    divLayer=`<clipPath id="sh${uid}"><path d="${shieldPath}"/></clipPath>
+      <rect x="0" y="${H/2}" width="${W}" height="${H/2}" fill="${fillB}" clip-path="url(#sh${uid})"/>`;
+  } else if(div==='bend'){
+    divLayer=`<clipPath id="sh${uid}"><path d="${shieldPath}"/></clipPath>
+      <polygon points="${W/2},0 ${W},0 ${W},${H/2} 0,${H} 0,${H/2}" fill="${fillB}" clip-path="url(#sh${uid})"/>`;
+  } else if(div==='bend-sin'){
+    divLayer=`<clipPath id="sh${uid}"><path d="${shieldPath}"/></clipPath>
+      <polygon points="0,0 ${W/2},0 ${W},${H/2} ${W},${H} 0,${H/2}" fill="${fillB}" clip-path="url(#sh${uid})"/>`;
+  } else if(div==='quarterly'){
+    divLayer=`<clipPath id="sh${uid}"><path d="${shieldPath}"/></clipPath>
+      <rect x="${W/2}" y="0" width="${W/2}" height="${H/2}" fill="${fillB}" clip-path="url(#sh${uid})"/>
+      <rect x="0" y="${H/2}" width="${W/2}" height="${H/2}" fill="${fillB}" clip-path="url(#sh${uid})"/>`;
+  }
+
+  // Charge scaled and centered
+  const cs=Math.round(W*0.5);
+  const cx=Math.round((W-cs)/2), cy=Math.round((H*0.45-cs/2));
+  let chargeLayer='';
+  if(charge.id!=='none'&&charge.path){
+    chargeLayer=`<svg x="${cx}" y="${cy}" width="${cs}" height="${cs}" viewBox="0 0 24 24" style="color:${chargeColor};overflow:visible">${charge.path}</svg>`;
+  }
+
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <path d="${shieldPath}" fill="${fillA}" stroke="${strokeC}" stroke-width="${Math.max(1.2,W/40)}"/>
+    ${divLayer}
+    ${chargeLayer}
+    <path d="${shieldPath}" fill="none" stroke="${strokeC}" stroke-width="${Math.max(1.2,W/40)}" opacity="0.6"/>
+  </svg>`;
+}
+
+// Render the crest designer UI
+function renderCrestDesigner(){
+  // Color swatches
+  const colorRow=document.getElementById('crest-color-row');
+  colorRow.innerHTML=PALETTE.map((p,i)=>`
+    <div class="cc-swatch ${i===draftCrest.colorIdx?'selected':''}"
+      style="background:${p.fill};border-color:${i===draftCrest.colorIdx?'rgba(255,255,255,0.75)':'transparent'}"
+      onclick="draftSetColor(${i})"></div>`).join('');
+
+  // Division buttons — mini SVG previews
+  const divRow=document.getElementById('crest-div-row');
+  divRow.innerHTML=DIVISIONS.map(d=>`
+    <button class="div-btn ${draftCrest.divisionId===d.id?'selected':''}" onclick="draftSetDiv('${d.id}')" title="${d.label}">
+      ${divPreviewSVG(d.id)}
+    </button>`).join('');
+
+  // Charge grid
+  const chargeGrid=document.getElementById('crest-charge-grid');
+  chargeGrid.innerHTML=CHARGES.map(c=>`
+    <button class="charge-btn ${draftCrest.chargeId===c.id?'selected':''}" onclick="draftSetCharge('${c.id}')" title="${c.label}">
+      ${c.id==='none'
+        ?'<svg width="22" height="22" viewBox="0 0 24 24"><line x1="5" y1="5" x2="19" y2="19" stroke="rgba(242,232,204,0.3)" stroke-width="2"/><line x1="19" y1="5" x2="5" y2="19" stroke="rgba(242,232,204,0.3)" stroke-width="2"/></svg>'
+        :`<svg width="22" height="22" viewBox="0 0 24 24" style="color:rgba(242,232,204,0.8)">${c.path}</svg>`}
+    </button>`).join('');
+
+  updateCrestPreview();
+}
+
+function divPreviewSVG(divId){
+  const W=28,H=22;
+  const path=`M1,1 L${W-1},1 L${W-1},${H*0.55} Q${W-1},${H-1} ${W/2},${H-1} Q1,${H-1} 1,${H*0.55} Z`;
+  let extra='';
+  const c1='rgba(80,50,20,0.8)',c2='rgba(140,100,40,0.7)';
+  if(divId==='pale')         extra=`<clipPath id="dp"><path d="${path}"/></clipPath><rect x="${W/2}" y="0" width="${W}" height="${H}" fill="${c2}" clip-path="url(#dp)"/>`;
+  else if(divId==='fess')    extra=`<clipPath id="dp"><path d="${path}"/></clipPath><rect x="0" y="${H/2}" width="${W}" height="${H}" fill="${c2}" clip-path="url(#dp)"/>`;
+  else if(divId==='bend')    extra=`<clipPath id="dp"><path d="${path}"/></clipPath><polygon points="${W/2},0 ${W},0 ${W},${H/2} 0,${H} 0,${H/2}" fill="${c2}" clip-path="url(#dp)"/>`;
+  else if(divId==='bend-sin')extra=`<clipPath id="dp"><path d="${path}"/></clipPath><polygon points="0,0 ${W/2},0 ${W},${H/2} ${W},${H} 0,${H/2}" fill="${c2}" clip-path="url(#dp)"/>`;
+  else if(divId==='quarterly')extra=`<clipPath id="dp"><path d="${path}"/></clipPath><rect x="${W/2}" y="0" width="${W/2}" height="${H/2}" fill="${c2}" clip-path="url(#dp)"/><rect x="0" y="${H/2}" width="${W/2}" height="${H/2}" fill="${c2}" clip-path="url(#dp)"/>`;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><path d="${path}" fill="${c1}"/>${extra}<path d="${path}" fill="none" stroke="rgba(201,146,10,0.5)" stroke-width="1"/></svg>`;
+}
+
+function updateCrestPreview(){
+  document.getElementById('crest-preview').innerHTML=buildCrestSVG(draftCrest,80);
+}
+
+function draftSetColor(i){
+  draftCrest.colorIdx=i;
+  document.querySelectorAll('.cc-swatch').forEach((el,idx)=>{
+    el.classList.toggle('selected',idx===i);
+    el.style.borderColor=idx===i?'rgba(255,255,255,0.75)':'transparent';
+  });
+  updateCrestPreview();
+}
+function draftSetDiv(id){
+  draftCrest.divisionId=id;
+  document.querySelectorAll('.div-btn').forEach(el=>el.classList.toggle('selected',el.getAttribute('onclick').includes(`'${id}'`)));
+  updateCrestPreview();
+}
+function draftSetCharge(id){
+  draftCrest.chargeId=id;
+  document.querySelectorAll('.charge-btn').forEach(el=>el.classList.toggle('selected',el.getAttribute('onclick').includes(`'${id}'`)));
+  updateCrestPreview();
+}
+
+function openCrestModal(){
+  draftCrest={...playerCrest};
+  renderCrestDesigner();
+  document.getElementById('crest-modal').classList.add('open');
+}
+function closeCrestModal(){document.getElementById('crest-modal').classList.remove('open');}
+
+function saveCrest(){
+  playerCrest={...draftCrest};
+  localStorage.setItem('tv-crest',JSON.stringify(playerCrest));
+  closeCrestModal();
+  // Update all territory colors to match new player color
+  const pal=PALETTE[playerCrest.colorIdx];
+  territories.forEach(t=>{t.color={fill:pal.fill,stroke:pal.stroke,text:pal.text};});
+  saveTerritories();
+  // Redraw all polygons with new color
+  polygonLayers.forEach(l=>{
+    map.removeLayer(l.poly);
+    if(l.label) map.removeLayer(l.label);
+  });
+  polygonLayers=[];
+  territories.forEach(t=>drawPoly(t,false));
+  updateHeader();
+  renderKingdomCrest();
+}
+
+function renderKingdomCrest(){
+  document.getElementById('kingdom-crest-wrap').innerHTML=buildCrestSVG(playerCrest,70);
+}
+
+// ═══════════════════ STATE ═══════════════════
+let recording=false,trail=[],trailLine=null,startMarker=null;
+let userMarker=null,currentPos=null,pendingPoints=null;
+let wakeLock=null,wakeLockDismissed=false;
+let territories=JSON.parse(localStorage.getItem('tv-territories')||'[]');
+let realmName=localStorage.getItem('tv-realm-name')||'My Realm';
+let playerName=localStorage.getItem('tv-player-name')||'Explorer';
+let totalDistKm=parseFloat(localStorage.getItem('tv-total-dist')||'0');
+let polygonLayers=[];
+let mergeTargetIdx=null;
+let insideTerritory=null;
 
 // Crash recovery
 const _saved=JSON.parse(localStorage.getItem('tv-active-trail')||'null');
 if(_saved&&_saved.length>=2) trail=_saved;
 
-// Heraldic colors — now user-selectable
-const HERALDIC=[
-  {fill:'#2d5a27',stroke:'#4a8a38',text:'#a8e890'},
-  {fill:'#1a3a5c',stroke:'#2d6090',text:'#88c0e8'},
-  {fill:'#5a2800',stroke:'#8a4010',text:'#e8a070'},
-  {fill:'#4a2060',stroke:'#7040a0',text:'#c890f0'},
-  {fill:'#3a3a00',stroke:'#686800',text:'#d8d860'},
-  {fill:'#4a0a1a',stroke:'#8a1a3a',text:'#e890b0'},
-  {fill:'#1a3a3a',stroke:'#2a6060',text:'#88e0e0'},
-  {fill:'#3a1a3a',stroke:'#602060',text:'#e088e0'},
-];
-let selectedColorIdx = 0; // chosen in claim modal
+// Migrate existing territories to player crest color
+(function migrateColors(){
+  const pal=PALETTE[playerCrest.colorIdx];
+  let changed=false;
+  territories.forEach(t=>{
+    if(t.color?.fill!==pal.fill){t.color={fill:pal.fill,stroke:pal.stroke,text:pal.text};changed=true;}
+  });
+  if(changed) localStorage.setItem('tv-territories',JSON.stringify(territories));
+})();
 
 const T_EMOJIS=['🏰','🗼','⚔','🛡','👑','🏯','⚜','🎌'];
-
 const CREATURES=[{emoji:'🐉'},{emoji:'🦑'},{emoji:'🐋'},{emoji:'🦈'},{emoji:'🗺'},{emoji:'⚓'},{emoji:'☠'},{emoji:'🦅'}];
 let creatureMarkers=[];
 
-// ═══════════════════════════════════════════════
-//  FOG OF WAR
-// ═══════════════════════════════════════════════
+// ═══════════════════ FOG ═══════════════════
 const fogCanvas=document.getElementById('fog-canvas');
 const fogCtx=fogCanvas.getContext('2d');
 let fogCircles=JSON.parse(localStorage.getItem('tv-fog-circles')||'[]');
 let waterPts=new Set(JSON.parse(localStorage.getItem('tv-water-points')||'[]'));
 
 function resizeFog(){fogCanvas.width=window.innerWidth;fogCanvas.height=window.innerHeight;drawFog();}
-
 function drawFog(){
   const W=fogCanvas.width,H=fogCanvas.height;
-  fogCtx.clearRect(0,0,W,H);
-  fogCtx.fillStyle='rgba(18,11,4,0.80)';fogCtx.fillRect(0,0,W,H);
+  fogCtx.clearRect(0,0,W,H);fogCtx.fillStyle='rgba(18,11,4,0.80)';fogCtx.fillRect(0,0,W,H);
   fogCtx.globalCompositeOperation='destination-out';
   fogCircles.forEach(c=>{
     const pt=map.latLngToContainerPoint([c.lat,c.lng]),r=c.r||130;
@@ -559,24 +670,15 @@ function drawFog(){
   });
   updateCreatureVis();
 }
-
 function addReveal(lat,lng){
   if(fogCircles.some(c=>dist([c.lat,c.lng],[lat,lng])<40)) return;
-  const idx=fogCircles.length;
-  fogCircles.push({lat,lng,r:130});
-  sampleWater(lat,lng,idx);
+  const idx=fogCircles.length;fogCircles.push({lat,lng,r:130});sampleWater(lat,lng,idx);
   if(!addReveal._t) addReveal._t=setTimeout(()=>{localStorage.setItem('tv-fog-circles',JSON.stringify(fogCircles));addReveal._t=null;},3000);
-  clearTimeout(castleTimer);
-  castleTimer=setTimeout(()=>fetchCastles(lat,lng),1200);
-  drawFog();
+  clearTimeout(castleTimer);castleTimer=setTimeout(()=>fetchCastles(lat,lng),1200);drawFog();
 }
-map.on('move zoom',drawFog);
-window.addEventListener('resize',resizeFog);
-resizeFog();
+map.on('move zoom',drawFog);window.addEventListener('resize',resizeFog);resizeFog();
 
-// ═══════════════════════════════════════════════
-//  WATER DETECTION
-// ═══════════════════════════════════════════════
+// ═══════════════════ WATER ═══════════════════
 function sampleWater(lat,lng,idx){
   const z=15,tx=lon2t(lng,z),ty=lat2t(lat,z);
   const img=new Image();img.crossOrigin='anonymous';
@@ -586,7 +688,7 @@ function sampleWater(lat,lng,idx){
     const s=Math.sin(lat*Math.PI/180);
     const py=Math.floor(((0.5-Math.log((1+s)/(1-s))/(4*Math.PI))*Math.pow(2,z))%1*256);
     try{
-      const [r,g,b]=c.getContext('2d').getImageData(Math.max(0,Math.min(255,px)),Math.max(0,Math.min(255,py)),1,1).data;
+      const[r,g,b]=c.getContext('2d').getImageData(Math.max(0,Math.min(255,px)),Math.max(0,Math.min(255,py)),1,1).data;
       if(b>180&&g>170&&r<200&&b>r){waterPts.add(idx);localStorage.setItem('tv-water-points',JSON.stringify([...waterPts]));drawFog();}
     }catch(_){}
   };img.onerror=()=>{};
@@ -595,9 +697,7 @@ function sampleWater(lat,lng,idx){
 function lon2t(lon,z){return Math.floor((lon+180)/360*Math.pow(2,z));}
 function lat2t(lat,z){return Math.floor((1-Math.log(Math.tan(lat*Math.PI/180)+1/Math.cos(lat*Math.PI/180))/Math.PI)/2*Math.pow(2,z));}
 
-// ═══════════════════════════════════════════════
-//  CREATURES
-// ═══════════════════════════════════════════════
+// ═══════════════════ CREATURES ═══════════════════
 function spawnAround(lat,lng){
   if(creatureMarkers.length>50) return;
   [[0.008,0.012],[-0.007,0.015],[0.011,-0.009],[-0.012,-0.008],[0.005,0.018],[-0.015,0.006],[0.018,0.003],[-0.004,-0.016]]
@@ -622,9 +722,7 @@ function updateCreatureVis(){
 }
 map.on('move zoom',()=>{creatureMarkers.forEach(posC);updateCreatureVis();});
 
-// ═══════════════════════════════════════════════
-//  CASTLE / TOWN MARKERS
-// ═══════════════════════════════════════════════
+// ═══════════════════ CASTLES ═══════════════════
 let castleMarkers={},castleTimer=null,lastCastlePos=null;
 const CASTLE_STYLES={
   townhall:{glyph:'🏰',ft:'#3a1a08',fb:'#6a2a0a',fs:'#c9920a',fg:'#f0d060',w:42,ls:'10px',lc:'#e8b84b'},
@@ -648,8 +746,7 @@ function makeCastleIcon(label,sk){
     html:`<div class="town-shield-wrap"><div class="town-shield" style="width:${s.w}px;height:${h}px">${castleSVG(s)}</div><div class="town-label" style="font-size:${s.ls};color:${s.lc}">${label}</div></div>`});
 }
 function fetchCastles(lat,lng){
-  if(lastCastlePos&&dist(lastCastlePos,[lat,lng])<800) return;
-  lastCastlePos=[lat,lng];
+  if(lastCastlePos&&dist(lastCastlePos,[lat,lng])<800) return;lastCastlePos=[lat,lng];
   const r=6000;
   const q=`[out:json][timeout:10];(node["amenity"="town_hall"](around:${r},${lat},${lng});way["amenity"="town_hall"](around:${r},${lat},${lng});node["place"~"^(city|town|village|borough|hamlet)$"](around:${r},${lat},${lng}););out center;`;
   fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)})
@@ -672,136 +769,47 @@ function fetchCastles(lat,lng){
   }).catch(()=>{});
 }
 
-// ═══════════════════════════════════════════════
-//  TERRITORY ENTRY LABEL
-// ═══════════════════════════════════════════════
-let insideTerritory = null; // territory object or null
-
-function checkTerritoryEntry(lat, lng) {
-  if (!recording) return;
-  // Find which territory (if any) contains the current position
-  const pt = [lng, lat]; // GeoJSON order
-  let found = null;
-  for (const t of territories) {
-    if (pointInPolygon(pt, t.points)) { found = t; break; }
-  }
-  if (found?.id !== insideTerritory?.id) {
-    insideTerritory = found;
-    showTerritoryLabel(found);
-  }
-}
-
-function pointInPolygon(pt, leafletPoints) {
-  // Ray-casting algorithm, leafletPoints are [lat,lng]
-  const x=pt[0], y=pt[1]; // pt is [lng,lat]
-  let inside=false;
-  for(let i=0,j=leafletPoints.length-1;i<leafletPoints.length;j=i++){
-    const xi=leafletPoints[i][1],yi=leafletPoints[i][0]; // lng,lat
-    const xj=leafletPoints[j][1],yj=leafletPoints[j][0];
-    const intersect=((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi);
-    if(intersect) inside=!inside;
-  }
-  return inside;
-}
-
-function showTerritoryLabel(territory) {
-  const el = document.getElementById('territory-label');
-  const top = document.getElementById('territory-label-top');
-  const name = document.getElementById('territory-label-name');
-  if (!territory) {
-    el.classList.remove('visible');
-    return;
-  }
-  top.textContent = `${playerName} · ${realmName}`;
-  name.textContent = `${territory.emoji} ${territory.name}`;
-  el.classList.add('visible');
-}
-
-function clearTerritoryLabel() {
-  insideTerritory = null;
-  document.getElementById('territory-label').classList.remove('visible');
-}
-
-// ═══════════════════════════════════════════════
-//  WAKE LOCK
-// ═══════════════════════════════════════════════
-async function acquireWL(){
-  await releaseWL();
-  if(!('wakeLock'in navigator)){showBanner(false);return;}
-  try{wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',onWLRelease);showBanner(true);}
-  catch(_){wakeLock=null;showBanner(false);}
-}
+// ═══════════════════ WAKE LOCK ═══════════════════
+async function acquireWL(){await releaseWL();if(!('wakeLock'in navigator)){showBanner(false);return;}try{wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',onWLRelease);showBanner(true);}catch(_){wakeLock=null;showBanner(false);}}
 async function releaseWL(){if(wakeLock){try{await wakeLock.release();}catch(_){}wakeLock=null;}hideBanner();}
 function onWLRelease(){wakeLock=null;if(recording){document.addEventListener('visibilitychange',reacquire,{once:true});showBanner(false);}}
 function reacquire(){if(document.visibilityState==='visible'&&recording){acquireWL();setStatus('Screen restored — expedition continues.','alert');}}
-function showBanner(active){
-  if(wakeLockDismissed) return;
-  document.getElementById('wake-banner-text').innerHTML=active
-    ?`<strong>Screen held open by Terranova.</strong> Pressing the side button still overrides this — your trail will pause until you return.`
-    :`<strong>Keep the lantern lit —</strong> do not press the side button or your trail will be lost to the fog.`;
-  document.getElementById('wake-banner').classList.add('visible');
-}
+function showBanner(active){if(wakeLockDismissed)return;document.getElementById('wake-banner-text').innerHTML=active?`<strong>Screen held open by Terranova.</strong> Pressing the side button still overrides this.`:`<strong>Keep the lantern lit —</strong> do not press the side button or your trail will be lost.`;document.getElementById('wake-banner').classList.add('visible');}
 function hideBanner(){document.getElementById('wake-banner').classList.remove('visible');}
 function dismissWakeBanner(){wakeLockDismissed=true;hideBanner();}
 
-// ═══════════════════════════════════════════════
-//  GPS
-// ═══════════════════════════════════════════════
+// ═══════════════════ GPS ═══════════════════
 function startGPS(){
   if(!navigator.geolocation){setStatus('GPS unavailable.','danger');return;}
-  navigator.geolocation.watchPosition(onPos,e=>setStatus('GPS: '+e.message,'danger'),
-    {enableHighAccuracy:true,maximumAge:2000,timeout:15000});
+  navigator.geolocation.watchPosition(onPos,e=>setStatus('GPS: '+e.message,'danger'),{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
 }
-
 function onPos(pos){
   const{latitude:lat,longitude:lng,accuracy:acc}=pos.coords;
   currentPos=[lat,lng];
   document.getElementById('gps-line').textContent=`${lat.toFixed(5)}° N, ${Math.abs(lng).toFixed(5)}° W  ·  ±${Math.round(acc)}m`;
-
-  addReveal(lat,lng);
-  spawnAround(lat,lng);
-  checkTerritoryEntry(lat,lng);
-
-  const svg=`<svg class="explorer-compass" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="12" r="11" fill="rgba(20,13,5,0.88)" stroke="rgba(201,146,10,0.75)" stroke-width="1.5"/>
-    <circle cx="12" cy="12" r="2" fill="#e8b84b"/>
-    <polygon points="12,3 13.2,11 12,13 10.8,11" fill="#e8b84b"/>
-    <polygon points="12,21 13.2,13 12,11 10.8,13" fill="rgba(242,232,204,0.5)"/>
-    <polygon points="3,12 11,10.8 13,12 11,13.2" fill="rgba(242,232,204,0.5)"/>
-    <polygon points="21,12 13,10.8 11,12 13,13.2" fill="rgba(242,232,204,0.5)"/>
-  </svg>`;
+  addReveal(lat,lng);spawnAround(lat,lng);checkTerritoryEntry(lat,lng);
+  const svg=`<svg class="explorer-compass" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="11" fill="rgba(20,13,5,0.88)" stroke="rgba(201,146,10,0.75)" stroke-width="1.5"/><circle cx="12" cy="12" r="2" fill="#e8b84b"/><polygon points="12,3 13.2,11 12,13 10.8,11" fill="#e8b84b"/><polygon points="12,21 13.2,13 12,11 10.8,13" fill="rgba(242,232,204,0.5)"/><polygon points="3,12 11,10.8 13,12 11,13.2" fill="rgba(242,232,204,0.5)"/><polygon points="21,12 13,10.8 11,12 13,13.2" fill="rgba(242,232,204,0.5)"/></svg>`;
   const icon=L.divIcon({className:'',html:`<div class="explorer-marker">${svg}</div>`,iconSize:[24,24],iconAnchor:[12,12]});
-
   if(!userMarker){
     userMarker=L.marker([lat,lng],{icon,zIndexOffset:2000}).addTo(map);
-    map.setView([lat,lng],16);
-    setStatus('Position fixed. The expedition begins.','alert');
+    map.setView([lat,lng],16);setStatus('Position fixed. The expedition begins.','alert');
     if(trail.length>=2){
       trailLine=L.polyline(trail,{color:'#c9920a',weight:3,opacity:0.9,dashArray:'8 5'}).addTo(map);
       placeStartDot(trail[0]);recording=true;
-      document.getElementById('seal-btn').classList.add('recording');
-      document.getElementById('seal-inner').textContent='◼';
-      document.getElementById('btn-stop').style.display='';
-      showHUD();startTimer();acquireWL();
+      document.getElementById('seal-btn').classList.add('recording');document.getElementById('seal-inner').textContent='◼';
+      document.getElementById('btn-stop').style.display='';showHUD();startTimer();acquireWL();
       setStatus(`Trail recovered — ${trail.length} waypoints restored.`,'alert');
     }
-  } else { userMarker.setLatLng([lat,lng]); }
-
+  } else {userMarker.setLatLng([lat,lng]);}
   if(!recording) return;
   const last=trail[trail.length-1];
   if(last&&dist(last,[lat,lng])<4) return;
   if(last) totalDistKm+=dist(last,[lat,lng])/1000;
-  trail.push([lat,lng]);
-  if(trailLine) trailLine.setLatLngs(trail);
-
+  trail.push([lat,lng]);if(trailLine) trailLine.setLatLngs(trail);
   if(!onPos._t) onPos._t=setTimeout(()=>{localStorage.setItem('tv-active-trail',JSON.stringify(trail));onPos._t=null;},5000);
-
-  updateHUD(lat,lng);
-
+  updateHUD();
   if(trail.length>=6){
-    const ds=dist(trail[0],[lat,lng]);
-    const canClose=ds<65;
-    // Right slot logic: show claim if closeable, territory label if inside own land, otherwise nothing
+    const ds=dist(trail[0],[lat,lng]),canClose=ds<65;
     document.getElementById('btn-claim').style.display=canClose?'':'none';
     document.getElementById('territory-label').style.display=(!canClose&&insideTerritory)?'':'none';
     document.getElementById('hud-loop').textContent=fmtDist(ds);
@@ -810,44 +818,40 @@ function onPos(pos){
   }
 }
 
-// ═══════════════════════════════════════════════
-//  LIVE TRAIL HUD
-// ═══════════════════════════════════════════════
-function showHUD(){
-  document.getElementById('trail-hud').classList.add('visible');
-  document.getElementById('hud-time').style.display='block';
-  document.getElementById('hud-sep-time').style.display='';
+// ═══════════════════ TERRITORY ENTRY LABEL ═══════════════════
+function checkTerritoryEntry(lat,lng){
+  if(!recording) return;
+  let found=null;
+  for(const t of territories){if(pointInPoly([lng,lat],t.points)){found=t;break;}}
+  if(found?.id!==insideTerritory?.id){
+    insideTerritory=found;
+    if(found){
+      document.getElementById('territory-label-top').textContent=`${playerName} · ${realmName}`;
+      document.getElementById('territory-label-name').textContent=`${found.emoji} ${found.name}`;
+    }
+    document.getElementById('territory-label').classList.toggle('visible',!!found);
+  }
 }
-function hideHUD(){
-  document.getElementById('trail-hud').classList.remove('visible');
-  document.getElementById('hud-time').style.display='none';
-  document.getElementById('hud-sep-time').style.display='none';
+function pointInPoly(pt,lpts){
+  const x=pt[0],y=pt[1];let inside=false;
+  for(let i=0,j=lpts.length-1;i<lpts.length;j=i++){
+    const xi=lpts[i][1],yi=lpts[i][0],xj=lpts[j][1],yj=lpts[j][0];
+    if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi)) inside=!inside;
+  }
+  return inside;
 }
-function updateHUD(){
-  const d=trailDist();
-  document.getElementById('hud-dist').textContent=fmtDist(d);
-  document.getElementById('hud-pts').textContent=trail.length;
-  if(trail.length<6) document.getElementById('hud-loop').textContent='—';
-}
-function trailDist(){let d=0;for(let i=1;i<trail.length;i++) d+=dist(trail[i-1],trail[i]);return d;}
+function clearTerritoryLabel(){insideTerritory=null;document.getElementById('territory-label').classList.remove('visible');}
 
-// ═══════════════════════════════════════════════
-//  START DOT
-// ═══════════════════════════════════════════════
-function placeStartDot(latlng){
-  if(startMarker){map.removeLayer(startMarker);startMarker=null;}
-  startMarker=L.marker(latlng,{
-    icon:L.divIcon({className:'',html:'<div class="start-dot"></div>',iconSize:[14,14],iconAnchor:[7,7]}),
-    zIndexOffset:1500,interactive:false,
-  }).addTo(map);
-}
+// ═══════════════════ HUD ═══════════════════
+function showHUD(){document.getElementById('trail-hud').classList.add('visible');document.getElementById('hud-time').style.display='block';document.getElementById('hud-sep-time').style.display='';}
+function hideHUD(){document.getElementById('trail-hud').classList.remove('visible');document.getElementById('hud-time').style.display='none';document.getElementById('hud-sep-time').style.display='none';}
+function updateHUD(){const d=trailDist();document.getElementById('hud-dist').textContent=fmtDist(d);document.getElementById('hud-pts').textContent=trail.length;if(trail.length<6)document.getElementById('hud-loop').textContent='—';}
+function trailDist(){let d=0;for(let i=1;i<trail.length;i++) d+=dist(trail[i-1],trail[i]);return d;}
+function placeStartDot(latlng){if(startMarker){map.removeLayer(startMarker);startMarker=null;}startMarker=L.marker(latlng,{icon:L.divIcon({className:'',html:'<div class="start-dot"></div>',iconSize:[14,14],iconAnchor:[7,7]}),zIndexOffset:1500,interactive:false}).addTo(map);}
 function removeStartDot(){if(startMarker){map.removeLayer(startMarker);startMarker=null;}}
 
-// ═══════════════════════════════════════════════
-//  RECORDING
-// ═══════════════════════════════════════════════
+// ═══════════════════ RECORDING ═══════════════════
 function toggleRecording(){recording?stopRecording():startRecording();}
-
 function startRecording(){
   if(!currentPos){setStatus('Awaiting position fix…','danger');return;}
   recording=true;wakeLockDismissed=false;
@@ -855,232 +859,128 @@ function startRecording(){
   if(trailLine){map.removeLayer(trailLine);trailLine=null;}
   trailLine=L.polyline(trail,{color:'#c9920a',weight:3,opacity:0.9,dashArray:'8 5'}).addTo(map);
   placeStartDot(currentPos);
-  document.getElementById('seal-btn').classList.add('recording');
-  document.getElementById('seal-inner').textContent='◼';
-  document.getElementById('btn-stop').style.display='';
-  document.getElementById('btn-claim').style.display='none';
+  document.getElementById('seal-btn').classList.add('recording');document.getElementById('seal-inner').textContent='◼';
+  document.getElementById('btn-stop').style.display='';document.getElementById('btn-claim').style.display='none';
   showHUD();acquireWL();startTimer();
   localStorage.setItem('tv-active-trail',JSON.stringify(trail));
   setStatus('The expedition has begun. Mark your trail.','alert');
 }
-
 function stopRecording(){
   if(trail.length>=3) logExpedition(null);
   recording=false;releaseWL();removeStartDot();hideHUD();stopTimer();clearTerritoryLabel();
-  document.getElementById('seal-btn').classList.remove('recording');
-  document.getElementById('seal-inner').textContent='⚑';
-  document.getElementById('btn-stop').style.display='none';
-  document.getElementById('territory-label').style.display='none';
-  if(trail.length>=3){
-    document.getElementById('btn-claim').style.display='';
-    setStatus('Expedition halted. Claim your territory or continue.','');
-  } else {
-    document.getElementById('btn-claim').style.display='none';
-    setStatus('Too little ground covered. Explore more.','danger');
-    localStorage.removeItem('tv-active-trail');
-  }
+  document.getElementById('seal-btn').classList.remove('recording');document.getElementById('seal-inner').textContent='⚑';
+  document.getElementById('btn-stop').style.display='none';document.getElementById('territory-label').style.display='none';
+  if(trail.length>=3){document.getElementById('btn-claim').style.display='';setStatus('Expedition halted. Claim your territory or continue.','');}
+  else{document.getElementById('btn-claim').style.display='none';setStatus('Too little ground covered. Explore more.','danger');localStorage.removeItem('tv-active-trail');}
 }
 
-// ═══════════════════════════════════════════════
-//  CLAIM — two-step modal
-// ═══════════════════════════════════════════════
-let mergeTargetIdx = null; // index of territory to merge into
-
+// ═══════════════════ CLAIM ═══════════════════
 function claimTerritory(){
   if(trail.length<3){setStatus('Chart more territory first.','danger');return;}
-  pendingPoints=[...trail];
-  mergeTargetIdx=null;
-  // Reset to step 1
+  pendingPoints=[...trail];mergeTargetIdx=null;
   document.getElementById('claim-step1').style.display='block';
   document.getElementById('claim-step2-new').style.display='none';
   document.getElementById('claim-step2-expand').style.display='none';
-  // Hide expand button if no territories to expand
   document.getElementById('btn-expand-province').style.display=territories.length?'':'none';
   document.getElementById('name-modal').classList.add('open');
 }
-
 function chooseNew(){
   document.getElementById('claim-step1').style.display='none';
   document.getElementById('claim-step2-new').style.display='block';
   document.getElementById('territory-input').value='';
-  selectedColorIdx=territories.length%HERALDIC.length;
-  buildColorPicker();
   setTimeout(()=>document.getElementById('territory-input').focus(),150);
 }
-
 function chooseExpand(){
   document.getElementById('claim-step1').style.display='none';
   document.getElementById('claim-step2-expand').style.display='block';
   document.getElementById('gap-warning').style.display='none';
-  mergeTargetIdx=0;
-  buildProvincePicker();
+  mergeTargetIdx=0;buildProvincePicker();
 }
-
 function backToStep1(){
   document.getElementById('claim-step1').style.display='block';
   document.getElementById('claim-step2-new').style.display='none';
   document.getElementById('claim-step2-expand').style.display='none';
 }
-
-function buildColorPicker(){
-  const el=document.getElementById('color-picker');
-  el.innerHTML=HERALDIC.map((c,i)=>`
-    <div class="color-swatch ${i===selectedColorIdx?'selected':''}"
-      style="background:${c.fill};border-color:${i===selectedColorIdx?'rgba(255,255,255,0.7)':'transparent'}"
-      onclick="selectColor(${i})"></div>`).join('');
-}
-
-function selectColor(i){
-  selectedColorIdx=i;
-  document.querySelectorAll('.color-swatch').forEach((el,idx)=>{
-    el.classList.toggle('selected',idx===i);
-    el.style.borderColor=idx===i?'rgba(255,255,255,0.7)':'transparent';
-  });
-}
-
 function buildProvincePicker(){
-  const el=document.getElementById('province-picker');
-  el.innerHTML=territories.map((t,i)=>`
+  document.getElementById('province-picker').innerHTML=territories.map((t,i)=>`
     <div class="province-pick-item ${i===mergeTargetIdx?'selected':''}" onclick="selectProvince(${i})">
       <div class="pick-swatch" style="background:${t.color.fill};border:2px solid ${t.color.stroke}"></div>
       <span class="pick-name" style="color:${t.color.text}">${t.emoji} ${t.name}</span>
       <span class="pick-area">${formatArea(t.area||0)}</span>
     </div>`).join('');
 }
-
 function selectProvince(i){
   mergeTargetIdx=i;
   document.querySelectorAll('.province-pick-item').forEach((el,idx)=>el.classList.toggle('selected',idx===i));
-  // Check if new trail touches/overlaps the selected territory — warn if not
-  const touches=trailTouchesTerritory(pendingPoints,territories[i].points);
-  document.getElementById('gap-warning').style.display=touches?'none':'block';
+  document.getElementById('gap-warning').style.display=trailTouches(pendingPoints,territories[i].points)?'none':'block';
 }
-
-function trailTouchesTerritory(trailPts, terrPts){
-  // Quick check: does any trail point land inside the territory, or within 50m of its border?
-  for(const tp of trailPts){
-    if(pointInPolygon([tp[1],tp[0]],terrPts)) return true;
-    // Check proximity to any border segment
-    for(let i=0;i<terrPts.length;i++){
-      const a=terrPts[i],b=terrPts[(i+1)%terrPts.length];
-      if(distToSegment(tp,a,b)<50) return true;
-    }
+function trailTouches(tpts,terrPts){
+  for(const tp of tpts){
+    if(pointInPoly([tp[1],tp[0]],terrPts)) return true;
+    for(let i=0;i<terrPts.length;i++){const a=terrPts[i],b=terrPts[(i+1)%terrPts.length];if(dSeg(tp,a,b)<50) return true;}
   }
   return false;
 }
-
-function distToSegment(p,a,b){
-  // p,a,b are [lat,lng] — approximate planar distance in meters
-  const dx=b[0]-a[0],dy=b[1]-a[1];
-  if(dx===0&&dy===0) return dist(p,a);
-  const t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy)));
-  return dist(p,[a[0]+t*dx,a[1]+t*dy]);
-}
-
+function dSeg(p,a,b){const dx=b[0]-a[0],dy=b[1]-a[1];if(!dx&&!dy) return dist(p,a);const t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy)));return dist(p,[a[0]+t*dx,a[1]+t*dy]);}
 function cancelClaim(){pendingPoints=null;mergeTargetIdx=null;document.getElementById('name-modal').classList.remove('open');}
 
 function saveClaim(){
   const name=document.getElementById('territory-input').value.trim()||'Unknown Lands';
   document.getElementById('name-modal').classList.remove('open');
-  const color=HERALDIC[selectedColorIdx];
+  const pal=PALETTE[playerCrest.colorIdx];
+  const color={fill:pal.fill,stroke:pal.stroke,text:pal.text};
   const emoji=T_EMOJIS[territories.length%T_EMOJIS.length];
-  const t={id:Date.now(),name,emoji,points:pendingPoints,color,
-    area:polyArea(pendingPoints),
+  const t={id:Date.now(),name,emoji,points:pendingPoints,color,area:polyArea(pendingPoints),
     date:new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})};
   territories.push(t);saveTerritories();drawPoly(t,true);
-  logExpedition(t);finishClaim();
-  setStatus(`"${name}" — claimed for the realm! ✦`,'alert');
+  logExpedition(t);finishClaim();setStatus(`"${name}" — claimed for the realm! ✦`,'alert');
 }
 
 function saveMerge(){
   if(mergeTargetIdx===null) return;
   document.getElementById('name-modal').classList.remove('open');
   const target=territories[mergeTargetIdx];
-
-  // Try Turf union if available, else concatenate ring
-  let newPoints;
-  let newArea;
+  let newPoints,newArea;
   if(typeof turf!=='undefined'){
     try{
-      const existingRing=[...target.points.map(p=>[p[1],p[0]])];
-      existingRing.push(existingRing[0]);
-      const newRing=[...pendingPoints.map(p=>[p[1],p[0]])];
-      newRing.push(newRing[0]);
-      const poly1=turf.polygon([existingRing]);
-      const poly2=turf.polygon([newRing]);
-      const merged=turf.union(poly1,poly2);
-      // Convert back to Leaflet [lat,lng]
-      const coords=merged.geometry.coordinates[0];
-      newPoints=coords.slice(0,-1).map(c=>[c[1],c[0]]);
+      const r1=[...target.points.map(p=>[p[1],p[0]])];r1.push(r1[0]);
+      const r2=[...pendingPoints.map(p=>[p[1],p[0]])];r2.push(r2[0]);
+      const merged=turf.union(turf.polygon([r1]),turf.polygon([r2]));
+      newPoints=merged.geometry.coordinates[0].slice(0,-1).map(c=>[c[1],c[0]]);
       newArea=turf.area(merged);
-    }catch(e){
-      // Fallback: concatenate
-      newPoints=[...target.points,...pendingPoints];
-      newArea=polyArea(newPoints);
-    }
-  } else {
-    newPoints=[...target.points,...pendingPoints];
-    newArea=polyArea(newPoints);
-  }
-
-  // Update territory object
-  territories[mergeTargetIdx]={...target,points:newPoints,area:newArea};
-  saveTerritories();
-
-  // Redraw this polygon
+    }catch(e){newPoints=[...target.points,...pendingPoints];newArea=polyArea(newPoints);}
+  }else{newPoints=[...target.points,...pendingPoints];newArea=polyArea(newPoints);}
+  territories[mergeTargetIdx]={...target,points:newPoints,area:newArea};saveTerritories();
   const li=polygonLayers.findIndex(l=>l.id===target.id);
   if(li>=0){map.removeLayer(polygonLayers[li].poly);if(polygonLayers[li].label)map.removeLayer(polygonLayers[li].label);polygonLayers.splice(li,1);}
   drawPoly(territories[mergeTargetIdx],true);
-
-  logExpedition(territories[mergeTargetIdx]);finishClaim();
-  setStatus(`"${target.name}" expanded! ✦`,'alert');
+  logExpedition(territories[mergeTargetIdx]);finishClaim();setStatus(`"${target.name}" expanded! ✦`,'alert');
 }
 
 function finishClaim(){
   if(trailLine){map.removeLayer(trailLine);trailLine=null;}
-  removeStartDot();clearTerritoryLabel();
-  trail=[];pendingPoints=null;recording=false;
+  removeStartDot();clearTerritoryLabel();trail=[];pendingPoints=null;recording=false;
   releaseWL();hideHUD();stopTimer();
-  localStorage.removeItem('tv-active-trail');
-  localStorage.setItem('tv-total-dist',totalDistKm.toFixed(3));
-  document.getElementById('seal-btn').classList.remove('recording');
-  document.getElementById('seal-inner').textContent='⚑';
-  document.getElementById('btn-claim').style.display='none';
-  document.getElementById('btn-stop').style.display='none';
-  document.getElementById('territory-label').style.display='none';
-  updateHeader();renderDrawer();
+  localStorage.removeItem('tv-active-trail');localStorage.setItem('tv-total-dist',totalDistKm.toFixed(3));
+  document.getElementById('seal-btn').classList.remove('recording');document.getElementById('seal-inner').textContent='⚑';
+  document.getElementById('btn-claim').style.display='none';document.getElementById('btn-stop').style.display='none';
+  document.getElementById('territory-label').style.display='none';updateHeader();renderDrawer();
 }
 
-// ═══════════════════════════════════════════════
-//  DRAW POLYGON + PROVINCE LABEL
-// ═══════════════════════════════════════════════
-function drawPoly(t, animate){
-  // Handle MultiPolygon (from Turf union of non-touching territories)
-  let poly;
-  if(t.points&&t.points.length&&Array.isArray(t.points[0][0])){
-    // MultiPolygon stored as array of rings
-    poly=L.polygon(t.points.map(ring=>ring),{color:t.color.stroke,weight:2,opacity:0.9,fillColor:t.color.fill,fillOpacity:animate?0:0.22,dashArray:'6 3'}).addTo(map);
-  } else {
-    poly=L.polygon(t.points,{color:t.color.stroke,weight:2,opacity:0.9,fillColor:t.color.fill,fillOpacity:animate?0:0.22,dashArray:'6 3'}).addTo(map);
-  }
+// ═══════════════════ DRAW POLYGON ═══════════════════
+function drawPoly(t,animate){
+  const poly=L.polygon(t.points,{color:t.color.stroke,weight:2,opacity:0.9,fillColor:t.color.fill,fillOpacity:animate?0:0.22,dashArray:'6 3'}).addTo(map);
   poly.bindTooltip(t.emoji+' '+t.name,{permanent:false,sticky:true,className:'territory-tooltip'});
-
-  // Province label at polygon center
-  const bounds=poly.getBounds();
-  const center=bounds.getCenter();
-  const label=L.tooltip({permanent:true,direction:'center',className:'province-label',interactive:false})
-    .setContent(t.name).setLatLng(center).addTo(map);
-
+  // Province label
+  const bounds=poly.getBounds(),center=bounds.getCenter();
+  const label=L.tooltip({permanent:true,direction:'center',className:'province-label',interactive:false}).setContent(t.name).setLatLng(center).addTo(map);
   if(animate){let op=0;const tk=setInterval(()=>{op=Math.min(op+0.015,0.22);poly.setStyle({fillOpacity:op});if(op>=0.22)clearInterval(tk);},16);}
   polygonLayers.push({id:t.id,poly,label});
 }
 
-// ═══════════════════════════════════════════════
-//  KINGDOM SCREEN
-// ═══════════════════════════════════════════════
+// ═══════════════════ KINGDOM ═══════════════════
 function openKingdom(){renderKingdom();document.getElementById('kingdom-screen').classList.add('open');}
 function closeKingdom(){document.getElementById('kingdom-screen').classList.remove('open');}
-
 function renderKingdom(){
   document.getElementById('unit-mi').classList.toggle('active',!useMetric);
   document.getElementById('unit-km').classList.toggle('active',useMetric);
@@ -1090,22 +990,20 @@ function renderKingdom(){
   document.getElementById('k-area').textContent=formatArea(territories.reduce((s,t)=>s+(t.area||0),0));
   document.getElementById('k-dist').textContent=fmtDistLong(totalDistKm);
   document.getElementById('k-dist-lbl').textContent=useMetric?'Km Walked':'Miles Walked';
-
+  renderKingdomCrest();
   const list=document.getElementById('kingdom-list');
   if(!territories.length){list.innerHTML=`<div id="empty-realm"><span class="big">🗺</span>No territories claimed.<br>Venture forth and conquer the unknown.</div>`;}
   else{list.innerHTML=territories.map((t,i)=>`
     <div class="kingdom-territory" onclick="flyTo(${i})">
-      <div class="kt-crest" style="background:${t.color.fill};border-color:${t.color.stroke}">${t.emoji}</div>
+      <div class="kt-crest-wrap">${buildCrestSVG(playerCrest,42)}</div>
       <div class="kt-info"><div class="kt-name" style="color:${t.color.text}">${t.name}</div><div class="kt-details">${t.date} · ${formatArea(t.area||0)}</div></div>
       <button class="kt-del" onclick="event.stopPropagation();delT(${i})">Cede</button>
     </div>`).join('');}
   renderLog();
 }
-
-function flyTo(i){const t=territories[i];if(!t?.points?.length) return;closeKingdom();map.fitBounds(L.latLngBounds(t.points),{padding:[60,60],animate:true});}
+function flyTo(i){const t=territories[i];if(!t?.points?.length)return;closeKingdom();map.fitBounds(L.latLngBounds(t.points),{padding:[60,60],animate:true});}
 function editRealmName(){const n=prompt('Name your realm:',realmName);if(n?.trim()){realmName=n.trim();localStorage.setItem('tv-realm-name',realmName);document.getElementById('realm-name-display').textContent=realmName;}}
 function editPlayerName(){const n=prompt('Your explorer name:',playerName);if(n?.trim()){playerName=n.trim();localStorage.setItem('tv-player-name',playerName);document.getElementById('player-name-display').textContent=playerName;}}
-
 function toggleDrawer(){document.getElementById('territories-drawer').classList.toggle('open');}
 function renderDrawer(){
   document.getElementById('territories-toggle').textContent=`⚜ My Provinces (${territories.length}) ⚜`;
@@ -1117,7 +1015,6 @@ function renderDrawer(){
       <button class="t-del" onclick="delT(${i})">Cede</button>
     </div>`).join('');
 }
-
 function delT(i){
   const id=territories[i].id;territories.splice(i,1);saveTerritories();
   const li=polygonLayers.findIndex(l=>l.id===id);
@@ -1126,151 +1023,61 @@ function delT(i){
 }
 function saveTerritories(){localStorage.setItem('tv-territories',JSON.stringify(territories));}
 
-// ═══════════════════════════════════════════════
-//  UTILS
-// ═══════════════════════════════════════════════
-function dist(a,b){
-  const R=6371000,f1=a[0]*Math.PI/180,f2=b[0]*Math.PI/180,df=(b[0]-a[0])*Math.PI/180,dl=(b[1]-a[1])*Math.PI/180;
-  return R*2*Math.atan2(Math.sqrt(Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2),Math.sqrt(1-(Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2)));
-}
-function polyArea(pts){
-  if(!pts||pts.length<3) return 0;const R=6371000;let a=0;
-  for(let i=0;i<pts.length;i++){const j=(i+1)%pts.length;
-    const xi=pts[i][1]*Math.PI/180*R*Math.cos(pts[i][0]*Math.PI/180),yi=pts[i][0]*Math.PI/180*R;
-    const xj=pts[j][1]*Math.PI/180*R*Math.cos(pts[j][0]*Math.PI/180),yj=pts[j][0]*Math.PI/180*R;
-    a+=xi*yj-xj*yi;}
-  return Math.abs(a/2);
-}
+// ═══════════════════ UTILS ═══════════════════
+function dist(a,b){const R=6371000,f1=a[0]*Math.PI/180,f2=b[0]*Math.PI/180,df=(b[0]-a[0])*Math.PI/180,dl=(b[1]-a[1])*Math.PI/180;return R*2*Math.atan2(Math.sqrt(Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2),Math.sqrt(1-(Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2)));}
+function polyArea(pts){if(!pts||pts.length<3)return 0;const R=6371000;let a=0;for(let i=0;i<pts.length;i++){const j=(i+1)%pts.length;const xi=pts[i][1]*Math.PI/180*R*Math.cos(pts[i][0]*Math.PI/180),yi=pts[i][0]*Math.PI/180*R,xj=pts[j][1]*Math.PI/180*R*Math.cos(pts[j][0]*Math.PI/180),yj=pts[j][0]*Math.PI/180*R;a+=xi*yj-xj*yi;}return Math.abs(a/2);}
 function formatArea(m2){return fmtArea(m2);}
 function setStatus(msg,type=''){document.getElementById('status-text').textContent=msg;document.getElementById('status-scroll').className=type;}
 function centerOnUser(){if(currentPos)map.setView(currentPos,17,{animate:true});else setStatus('No position fix yet. Patience…','danger');}
-function updateHeader(){
-  document.getElementById('stat-zones').textContent=territories.length;
-  const t=territories.reduce((s,t)=>s+(t.area||0),0);
-  document.getElementById('stat-area').textContent=t>0?formatArea(t):'—';
-}
+function updateHeader(){document.getElementById('stat-zones').textContent=territories.length;const t=territories.reduce((s,t)=>s+(t.area||0),0);document.getElementById('stat-area').textContent=t>0?formatArea(t):'—';}
 
-// ═══════════════════════════════════════════════
-//  GEOJSON EXPORT
-// ═══════════════════════════════════════════════
+// ═══════════════════ GEOJSON EXPORT ═══════════════════
 function exportGeoJSON(){
   const cfm=document.getElementById('export-confirm');
   if(!territories.length){setStatus('No territories to export yet.','danger');return;}
-  const features=territories.map(t=>{
-    const coords=t.points.map(p=>[p[1],p[0]]);coords.push([t.points[0][1],t.points[0][0]]);
-    return{type:'Feature',properties:{name:t.name,emoji:t.emoji,date:t.date,area_m2:Math.round(t.area||0),area_ha:parseFloat(((t.area||0)/10000).toFixed(4)),realm:realmName,player:playerName},
-      geometry:{type:'Polygon',coordinates:[coords]}};
-  });
+  const features=territories.map(t=>{const coords=t.points.map(p=>[p[1],p[0]]);coords.push([t.points[0][1],t.points[0][0]]);return{type:'Feature',properties:{name:t.name,emoji:t.emoji,date:t.date,area_m2:Math.round(t.area||0),area_ha:parseFloat(((t.area||0)/10000).toFixed(4)),realm:realmName,player:playerName},geometry:{type:'Polygon',coordinates:[coords]}};});
   const fogFeatures=fogCircles.map((c,i)=>({type:'Feature',properties:{index:i,is_water:waterPts.has(i),radius_m:Math.round((c.r||130)*0.85)},geometry:{type:'Point',coordinates:[c.lng,c.lat]}}));
-  const geojson={type:'FeatureCollection',name:`${realmName} — Terranova Export`,
-    crs:{type:'name',properties:{name:'urn:ogc:def:crs:OGC:1.3:CRS84'}},
-    metadata:{realm:realmName,player:playerName,exported:new Date().toISOString(),total_provinces:territories.length,
-      total_area_m2:Math.round(territories.reduce((s,t)=>s+(t.area||0),0)),
-      distance_km:parseFloat(totalDistKm.toFixed(2)),distance_mi:parseFloat((totalDistKm/1.609344).toFixed(2)),app:'Terranova'},
-    features,exploration_points:fogFeatures};
+  const geojson={type:'FeatureCollection',name:`${realmName} — Terranova Export`,crs:{type:'name',properties:{name:'urn:ogc:def:crs:OGC:1.3:CRS84'}},metadata:{realm:realmName,player:playerName,exported:new Date().toISOString(),total_provinces:territories.length,total_area_m2:Math.round(territories.reduce((s,t)=>s+(t.area||0),0)),distance_km:parseFloat(totalDistKm.toFixed(2)),distance_mi:parseFloat((totalDistKm/1.609344).toFixed(2)),app:'Terranova'},features,exploration_points:fogFeatures};
   const blob=new Blob([JSON.stringify(geojson,null,2)],{type:'application/geo+json'});
   const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;
-  a.download=`terranova_${realmName.toLowerCase().replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.geojson`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  const a=document.createElement('a');a.href=url;a.download=`terranova_${realmName.toLowerCase().replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.geojson`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),2000);
   cfm.classList.add('show');setTimeout(()=>cfm.classList.remove('show'),3500);
 }
 
-// ═══════════════════════════════════════════════
-//  UNIT SYSTEM
-// ═══════════════════════════════════════════════
+// ═══════════════════ UNITS ═══════════════════
 let useMetric=localStorage.getItem('tv-units')!=='mi';
-
-function setUnits(u){
-  useMetric=(u==='km');localStorage.setItem('tv-units',u);
-  document.getElementById('unit-mi').classList.toggle('active',!useMetric);
-  document.getElementById('unit-km').classList.toggle('active',useMetric);
-  renderKingdom();updateHeader();
-  if(recording) updateHUD();
-}
-function fmtDist(meters){
-  if(useMetric) return meters>=1000?(meters/1000).toFixed(2)+' km':Math.round(meters)+' m';
-  const mi=meters/1609.344;return mi>=0.1?mi.toFixed(2)+' mi':Math.round(meters*3.28084)+' ft';
-}
+function setUnits(u){useMetric=(u==='km');localStorage.setItem('tv-units',u);document.getElementById('unit-mi').classList.toggle('active',!useMetric);document.getElementById('unit-km').classList.toggle('active',useMetric);renderKingdom();updateHeader();if(recording)updateHUD();}
+function fmtDist(m){if(useMetric)return m>=1000?(m/1000).toFixed(2)+' km':Math.round(m)+' m';const mi=m/1609.344;return mi>=0.1?mi.toFixed(2)+' mi':Math.round(m*3.28084)+' ft';}
 function fmtDistLong(km){return useMetric?km.toFixed(2)+' km':(km/1.609344).toFixed(2)+' mi';}
-function fmtArea(m2){
-  if(useMetric){if(m2>=1e6)return(m2/1e6).toFixed(2)+' km²';if(m2>=1e4)return(m2/1e4).toFixed(2)+' ha';return Math.round(m2)+' m²';}
-  const ac=m2/4046.856;if(ac>=640)return(ac/640).toFixed(2)+' sq mi';if(ac>=1)return ac.toFixed(2)+' ac';return Math.round(m2*10.7639)+' ft²';
-}
+function fmtArea(m2){if(useMetric){if(m2>=1e6)return(m2/1e6).toFixed(2)+' km²';if(m2>=1e4)return(m2/1e4).toFixed(2)+' ha';return Math.round(m2)+' m²';}const ac=m2/4046.856;if(ac>=640)return(ac/640).toFixed(2)+' sq mi';if(ac>=1)return ac.toFixed(2)+' ac';return Math.round(m2*10.7639)+' ft²';}
 
-// ═══════════════════════════════════════════════
-//  SESSION TIMER
-// ═══════════════════════════════════════════════
+// ═══════════════════ TIMER ═══════════════════
 let sessionStart=null,timerInterval=null;
-function startTimer(){
-  sessionStart=Date.now();
-  document.getElementById('hud-time').style.display='block';
-  document.getElementById('hud-sep-time').style.display='';
-  timerInterval=setInterval(tickTimer,1000);tickTimer();
-}
-function stopTimer(){
-  clearInterval(timerInterval);timerInterval=null;
-  document.getElementById('hud-time').style.display='none';
-  document.getElementById('hud-sep-time').style.display='none';
-}
-function tickTimer(){
-  if(!sessionStart) return;
-  const e=Math.floor((Date.now()-sessionStart)/1000);
-  const h=Math.floor(e/3600),m=Math.floor((e%3600)/60),s=e%60;
-  document.getElementById('hud-elapsed').textContent=h>0?`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${m}:${String(s).padStart(2,'0')}`;
-}
+function startTimer(){sessionStart=Date.now();document.getElementById('hud-time').style.display='block';document.getElementById('hud-sep-time').style.display='';timerInterval=setInterval(tickTimer,1000);tickTimer();}
+function stopTimer(){clearInterval(timerInterval);timerInterval=null;document.getElementById('hud-time').style.display='none';document.getElementById('hud-sep-time').style.display='none';}
+function tickTimer(){if(!sessionStart)return;const e=Math.floor((Date.now()-sessionStart)/1000),h=Math.floor(e/3600),m=Math.floor((e%3600)/60),s=e%60;document.getElementById('hud-elapsed').textContent=h>0?`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${m}:${String(s).padStart(2,'0')}`;}
 function sessionElapsedMs(){return sessionStart?Date.now()-sessionStart:0;}
 function fmtDuration(ms){const t=Math.floor(ms/1000),h=Math.floor(t/3600),m=Math.floor((t%3600)/60);return h>0?`${h}h ${m}m`:`${m}m ${t%60}s`;}
 
-// ═══════════════════════════════════════════════
-//  CONQUEST LOG
-// ═══════════════════════════════════════════════
+// ═══════════════════ CONQUEST LOG ═══════════════════
 let conquestLog=JSON.parse(localStorage.getItem('tv-conquest-log')||'[]');
-
-function logExpedition(claimed){
-  const entry={id:Date.now(),
-    date:new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'}),
-    time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
-    durationMs:sessionElapsedMs(),distKm:trailDist()/1000,
-    claimed:claimed?{name:claimed.name,emoji:claimed.emoji,area:claimed.area}:null};
-  conquestLog.unshift(entry);
-  if(conquestLog.length>100) conquestLog=conquestLog.slice(0,100);
-  localStorage.setItem('tv-conquest-log',JSON.stringify(conquestLog));
-}
-function renderLog(){
-  const el=document.getElementById('conquest-log');
-  if(!conquestLog.length){el.innerHTML='<div id="log-empty">No expeditions recorded yet.<br>Begin your first march.</div>';return;}
-  el.innerHTML=conquestLog.map((e,i)=>`
-    <div class="log-entry">
-      <button class="log-del" onclick="deleteLogEntry(${i})" title="Remove">✕</button>
-      <div class="log-entry-header">
-        <div class="log-date">${e.date} · ${e.time}</div>
-        ${e.claimed?`<div class="log-claimed">${e.claimed.emoji} ${e.claimed.name}</div>`:`<div class="log-no-claim">No claim</div>`}
-      </div>
-      <div class="log-stats">
-        <div class="log-stat">⏱ <span>${fmtDuration(e.durationMs)}</span></div>
-        <div class="log-stat">📍 <span>${fmtDistLong(e.distKm)}</span></div>
-        ${e.claimed?`<div class="log-stat">⚜ <span>${fmtArea(e.claimed.area||0)}</span></div>`:''}
-      </div>
-    </div>`).join('');
-}
+function logExpedition(claimed){const entry={id:Date.now(),date:new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'}),time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),durationMs:sessionElapsedMs(),distKm:trailDist()/1000,claimed:claimed?{name:claimed.name,emoji:claimed.emoji,area:claimed.area}:null};conquestLog.unshift(entry);if(conquestLog.length>100)conquestLog=conquestLog.slice(0,100);localStorage.setItem('tv-conquest-log',JSON.stringify(conquestLog));}
+function renderLog(){const el=document.getElementById('conquest-log');if(!conquestLog.length){el.innerHTML='<div id="log-empty">No expeditions recorded yet.<br>Begin your first march.</div>';return;}el.innerHTML=conquestLog.map((e,i)=>`<div class="log-entry"><button class="log-del" onclick="deleteLogEntry(${i})" title="Remove">✕</button><div class="log-entry-header"><div class="log-date">${e.date} · ${e.time}</div>${e.claimed?`<div class="log-claimed">${e.claimed.emoji} ${e.claimed.name}</div>`:`<div class="log-no-claim">No claim</div>`}</div><div class="log-stats"><div class="log-stat">⏱ <span>${fmtDuration(e.durationMs)}</span></div><div class="log-stat">📍 <span>${fmtDistLong(e.distKm)}</span></div>${e.claimed?`<div class="log-stat">⚜ <span>${fmtArea(e.claimed.area||0)}</span></div>`:''}</div></div>`).join('');}
 function deleteLogEntry(i){conquestLog.splice(i,1);localStorage.setItem('tv-conquest-log',JSON.stringify(conquestLog));renderLog();}
 
-// ═══════════════════════════════════════════════
-//  KEYBOARD
-// ═══════════════════════════════════════════════
+// ═══════════════════ KEYBOARD ═══════════════════
 document.getElementById('territory-input').addEventListener('keydown',e=>{if(e.key==='Enter')saveClaim();if(e.key==='Escape')cancelClaim();});
 document.getElementById('kingdom-screen').addEventListener('keydown',e=>{if(e.key==='Escape')closeKingdom();});
+document.getElementById('crest-modal').addEventListener('keydown',e=>{if(e.key==='Escape')closeCrestModal();});
 
-// ═══════════════════════════════════════════════
-//  BOOT
-// ═══════════════════════════════════════════════
+// ═══════════════════ BOOT ═══════════════════
 territories.forEach(t=>drawPoly(t,false));
 updateHeader();renderDrawer();drawFog();
 setUnits(useMetric?'km':'mi');
 document.getElementById('player-name-display').textContent=playerName;
 document.getElementById('realm-name-display').textContent=realmName;
+renderKingdomCrest();
 setTimeout(()=>{fogCircles.forEach((c,i)=>{if(!waterPts.has(i))sampleWater(c.lat,c.lng,i);});},2500);
 startGPS();
 setStatus('Consulting the stars for your position…');
