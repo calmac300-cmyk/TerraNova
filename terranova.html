@@ -396,6 +396,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
         <span id="territory-label-name"></span>
       </div>
       <button class="scroll-btn claim-btn" id="btn-claim" style="display:none" onclick="claimTerritory()">Claim Land</button>
+      <button class="scroll-btn claim-btn" id="btn-close-border" style="display:none" onclick="closeBorderProvince()">⚑ Close Province</button>
       <button class="scroll-btn stop-btn" id="btn-stop" style="display:none" onclick="stopRecording()">Abandon</button>
     </div>
     <div id="pin-row" style="display:none;text-align:center;margin-bottom:10px;">
@@ -813,6 +814,7 @@ function renderKingdomCrest(){
 
 // ═══════════════════ STATE ═══════════════════
 let recording=false,routeMode=false,trail=[],trailLine=null,startMarker=null;
+let borderCloseMode=false,claimedPolylines=[],trailSegmentStart=0;
 let userMarker=null,currentPos=null,pendingPoints=null;
 let wakeLock=null,wakeLockDismissed=false;
 let territories=JSON.parse(localStorage.getItem('tv-territories')||'[]');
@@ -1097,11 +1099,15 @@ function onPos(pos){
   updateHUD();
   if(trail.length>=6){
     const ds=dist(trail[0],[lat,lng]),canClose=ds<65;
-    document.getElementById('btn-claim').style.display=canClose?'':'none';
-    document.getElementById('territory-label').style.display=(!canClose&&insideTerritory)?'':'none';
+    const segLen=trail.length-trailSegmentStart;
+    const canBorderClose=!!(insideTerritory&&segLen>=6);
+    // Border-close takes priority over normal close when inside own territory
+    document.getElementById('btn-close-border').style.display=canBorderClose?'':'none';
+    document.getElementById('btn-claim').style.display=(!canBorderClose&&canClose)?'':'none';
+    document.getElementById('territory-label').style.display=(!canBorderClose&&!canClose&&insideTerritory)?'':'none';
     document.getElementById('hud-loop').textContent=fmtDist(ds);
     const dot=startMarker?.getElement()?.querySelector('.start-dot');
-    if(dot) dot.classList.toggle('pulsing',canClose);
+    if(dot) dot.classList.toggle('pulsing',!canBorderClose&&canClose);
   }
 }
 
@@ -1180,7 +1186,7 @@ function startRecording(){
   trailLine=L.polyline(trail,{color:'#c9920a',weight:3,opacity:0.9,dashArray:'8 5'}).addTo(map);
   placeStartDot(currentPos);
   const _sb=document.getElementById('seal-btn');_sb.classList.add('recording');_sb.textContent='◼ Stop';
-  document.getElementById('btn-stop').style.display='';document.getElementById('btn-claim').style.display='none';
+  document.getElementById('btn-stop').style.display='';document.getElementById('btn-claim').style.display='none';document.getElementById('btn-close-border').style.display='none';
   document.getElementById('btn-find-me').style.display='';document.getElementById('btn-name-trail').style.display='none';
   document.getElementById('btn-route').style.display='none';
   showHUD();acquireWL();startTimer();
@@ -1191,7 +1197,7 @@ function stopRecording(){
   if(trail.length>=3) logExpedition(null);
   recording=false;releaseWL();removeStartDot();hideHUD();stopTimer();clearTerritoryLabel();
   const _sb2=document.getElementById('seal-btn');_sb2.classList.remove('recording');_sb2.textContent='⚑ Conquer';_sb2.style.borderColor='';
-  document.getElementById('btn-stop').style.display='none';document.getElementById('territory-label').style.display='none';
+  document.getElementById('btn-stop').style.display='none';document.getElementById('btn-close-border').style.display='none';document.getElementById('territory-label').style.display='none';
   if(routeMode){
     routeMode=false;
     if(trail.length>=2){
@@ -1223,6 +1229,37 @@ function restoreFindMe(){
 }
 
 // ═══════════════════ CLAIM ═══════════════════
+function closeBorderProvince(){
+  if(!insideTerritory) return;
+  // Walk backwards through current segment to find last point outside all territories
+  const seg=trail.slice(trailSegmentStart);
+  let trimIdx=seg.length-1;
+  while(trimIdx>0&&territories.some(t=>validPoints(t.points)&&pointInPoly([seg[trimIdx][1],seg[trimIdx][0]],t.points))){trimIdx--;}
+  if(trimIdx<3){setStatus('Not enough trail outside territory to close a province.','danger');return;}
+  pendingPoints=seg.slice(0,trimIdx+1);
+  borderCloseMode=true;
+  // Reuse existing claim flow
+  document.getElementById('claim-step1').style.display='block';
+  document.getElementById('claim-step2-new').style.display='none';
+  document.getElementById('claim-step2-expand').style.display='none';
+  document.getElementById('name-modal').classList.add('open');
+}
+function continueBorderRecording(){
+  borderCloseMode=false;
+  // Dim the claimed segment and keep it visible on map
+  if(trailLine){
+    trailLine.setStyle({color:'rgba(201,146,10,0.35)',weight:2,opacity:0.5,dashArray:'4 7'});
+    claimedPolylines.push(trailLine);
+    trailLine=null;
+  }
+  // Start a new active segment from current position
+  trailSegmentStart=trail.length-1;
+  const newSeg=trail.slice(trailSegmentStart);
+  trailLine=L.polyline(newSeg,{color:'#c9920a',weight:3,opacity:0.9,dashArray:'8 5'}).addTo(map);
+  document.getElementById('btn-close-border').style.display='none';
+  document.getElementById('btn-claim').style.display='none';
+  setStatus('Province claimed — recording continues. Walk another loop to claim more. ✦','alert');
+}
 function claimTerritory(){
   if(trail.length<3){setStatus('Chart more territory first.','danger');return;}
   pendingPoints=[...trail];mergeTargetIdx=null;
@@ -1281,7 +1318,8 @@ function saveClaim(){
   const t={id:Date.now(),name,emoji,points:pendingPoints,color,area:polyArea(pendingPoints),
     date:new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})};
   territories.push(t);saveTerritories();drawPoly(t,true);
-  fetchElevation(t);logExpedition(t);checkAchievements({event:'claim',area:t.area});pushLedger('⚑',`Claimed ${t.emoji} ${name}`,null);changeInstability(5,`Claimed ${name} — realm consolidated`);finishClaim();setStatus(`"${name}" — claimed for the realm! ✦`,'alert');
+  fetchElevation(t);logExpedition(t);checkAchievements({event:'claim',area:t.area});pushLedger('⚑',`Claimed ${t.emoji} ${name}`,null);changeInstability(5,`Claimed ${name} — realm consolidated`);
+  if(borderCloseMode){continueBorderRecording();}else{finishClaim();setStatus(`"${name}" — claimed for the realm! ✦`,'alert');}
 }
 
 function saveMerge(){
@@ -1308,10 +1346,12 @@ function saveMerge(){
   const li=polygonLayers.findIndex(l=>l.id===target.id);
   if(li>=0){map.removeLayer(polygonLayers[li].poly);if(polygonLayers[li].centroidMarker)map.removeLayer(polygonLayers[li].centroidMarker);polygonLayers.splice(li,1);}
   drawPoly(territories[mergeTargetIdx],true);
-  fetchElevation(territories[mergeTargetIdx]);logExpedition(territories[mergeTargetIdx]);checkAchievements({event:'claim',area:territories[mergeTargetIdx].area});pushLedger('⚑',`Expanded ${target.emoji} ${target.name}`,null);changeInstability(5,`Expanded ${target.name} — realm consolidated`);finishClaim();setStatus(`"${target.name}" expanded! ✦`,'alert');
+  fetchElevation(territories[mergeTargetIdx]);logExpedition(territories[mergeTargetIdx]);checkAchievements({event:'claim',area:territories[mergeTargetIdx].area});pushLedger('⚑',`Expanded ${target.emoji} ${target.name}`,null);changeInstability(5,`Expanded ${target.name} — realm consolidated`);
+  if(borderCloseMode){continueBorderRecording();}else{finishClaim();setStatus(`"${target.name}" expanded! ✦`,'alert');}
 }
 
 function finishClaim(){
+  claimedPolylines.forEach(l=>map.removeLayer(l));claimedPolylines=[];trailSegmentStart=0;
   if(trailLine){map.removeLayer(trailLine);trailLine=null;}
   removeStartDot();clearTerritoryLabel();trail=[];pendingPoints=null;recording=false;
   releaseWL();hideHUD();stopTimer();
