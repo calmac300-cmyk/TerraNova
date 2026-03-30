@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 <style>
@@ -192,8 +195,8 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 .empire-stat-icon{font-size:20px;margin-bottom:4px;}
 .empire-stat-val{font-family:var(--font-body);font-weight:700;font-size:18px;color:var(--gold-lt);line-height:1;margin-bottom:3px;}
 .empire-stat-lbl{font-family:var(--font-text);font-style:italic;font-size:9px;color:rgba(242,232,204,0.45);text-transform:uppercase;letter-spacing:0.08em;}
-#territories-section h3,#log-section h3{font-family:var(--font-body);font-weight:700;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#8b6914;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
-#territories-section h3::after,#log-section h3::after{content:'';flex:1;height:1px;background:rgba(139,105,20,0.25);}
+#achievements-section h3,#discoveries-section h3,#territories-section h3,#log-section h3,#trails-section h3{font-family:var(--font-body);font-weight:700;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#8b6914;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+#achievements-section h3::after,#discoveries-section h3::after,#territories-section h3::after,#log-section h3::after,#trails-section h3::after{content:'';flex:1;height:1px;background:rgba(139,105,20,0.25);}
 #unit-toggle{display:flex;margin-bottom:16px;border:1px solid rgba(201,146,10,0.3);border-radius:6px;overflow:hidden;}
 .unit-opt{flex:1;padding:8px 0;text-align:center;cursor:pointer;touch-action:manipulation;font-family:var(--font-body);font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:rgba(242,232,204,0.45);background:transparent;border:none;transition:all 0.18s;}
 .unit-opt.active{background:rgba(201,146,10,0.2);color:var(--gold-lt);}
@@ -202,13 +205,31 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 #export-btn:active{background:rgba(139,105,20,0.3);transform:scale(0.98);}
 #export-confirm{text-align:center;font-family:var(--font-text);font-style:italic;font-size:11px;color:#6fcf97;margin-top:-12px;margin-bottom:16px;opacity:0;transition:opacity 0.4s;pointer-events:none;}
 #export-confirm.show{opacity:1;}
-.kingdom-territory{background:rgba(20,14,5,0.7);border:1px solid rgba(201,146,10,0.15);border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color 0.2s;}
-.kingdom-territory:active{border-color:rgba(201,146,10,0.4);}
+.kingdom-territory{background:rgba(20,14,5,0.7);border:1px solid rgba(201,146,10,0.15);border-radius:8px;padding:14px 16px;margin-bottom:10px;transition:border-color 0.2s;}
+.kt-top{display:flex;align-items:center;gap:14px;cursor:pointer;}
+.kt-top:active{opacity:0.85;}
 .kt-crest-wrap{width:42px;height:49px;flex-shrink:0;}
 .kt-info{flex:1;min-width:0;}
-.kt-name{font-family:var(--font-body);font-weight:600;font-size:14px;color:var(--parchment);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.kt-name{font-family:var(--font-body);font-weight:600;font-size:14px;color:var(--parchment);display:flex;align-items:center;gap:4px;}
+.kt-name-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .kt-details{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.4);margin-top:2px;}
-.kt-del{background:none;border:1px solid rgba(160,60,60,0.3);color:rgba(200,100,100,0.5);border-radius:5px;padding:5px 10px;font-family:var(--font-text);font-size:10px;cursor:pointer;touch-action:manipulation;flex-shrink:0;}
+.kt-actions{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0;}
+.kt-del{background:none;border:1px solid rgba(160,60,60,0.3);color:rgba(200,100,100,0.5);border-radius:5px;padding:5px 10px;font-family:var(--font-text);font-size:10px;cursor:pointer;touch-action:manipulation;}
+.kt-rename{background:none;border:none;font-size:12px;cursor:pointer;opacity:0.35;padding:1px 3px;touch-action:manipulation;flex-shrink:0;line-height:1;}
+.kt-set-capital{background:none;border:1px solid rgba(201,146,10,0.25);border-radius:4px;color:rgba(242,232,204,0.4);font-family:var(--font-body);font-size:9px;letter-spacing:0.05em;text-transform:uppercase;padding:3px 8px;cursor:pointer;touch-action:manipulation;transition:all 0.15s;white-space:nowrap;}
+.kt-set-capital.is-capital{border-color:rgba(201,146,10,0.6);color:var(--gold-lt);background:rgba(201,146,10,0.1);}
+.province-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.prov-act{background:none;border:1px solid rgba(201,146,10,0.2);border-radius:5px;color:rgba(242,232,204,0.45);font-family:var(--font-body);font-size:9px;letter-spacing:0.04em;padding:3px 9px;cursor:pointer;touch-action:manipulation;transition:all 0.15s;white-space:nowrap;}
+.prov-act:hover:not(:disabled){border-color:rgba(201,146,10,0.55);color:var(--gold-lt);background:rgba(201,146,10,0.08);}
+.prov-act:disabled{opacity:0.5;cursor:default;}
+.prov-act.active-state{border-color:rgba(201,146,10,0.5);color:var(--gold-lt);background:rgba(201,146,10,0.1);}
+.kt-bottom{margin-top:10px;padding-top:10px;border-top:1px solid rgba(201,146,10,0.1);}
+.tag-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.tag-btn{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:0.03em;border-radius:10px;padding:3px 10px;cursor:pointer;touch-action:manipulation;border:1px solid rgba(201,146,10,0.2);background:rgba(201,146,10,0.04);color:rgba(242,232,204,0.45);transition:all 0.15s;}
+.tag-btn.active{border-color:rgba(201,146,10,0.65);background:rgba(201,146,10,0.18);color:var(--gold-lt);}
+.kt-notes{width:100%;background:rgba(242,232,204,0.04);border:1px solid rgba(201,146,10,0.15);border-radius:5px;padding:7px 10px;font-family:var(--font-text);font-style:italic;font-size:11px;color:var(--parchment-dk);resize:none;outline:none;line-height:1.55;min-height:38px;display:block;}
+.kt-notes::placeholder{color:rgba(242,232,204,0.18);}
+.kt-notes:focus{border-color:rgba(201,146,10,0.35);}
 #empty-realm{text-align:center;padding:40px 20px;font-family:var(--font-text);font-style:italic;color:rgba(242,232,204,0.3);font-size:14px;line-height:1.8;}
 #empty-realm .big{font-size:40px;display:block;margin-bottom:12px;opacity:0.4;}
 #log-section{margin-top:28px;}
@@ -230,6 +251,94 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 .town-label{font-family:var(--font-body);font-weight:600;letter-spacing:0.04em;color:var(--parchment);text-shadow:0 1px 4px rgba(0,0,0,0.95),0 0 10px rgba(0,0,0,0.9);margin-top:2px;max-width:80px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;line-height:1.2;}
 .territory-tooltip{font-family:var(--font-body)!important;font-size:11px!important;background:rgba(20,13,5,0.9)!important;border:1px solid rgba(201,146,10,0.4)!important;color:var(--gold-lt)!important;border-radius:4px!important;padding:4px 10px!important;box-shadow:none!important;}
 .territory-tooltip::before{display:none!important;}
+/* POI MARKERS */
+.poi-pin{width:28px;height:28px;border-radius:50%;background:rgba(20,13,5,0.92);border:1.5px solid rgba(201,146,10,0.75);display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,0.75);cursor:pointer;transition:transform 0.15s;}
+.poi-pin:active{transform:scale(0.9);}
+.poi-needle{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:8px solid rgba(201,146,10,0.75);margin-top:-1px;}
+/* POI MODAL */
+#poi-modal{position:absolute;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(10,7,3,0.82);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity 0.25s;}
+#poi-modal.open{opacity:1;pointer-events:all;}
+#poi-card{background:#1e1408;border:1px solid rgba(201,146,10,0.4);border-radius:10px;padding:24px 20px 20px;width:min(360px,calc(100vw - 28px));box-shadow:0 8px 40px rgba(0,0,0,0.7);}
+#poi-cat-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:14px;}
+.poi-cat-btn{width:40px;height:40px;border-radius:8px;border:1px solid rgba(201,146,10,0.2);background:rgba(201,146,10,0.05);font-size:18px;cursor:pointer;touch-action:manipulation;transition:all 0.15s;display:flex;align-items:center;justify-content:center;}
+.poi-cat-btn.selected{border-color:rgba(201,146,10,0.7);background:rgba(201,146,10,0.18);}
+#poi-input{width:100%;background:rgba(242,232,204,0.06);border:1px solid rgba(201,146,10,0.3);border-radius:6px;padding:12px 14px;font-family:var(--font-body);font-size:16px;font-weight:600;color:var(--parchment);outline:none;margin-bottom:14px;}
+#poi-input:focus{border-color:rgba(201,146,10,0.6);}
+#poi-input::placeholder{color:rgba(242,232,204,0.25);font-weight:400;}
+/* DISCOVERIES */
+#discoveries-section{margin-bottom:28px;}
+.disc-entry{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid rgba(201,146,10,0.1);}
+.disc-entry:last-child{border-bottom:none;}
+.disc-icon{font-size:20px;flex-shrink:0;width:28px;text-align:center;}
+.disc-info{flex:1;min-width:0;}
+.disc-name{font-family:var(--font-body);font-size:12px;font-weight:600;color:var(--parchment);}
+.disc-date{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.4);margin-top:1px;}
+/* NAMED TRAILS */
+#trails-section{margin-top:28px;}
+/* PROGRESSION */
+#power-score-banner{text-align:center;margin-bottom:12px;padding:14px 10px;background:rgba(201,146,10,0.07);border:1px solid rgba(201,146,10,0.25);border-radius:10px;}
+#treasury-banner{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding:10px 16px;background:rgba(201,146,10,0.05);border:1px solid rgba(201,146,10,0.2);border-radius:10px;}
+#treasury-gold{font-family:var(--font-gothic);font-size:22px;color:var(--gold-lt);text-shadow:0 1px 8px rgba(201,146,10,0.3);}
+#treasury-rate{font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.5);}
+#power-score-val{font-family:var(--font-gothic);font-size:44px;color:var(--gold-lt);line-height:1;text-shadow:0 2px 12px rgba(201,146,10,0.3);}
+#power-score-lbl{font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.45);letter-spacing:0.1em;margin-top:4px;}
+#rank-display-wrap{display:flex;align-items:center;gap:6px;justify-content:center;margin:6px 0 2px;}
+#kingdom-rank-icon{font-size:16px;}
+#kingdom-rank-title{font-family:var(--font-text);font-style:italic;font-size:13px;color:var(--gold-lt);}
+#achievements-section{margin-bottom:28px;}
+#achievement-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.achievement-card{background:rgba(20,14,5,0.7);border:1px solid rgba(201,146,10,0.12);border-radius:8px;padding:12px 10px;text-align:center;transition:border-color 0.3s;}
+.achievement-card.unlocked{border-color:rgba(201,146,10,0.4);background:rgba(201,146,10,0.08);}
+.achievement-card.locked{opacity:0.35;}
+#records-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;}
+.record-card{background:rgba(20,14,5,0.7);border:1px solid rgba(201,146,10,0.18);border-radius:8px;padding:12px 10px;text-align:center;}
+.rec-icon{font-size:18px;margin-bottom:3px;}
+.rec-val{font-family:var(--font-gothic);font-size:17px;color:var(--gold-lt);line-height:1.1;}
+.rec-label{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.4);margin-top:3px;letter-spacing:0.04em;}
+.rec-date{font-family:var(--font-body);font-size:9px;color:rgba(242,232,204,0.22);margin-top:2px;}
+#ledger-list{border:1px solid rgba(201,146,10,0.1);border-radius:8px;overflow:hidden;background:rgba(14,10,4,0.4);}
+.ledger-entry{display:flex;align-items:center;gap:9px;padding:8px 12px;border-bottom:1px solid rgba(201,146,10,0.07);}
+.ledger-entry:last-child{border-bottom:none;}
+.ledger-icon{font-size:13px;flex-shrink:0;}
+.ledger-desc{flex:1;font-family:var(--font-body);font-size:10px;color:rgba(242,232,204,0.55);letter-spacing:0.03em;}
+.ledger-date{font-family:var(--font-body);font-size:9px;color:rgba(242,232,204,0.22);flex-shrink:0;}
+.ledger-amount{font-family:var(--font-body);font-size:10px;font-weight:600;flex-shrink:0;}
+.ledger-amount.gain{color:rgba(140,210,80,0.85);}
+.ledger-amount.loss{color:rgba(200,90,80,0.85);}
+#instability-wrap{margin:16px 0;padding:12px 16px;border:1px solid rgba(201,146,10,0.15);border-radius:10px;background:rgba(14,10,4,0.4);}
+#instability-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+#instability-title{font-family:var(--font-body);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(242,232,204,0.3);flex:1;}
+#instability-status{font-family:var(--font-text);font-style:italic;font-size:11px;transition:color 0.4s;}
+#instability-val{font-family:var(--font-body);font-size:9px;color:rgba(242,232,204,0.25);}
+#instability-track{height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;}
+#instability-fill{height:100%;border-radius:3px;transition:width 0.5s ease,background-color 0.5s ease;width:0%;}
+#known-realms-empty{font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.25);text-align:center;padding:16px 0;line-height:1.7;}
+#leaderboard-list{border:1px solid rgba(201,146,10,0.15);border-radius:10px;overflow:hidden;background:rgba(14,10,4,0.4);}
+.lb-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid rgba(201,146,10,0.07);}
+.lb-row:last-child{border-bottom:none;}
+.lb-row.lb-me{background:rgba(201,146,10,0.06);}
+.lb-rank{font-family:var(--font-gothic);font-size:16px;color:rgba(242,232,204,0.25);width:22px;text-align:center;flex-shrink:0;}
+.lb-rank.lb-top{color:var(--gold-lt);}
+.lb-icon{font-size:13px;flex-shrink:0;}
+.lb-names{flex:1;min-width:0;}
+.lb-realm{font-family:var(--font-body);font-size:11px;font-weight:600;color:var(--parchment);letter-spacing:0.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-player{font-family:var(--font-text);font-style:italic;font-size:9px;color:rgba(242,232,204,0.35);margin-top:1px;}
+.lb-score{font-family:var(--font-gothic);font-size:14px;color:var(--gold-lt);flex-shrink:0;text-align:right;}
+.lb-provinces{font-family:var(--font-body);font-size:9px;color:rgba(242,232,204,0.3);text-align:right;margin-top:1px;}
+.realm-card{background:rgba(20,14,5,0.6);border:1px solid rgba(201,146,10,0.15);border-radius:8px;padding:10px 14px;margin-bottom:8px;}
+.realm-card-name{font-family:var(--font-gothic);font-size:15px;color:var(--gold-lt);}
+.realm-card-meta{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.4);margin-top:3px;}
+#game-modal{position:fixed;inset:0;background:rgba(10,6,2,0.88);z-index:4000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+#game-modal.open{opacity:1;pointer-events:all;}
+#game-card{background:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.04"/></svg>'),linear-gradient(160deg,#1e1408 0%,#120d06 100%);border:1px solid rgba(201,146,10,0.3);border-radius:14px;padding:28px 24px;width:min(340px,90vw);text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.7);}
+#game-code-input{width:100%;margin:16px 0 4px;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,146,10,0.25);border-radius:8px;color:var(--parchment);font-family:var(--font-body);font-size:15px;letter-spacing:0.12em;text-align:center;text-transform:uppercase;outline:none;}
+#game-code-input::placeholder{letter-spacing:0.04em;text-transform:none;opacity:0.35;}
+#game-modal-btns{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+#game-code-display{font-family:var(--font-body);font-size:11px;color:var(--gold-lt);letter-spacing:0.08em;margin-top:8px;padding:8px;background:rgba(201,146,10,0.08);border-radius:6px;}
+#mp-status-badge{position:fixed;bottom:60px;left:14px;font-family:var(--font-body);font-size:9px;letter-spacing:0.06em;color:rgba(201,146,10,0.55);pointer-events:none;z-index:900;}
+.ach-icon{font-size:22px;margin-bottom:5px;}
+.ach-name{font-family:var(--font-body);font-size:11px;font-weight:600;color:var(--gold-lt);letter-spacing:0.04em;margin-bottom:3px;}
+.ach-desc{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.45);line-height:1.4;}
 </style>
 </head>
 <body>
@@ -246,6 +355,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
   <div id="header-stats">
     <div class="hstat"><div class="hstat-label">Provinces</div><div class="hstat-value" id="stat-zones">0</div></div>
     <div class="hstat"><div class="hstat-label">Domain</div><div class="hstat-value" id="stat-area">—</div></div>
+    <div class="hstat"><div class="hstat-label">Rank</div><div class="hstat-value" id="stat-rank">🧭</div></div>
   </div>
 </div>
 
@@ -273,7 +383,8 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
   <div id="control-parchment">
     <div id="gps-line">Awaiting celestial fix…</div>
     <div id="main-controls">
-      <button class="scroll-btn" onclick="centerOnUser()">Find Me</button>
+      <button class="scroll-btn" id="btn-find-me" onclick="centerOnUser()">Find Me</button>
+      <button class="scroll-btn" id="btn-name-trail" style="display:none" onclick="nameTrail()">Name Trail</button>
       <button id="seal-btn" onclick="toggleRecording()">
         <div id="seal-pulse"></div>
         <div id="seal-inner">⚑</div>
@@ -285,12 +396,29 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
       <button class="scroll-btn claim-btn" id="btn-claim" style="display:none" onclick="claimTerritory()">Claim Land</button>
       <button class="scroll-btn stop-btn" id="btn-stop" style="display:none" onclick="stopRecording()">Abandon</button>
     </div>
+    <div id="pin-row" style="display:none;text-align:center;margin-bottom:10px;">
+      <button class="scroll-btn" onclick="dropPin()" style="padding:5px 18px;font-size:10px;width:auto">📍 Drop Discovery Pin</button>
+    </div>
     <button id="territories-toggle" onclick="toggleDrawer()">⚜ My Provinces (0) ⚜</button>
     <div id="territories-drawer"><div id="drawer-list"></div></div>
   </div>
 </div>
 
 <!-- CLAIM MODAL -->
+<div id="mp-status-badge"></div>
+<div id="game-modal">
+  <div id="game-card">
+    <div class="card-title">⚔ Realm War ⚔</div>
+    <div class="card-sub">Join an existing game or forge a new conflict</div>
+    <input id="game-code-input" type="text" placeholder="Enter game code…" maxlength="8" autocomplete="off" oninput="this.value=this.value.toUpperCase()"/>
+    <div id="game-code-display" style="display:none"></div>
+    <div id="game-modal-btns">
+      <button class="modal-btn" onclick="joinGame()">⚑ Join Realm War</button>
+      <button class="modal-btn" style="opacity:0.65" onclick="createGame()">✦ Create New Game</button>
+      <button class="modal-btn" style="opacity:0.35;font-size:10px;margin-top:4px" onclick="playSolo()">Continue Solo</button>
+    </div>
+  </div>
+</div>
 <div id="name-modal">
   <div id="scroll-card">
     <div id="claim-step1">
@@ -346,6 +474,19 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
   </div>
 </div>
 
+<!-- POI MODAL -->
+<div id="poi-modal">
+  <div id="poi-card">
+    <div class="card-title">❧ Mark a Discovery ❧</div>
+    <div id="poi-cat-row"></div>
+    <input type="text" id="poi-input" placeholder="Name this discovery…" maxlength="48">
+    <div style="display:flex;gap:10px;">
+      <button class="modal-btn" style="background:transparent;color:rgba(242,232,204,0.4)" onclick="cancelPin()">Cancel</button>
+      <button class="modal-btn" style="background:rgba(45,90,39,0.4);border-color:rgba(90,128,56,0.6);color:#a8d890" onclick="savePin()">Mark It!</button>
+    </div>
+  </div>
+</div>
+
 <!-- KINGDOM SCREEN -->
 <div id="kingdom-screen">
   <div id="kingdom-inner">
@@ -356,6 +497,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
         <div id="player-name-display">Explorer</div>
         <button id="edit-player-btn" onclick="editPlayerName()">✎</button>
       </div>
+      <div id="rank-display-wrap"><span id="kingdom-rank-icon">🧭</span><span id="kingdom-rank-title">Wanderer</span></div>
       <div id="kingdom-title-text">The Kingdom of</div>
       <div id="realm-name-row">
         <div id="realm-name-display">My Realm</div>
@@ -363,10 +505,38 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
       </div>
       <div id="kingdom-subtitle">A chronicle of conquered lands</div>
     </div>
+    <div id="power-score-banner">
+      <div id="power-score-val">0</div>
+      <div id="power-score-lbl">Realm Power</div>
+    </div>
+    <div id="treasury-banner">
+      <span id="treasury-gold">⚜ 0</span>
+      <span id="treasury-rate">+0 / day</span>
+    </div>
     <div id="empire-stats">
       <div class="empire-stat"><div class="empire-stat-icon">⚑</div><div class="empire-stat-val" id="k-zones">0</div><div class="empire-stat-lbl">Provinces</div></div>
       <div class="empire-stat"><div class="empire-stat-icon">⚜</div><div class="empire-stat-val" id="k-area">0</div><div class="empire-stat-lbl">Total Domain</div></div>
       <div class="empire-stat"><div class="empire-stat-icon">🗺</div><div class="empire-stat-val" id="k-dist">0</div><div class="empire-stat-lbl" id="k-dist-lbl">Miles Walked</div></div>
+    </div>
+    <div id="leaderboard-section">
+      <h3>Leaderboard</h3>
+      <div id="leaderboard-list"></div>
+    </div>
+    <div id="instability-wrap">
+      <div id="instability-bar-row">
+        <span id="instability-title">Realm Stability</span>
+        <span id="instability-status">Serene</span>
+        <span id="instability-val">0 / 100</span>
+      </div>
+      <div id="instability-track"><div id="instability-fill"></div></div>
+    </div>
+    <div id="diplomacy-section">
+      <h3>Known Realms</h3>
+      <div id="known-realms-list"><div id="known-realms-empty">No rival realms discovered.<br><span style="font-size:10px">Venture beyond your borders to encounter other kingdoms.</span></div></div>
+    </div>
+    <div id="achievements-section">
+      <h3>Achievements</h3>
+      <div id="achievement-grid"></div>
     </div>
     <div id="territories-section">
       <h3>Conquered Territories</h3>
@@ -378,9 +548,25 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
       <div id="export-confirm">✦ Scroll saved — open in ArcGIS or QGIS ✦</div>
       <div id="kingdom-list"></div>
     </div>
+    <div id="discoveries-section">
+      <h3>Discoveries</h3>
+      <div id="discoveries-list"></div>
+    </div>
+    <div id="records-section">
+      <h3>Expedition Records</h3>
+      <div id="records-grid"></div>
+    </div>
     <div id="log-section">
       <h3>Expedition Chronicle</h3>
       <div id="conquest-log"></div>
+    </div>
+    <div id="ledger-section">
+      <h3>Realm Ledger</h3>
+      <div id="ledger-list"></div>
+    </div>
+    <div id="trails-section">
+      <h3>Named Trails</h3>
+      <div id="trails-list"></div>
     </div>
   </div>
 </div>
@@ -388,6 +574,16 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 <script>
 // ═══════════════════ CONFIG ═══════════════════
 const STADIA_KEY='30f4c480-41bb-42c2-8231-c58ca4b763e3';
+// Paste your Firebase project config here (Firebase Console → Project Settings → Your apps)
+const FIREBASE_CONFIG={
+  apiKey:'AIzaSyBwg19lWL8D6HNP6uvcYg1MD39iDhZ0E8A',
+  authDomain:'town-trek.firebaseapp.com',
+  projectId:'town-trek',
+  storageBucket:'town-trek.firebasestorage.app',
+  messagingSenderId:'391881881328',
+  appId:'1:391881881328:web:c0b80922bc7efad8f1f435'
+};
+const MULTIPLAYER_ENABLED=!!(FIREBASE_CONFIG.apiKey);
 
 // ═══════════════════ TILE LAYERS ═══════════════════
 const TILE_LAYERS=[
@@ -601,7 +797,7 @@ function saveCrest(){
   // Redraw all polygons with new color
   polygonLayers.forEach(l=>{
     map.removeLayer(l.poly);
-    if(l.label) map.removeLayer(l.label);
+    if(l.centroidMarker) map.removeLayer(l.centroidMarker);
   });
   polygonLayers=[];
   territories.forEach(t=>drawPoly(t,false));
@@ -624,6 +820,20 @@ let totalDistKm=parseFloat(localStorage.getItem('tv-total-dist')||'0');
 let polygonLayers=[];
 let mergeTargetIdx=null;
 let insideTerritory=null;
+let capitalId=localStorage.getItem('tv-capital-id')||null;
+let pois=JSON.parse(localStorage.getItem('tv-pois')||'[]');
+let namedTrails=JSON.parse(localStorage.getItem('tv-named-trails')||'[]');
+let poiMarkers=[],namedTrailLines=[],terraMarkers=[],terraUpdateTimer=null;
+let pendingPinPos=null,selectedPinEmoji='⭐';
+let gold=parseFloat(localStorage.getItem('tv-gold')||'0');
+let lastCollect=parseFloat(localStorage.getItem('tv-last-collect')||String(Date.now()));
+let ledger=JSON.parse(localStorage.getItem('tv-ledger')||'[]');
+let instability=parseFloat(localStorage.getItem('tv-instability')||'0');
+let knownRealms=JSON.parse(localStorage.getItem('tv-known-realms')||'[]');
+let gameCode=localStorage.getItem('tv-game-code')||null;
+let db=null,fbAuth=null,myUid=localStorage.getItem('tv-player-uid')||null;
+let otherPolyLayers=[],otherTerritories=[],syncTimer=null,mpUnsubTerritories=null,mpUnsubPlayers=null;
+const POI_CATS=[{icon:'☕',label:'Food & Drink'},{icon:'🌳',label:'Nature'},{icon:'👻',label:'Spooky'},{icon:'🗿',label:'Landmark'},{icon:'⭐',label:'Notable'},{icon:'🎣',label:'Activity'},{icon:'🎵',label:'Culture'},{icon:'📸',label:'View'}];
 
 // Crash recovery
 const _saved=JSON.parse(localStorage.getItem('tv-active-trail')||'null');
@@ -640,6 +850,14 @@ if(_saved&&_saved.length>=2) trail=_saved;
 })();
 
 const T_EMOJIS=['🏰','🗼','⚔','🛡','👑','🏯','⚜','🎌'];
+const TAGS=[
+  {id:'highlands',icon:'⛰',label:'Highlands'},
+  {id:'harbor',   icon:'⚓',label:'Harbor'},
+  {id:'forest',   icon:'🌲',label:'Forest'},
+  {id:'citadel',  icon:'🏰',label:'Citadel'},
+  {id:'farmland', icon:'🌾',label:'Farmland'},
+  {id:'merchant', icon:'🏪',label:'Merchant Hub'},
+];
 const CREATURES=[{emoji:'🐉'},{emoji:'🦑'},{emoji:'🐋'},{emoji:'🦈'},{emoji:'🗺'},{emoji:'⚓'},{emoji:'☠'},{emoji:'🦅'}];
 let creatureMarkers=[];
 
@@ -674,7 +892,9 @@ function addReveal(lat,lng){
   if(fogCircles.some(c=>dist([c.lat,c.lng],[lat,lng])<40)) return;
   const idx=fogCircles.length;fogCircles.push({lat,lng,r:130});sampleWater(lat,lng,idx);
   if(!addReveal._t) addReveal._t=setTimeout(()=>{localStorage.setItem('tv-fog-circles',JSON.stringify(fogCircles));addReveal._t=null;},3000);
-  clearTimeout(castleTimer);castleTimer=setTimeout(()=>fetchCastles(lat,lng),1200);drawFog();
+  clearTimeout(castleTimer);castleTimer=setTimeout(()=>fetchCastles(lat,lng),1200);
+  clearTimeout(terraUpdateTimer);terraUpdateTimer=setTimeout(updateTerraIncognita,2500);
+  drawFog();
 }
 map.on('move zoom',drawFog);window.addEventListener('resize',resizeFog);resizeFog();
 
@@ -699,6 +919,7 @@ function lat2t(lat,z){return Math.floor((1-Math.log(Math.tan(lat*Math.PI/180)+1/
 
 // ═══════════════════ CREATURES ═══════════════════
 function spawnAround(lat,lng){
+  return; // disabled — placeholder for era-appropriate art
   if(creatureMarkers.length>50) return;
   [[0.008,0.012],[-0.007,0.015],[0.011,-0.009],[-0.012,-0.008],[0.005,0.018],[-0.015,0.006],[0.018,0.003],[-0.004,-0.016]]
   .forEach(([dl,dn])=>{
@@ -720,7 +941,8 @@ function updateCreatureVis(){
     if(hit){m.done=true;m.el.style.opacity='0';setTimeout(()=>m.el.parentNode?.removeChild(m.el),2600);}
   });
 }
-map.on('move zoom',()=>{creatureMarkers.forEach(posC);updateCreatureVis();});
+map.on('move zoom',()=>{creatureMarkers.forEach(posC);updateCreatureVis();terraMarkers.forEach(posTM);});
+map.on('zoomend',updateCentroidMarkers);
 
 // ═══════════════════ CASTLES ═══════════════════
 let castleMarkers={},castleTimer=null,lastCastlePos=null;
@@ -729,6 +951,8 @@ const CASTLE_STYLES={
   city:    {glyph:'♛', ft:'#4a1a0a',fb:'#8b2010',fs:'#c9920a',fg:'#f0d060',w:38,ls:'10px',lc:'#e8b84b'},
   town:    {glyph:'⚑', ft:'#0a1a3a',fb:'#1a3a6a',fs:'#8090c0',fg:'#c0d8f0',w:32,ls:'9px', lc:'#d4c49a'},
   village: {glyph:'✦', ft:'#1a2a0a',fb:'#2a4a10',fs:'#608040',fg:'#a0c870',w:26,ls:'8px', lc:'#a8b890'},
+  park:    {glyph:'🌿',ft:'#081a08',fb:'#1a4a10',fs:'#4a8a30',fg:'#90d060',w:28,ls:'8px', lc:'#80c050'},
+  church:  {glyph:'⛪',ft:'#1a1a28',fb:'#28284a',fs:'#7070a0',fg:'#d0d0f0',w:28,ls:'8px', lc:'#b0b0d8'},
 };
 function castleSVG(s){
   const cp=s.glyph.codePointAt(0);
@@ -748,17 +972,21 @@ function makeCastleIcon(label,sk){
 function fetchCastles(lat,lng){
   if(lastCastlePos&&dist(lastCastlePos,[lat,lng])<800) return;lastCastlePos=[lat,lng];
   const r=6000;
-  const q=`[out:json][timeout:10];(node["amenity"="town_hall"](around:${r},${lat},${lng});way["amenity"="town_hall"](around:${r},${lat},${lng});node["place"~"^(city|town|village|borough|hamlet)$"](around:${r},${lat},${lng}););out center;`;
+  const q=`[out:json][timeout:15];(node["amenity"="town_hall"](around:${r},${lat},${lng});way["amenity"="town_hall"](around:${r},${lat},${lng});node["place"~"^(city|town|village|borough|hamlet)$"](around:${r},${lat},${lng});way["leisure"="park"](around:${r},${lat},${lng});node["leisure"="park"](around:${r},${lat},${lng});way["landuse"="forest"](around:${r},${lat},${lng});way["natural"="wood"](around:${r},${lat},${lng});node["amenity"="place_of_worship"](around:${r},${lat},${lng});way["amenity"="place_of_worship"](around:${r},${lat},${lng}););out center;`;
   fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)})
   .then(r=>r.json()).then(data=>{
     (data.elements||[]).forEach(el=>{
       const id=el.id+'_'+el.type;if(castleMarkers[id]) return;
       const name=el.tags?.name||el.tags?.['name:en'];if(!name) return;
       const isTH=el.tags.amenity==='town_hall';
+      const isPark=el.tags.leisure==='park'||el.tags.landuse==='forest'||el.tags.natural==='wood';
+      const isChurch=el.tags.amenity==='place_of_worship';
       let sk='village';
       if(isTH) sk='townhall';
       else if(el.tags.place==='city') sk='city';
       else if(el.tags.place==='town'||el.tags.place==='borough') sk='town';
+      else if(isPark) sk='park';
+      else if(isChurch) sk='church';
       const label=name.replace(/\s+town\s+hall$/i,'').trim();
       const la=el.lat??el.center?.lat,lo=el.lon??el.center?.lon;
       if(!la||!lo) return;
@@ -793,6 +1021,7 @@ function onPos(pos){
   if(!userMarker){
     userMarker=L.marker([lat,lng],{icon,zIndexOffset:2000}).addTo(map);
     map.setView([lat,lng],16);setStatus('Position fixed. The expedition begins.','alert');
+    document.getElementById('pin-row').style.display='';
     if(trail.length>=2){
       trailLine=L.polyline(trail,{color:'#c9920a',weight:3,opacity:0.9,dashArray:'8 5'}).addTo(map);
       placeStartDot(trail[0]);recording=true;
@@ -820,16 +1049,42 @@ function onPos(pos){
 
 // ═══════════════════ TERRITORY ENTRY LABEL ═══════════════════
 function checkTerritoryEntry(lat,lng){
-  if(!recording) return;
   let found=null;
   for(const t of territories){if(pointInPoly([lng,lat],t.points)){found=t;break;}}
   if(found?.id!==insideTerritory?.id){
     insideTerritory=found;
     if(found){
-      document.getElementById('territory-label-top').textContent=`${playerName} · ${realmName}`;
-      document.getElementById('territory-label-name').textContent=`${found.emoji} ${found.name}`;
+      found.lastVisited=Date.now();
+      updatePolyOpacity(found);
+      if(instability>0) changeInstability(-2,'');
+      clearTimeout(checkTerritoryEntry._st);
+      checkTerritoryEntry._st=setTimeout(()=>saveTerritories(),8000);
     }
-    document.getElementById('territory-label').classList.toggle('visible',!!found);
+    if(recording){
+      if(found){
+        document.getElementById('territory-label-top').textContent=`${playerName} · ${realmName}`;
+        document.getElementById('territory-label-name').textContent=`${found.emoji} ${found.name}`;
+      }
+      document.getElementById('territory-label').classList.toggle('visible',!!found&&recording);
+    }
+  }
+  if(!found&&recording){
+    let enemy=null;
+    for(const t of otherTerritories){if(pointInPoly([lng,lat],t.points)){enemy=t;break;}}
+    if(enemy?.id!==checkTerritoryEntry._lastEnemy){
+      checkTerritoryEntry._lastEnemy=enemy?.id||null;
+      if(enemy){
+        document.getElementById('territory-label-top').textContent=`⚔ ${enemy.realmName||enemy.ownerName||'Unknown Realm'}`;
+        document.getElementById('territory-label-name').textContent=`${enemy.emoji||'⚑'} ${enemy.name}`;
+        document.getElementById('territory-label-top').style.color='rgba(200,90,80,0.8)';
+      } else {
+        document.getElementById('territory-label-top').style.color='';
+      }
+      document.getElementById('territory-label').classList.toggle('visible',!!enemy&&recording);
+    }
+  } else {
+    checkTerritoryEntry._lastEnemy=null;
+    document.getElementById('territory-label-top').style.color='';
   }
 }
 function pointInPoly(pt,lpts){
@@ -861,6 +1116,7 @@ function startRecording(){
   placeStartDot(currentPos);
   document.getElementById('seal-btn').classList.add('recording');document.getElementById('seal-inner').textContent='◼';
   document.getElementById('btn-stop').style.display='';document.getElementById('btn-claim').style.display='none';
+  document.getElementById('btn-find-me').style.display='';document.getElementById('btn-name-trail').style.display='none';
   showHUD();acquireWL();startTimer();
   localStorage.setItem('tv-active-trail',JSON.stringify(trail));
   setStatus('The expedition has begun. Mark your trail.','alert');
@@ -870,8 +1126,21 @@ function stopRecording(){
   recording=false;releaseWL();removeStartDot();hideHUD();stopTimer();clearTerritoryLabel();
   document.getElementById('seal-btn').classList.remove('recording');document.getElementById('seal-inner').textContent='⚑';
   document.getElementById('btn-stop').style.display='none';document.getElementById('territory-label').style.display='none';
-  if(trail.length>=3){document.getElementById('btn-claim').style.display='';setStatus('Expedition halted. Claim your territory or continue.','');}
-  else{document.getElementById('btn-claim').style.display='none';setStatus('Too little ground covered. Explore more.','danger');localStorage.removeItem('tv-active-trail');}
+  if(trail.length>=3){
+    document.getElementById('btn-claim').style.display='';
+    document.getElementById('btn-find-me').style.display='none';
+    document.getElementById('btn-name-trail').style.display='';
+    setStatus('Expedition halted. Claim land or name this trail.','');
+  } else{
+    document.getElementById('btn-claim').style.display='none';
+    setStatus('Too little ground covered. Explore more.','danger');
+    localStorage.removeItem('tv-active-trail');
+  }
+}
+function restoreFindMe(){
+  document.getElementById('btn-find-me').style.display='';
+  document.getElementById('btn-name-trail').style.display='none';
+  document.getElementById('btn-claim').style.display='none';
 }
 
 // ═══════════════════ CLAIM ═══════════════════
@@ -933,7 +1202,7 @@ function saveClaim(){
   const t={id:Date.now(),name,emoji,points:pendingPoints,color,area:polyArea(pendingPoints),
     date:new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})};
   territories.push(t);saveTerritories();drawPoly(t,true);
-  logExpedition(t);finishClaim();setStatus(`"${name}" — claimed for the realm! ✦`,'alert');
+  fetchElevation(t);logExpedition(t);checkAchievements({event:'claim',area:t.area});pushLedger('⚑',`Claimed ${t.emoji} ${name}`,null);changeInstability(-5,`Claimed ${name} — realm consolidated`);finishClaim();setStatus(`"${name}" — claimed for the realm! ✦`,'alert');
 }
 
 function saveMerge(){
@@ -952,9 +1221,9 @@ function saveMerge(){
   }else{newPoints=[...target.points,...pendingPoints];newArea=polyArea(newPoints);}
   territories[mergeTargetIdx]={...target,points:newPoints,area:newArea};saveTerritories();
   const li=polygonLayers.findIndex(l=>l.id===target.id);
-  if(li>=0){map.removeLayer(polygonLayers[li].poly);if(polygonLayers[li].label)map.removeLayer(polygonLayers[li].label);polygonLayers.splice(li,1);}
+  if(li>=0){map.removeLayer(polygonLayers[li].poly);if(polygonLayers[li].centroidMarker)map.removeLayer(polygonLayers[li].centroidMarker);polygonLayers.splice(li,1);}
   drawPoly(territories[mergeTargetIdx],true);
-  logExpedition(territories[mergeTargetIdx]);finishClaim();setStatus(`"${target.name}" expanded! ✦`,'alert');
+  fetchElevation(territories[mergeTargetIdx]);logExpedition(territories[mergeTargetIdx]);checkAchievements({event:'claim',area:territories[mergeTargetIdx].area});pushLedger('⚑',`Expanded ${target.emoji} ${target.name}`,null);finishClaim();setStatus(`"${target.name}" expanded! ✦`,'alert');
 }
 
 function finishClaim(){
@@ -963,25 +1232,155 @@ function finishClaim(){
   releaseWL();hideHUD();stopTimer();
   localStorage.removeItem('tv-active-trail');localStorage.setItem('tv-total-dist',totalDistKm.toFixed(3));
   document.getElementById('seal-btn').classList.remove('recording');document.getElementById('seal-inner').textContent='⚑';
-  document.getElementById('btn-claim').style.display='none';document.getElementById('btn-stop').style.display='none';
-  document.getElementById('territory-label').style.display='none';updateHeader();renderDrawer();
+  document.getElementById('btn-stop').style.display='none';
+  document.getElementById('territory-label').style.display='none';
+  restoreFindMe();updateHeader();renderDrawer();
 }
 
 // ═══════════════════ DRAW POLYGON ═══════════════════
+function visitOpacity(t){
+  if(!t.lastVisited) return 0.22;
+  const days=(Date.now()-t.lastVisited)/86400000;
+  if(days<8) return 0.22;
+  if(days<30) return 0.13;
+  return 0.06;
+}
+function updatePolyOpacity(t){
+  const l=polygonLayers.find(x=>x.id===t.id);
+  if(l) l.poly.setStyle({fillOpacity:visitOpacity(t)});
+}
+function buildCentroidIcon(t){
+  const z=map.getZoom();
+  const size=28,shieldH=Math.round(size*1.15);
+  const crestSVG=buildCrestSVG(playerCrest,size);
+  const isCapital=t.id===capitalId;
+  const crownHtml=isCapital?`<div style="font-size:13px;line-height:1;margin-bottom:1px;text-shadow:0 1px 6px rgba(0,0,0,0.9)">♛</div>`:'';
+  let labelHtml='';
+  if(z>=15){
+    labelHtml=`<div style="font-family:var(--font-body);font-size:10px;font-weight:600;color:rgba(242,232,204,0.85);text-shadow:0 1px 4px rgba(0,0,0,0.95),0 0 10px rgba(0,0,0,0.8);white-space:nowrap;letter-spacing:0.05em;margin-top:2px;text-align:center;line-height:1">${t.name}</div>`;
+  } else if(z>=12){
+    labelHtml=`<div style="font-family:var(--font-body);font-size:9px;font-weight:600;color:rgba(242,232,204,0.55);text-shadow:0 1px 4px rgba(0,0,0,0.95);white-space:nowrap;letter-spacing:0.06em;margin-top:2px;text-align:center;line-height:1;text-transform:uppercase">${realmName}</div>`;
+  }
+  const totalH=shieldH+(isCapital?15:0)+(labelHtml?15:0);
+  return L.divIcon({className:'',html:`<div style="display:flex;flex-direction:column;align-items:center;pointer-events:none">${crownHtml}<div style="filter:drop-shadow(0 2px 8px rgba(0,0,0,0.85))">${crestSVG}</div>${labelHtml}</div>`,iconSize:[80,totalH],iconAnchor:[40,totalH/2]});
+}
+function updateCentroidMarkers(){
+  polygonLayers.forEach(l=>{if(l.centroidMarker)l.centroidMarker.setIcon(buildCentroidIcon(l.territory));});
+}
 function drawPoly(t,animate){
-  const poly=L.polygon(t.points,{color:t.color.stroke,weight:2,opacity:0.9,fillColor:t.color.fill,fillOpacity:animate?0:0.22,dashArray:'6 3'}).addTo(map);
+  const poly=L.polygon(t.points,{color:t.color.stroke,weight:2,opacity:0.9,fillColor:t.color.fill,fillOpacity:animate?0:visitOpacity(t),dashArray:'6 3'}).addTo(map);
   poly.bindTooltip(t.emoji+' '+t.name,{permanent:false,sticky:true,className:'territory-tooltip'});
-  // Province label
-  const bounds=poly.getBounds(),center=bounds.getCenter();
-  const label=L.tooltip({permanent:true,direction:'center',className:'province-label',interactive:false}).setContent(t.name).setLatLng(center).addTo(map);
+  // Crest + province/realm label marker
+  const center=poly.getBounds().getCenter();
+  const centroidMarker=L.marker(center,{icon:buildCentroidIcon(t),interactive:false,zIndexOffset:100}).addTo(map);
   if(animate){let op=0;const tk=setInterval(()=>{op=Math.min(op+0.015,0.22);poly.setStyle({fillOpacity:op});if(op>=0.22)clearInterval(tk);},16);}
-  polygonLayers.push({id:t.id,poly,label});
+  polygonLayers.push({id:t.id,poly,centroidMarker,territory:t});
+}
+
+// ═══════════════════ PROGRESSION ═══════════════════
+const RANKS=[
+  {title:'Wanderer',   minP:0,  minA:0,       icon:'🧭'},
+  {title:'Landholder', minP:1,  minA:0,       icon:'⚑'},
+  {title:'Baron',      minP:3,  minA:0,       icon:'🏰'},
+  {title:'Count',      minP:5,  minA:100000,  icon:'⚔'},
+  {title:'Duke',       minP:10, minA:500000,  icon:'👑'},
+  {title:'Sovereign',  minP:20, minA:2000000, icon:'♛'},
+];
+const ACHIEVEMENTS=[
+  {id:'first_claim',  icon:'🏆',name:'First Conquest',    desc:'Claim your first territory'},
+  {id:'five_prov',    icon:'⚑', name:'Growing Realm',     desc:'Hold 5 provinces at once'},
+  {id:'ten_prov',     icon:'👑',name:'Mighty Kingdom',    desc:'Hold 10 provinces at once'},
+  {id:'night_owl',    icon:'🌙',name:'Night Owl',         desc:'Claim a territory after dark (10pm–5am)'},
+  {id:'dawn_patrol',  icon:'🌅',name:'Dawn Patrol',       desc:'Claim a territory at dawn (5am–7am)'},
+  {id:'vast_domain',  icon:'🗺',name:'Vast Domain',       desc:'A single province over 1 km²'},
+  {id:'marathon',     icon:'🏃',name:'The Long March',    desc:'Walk 10 miles in a single expedition'},
+  {id:'wanderer_50',  icon:'🧭',name:'Grand Wanderer',    desc:'Walk 50 miles across all expeditions'},
+  {id:'cartographer', icon:'📜',name:'Royal Cartographer',desc:'Export your realm to GeoJSON'},
+  {id:'sovereign',    icon:'♛', name:'Sovereign',         desc:'Reach the rank of Sovereign'},
+  {id:'first_tax',    icon:'💰',name:'Tax Collector',     desc:'Collect your first gold from your realm'},
+];
+let unlockedAchievements=new Set(JSON.parse(localStorage.getItem('tv-achievements')||'[]'));
+
+function computeRank(){
+  const totalArea=territories.reduce((s,t)=>s+(t.area||0),0),np=territories.length;
+  let rank=RANKS[0];
+  for(const r of RANKS){if(np>=r.minP&&totalArea>=r.minA)rank=r;}
+  return rank;
+}
+function computePowerScore(){
+  const totalArea=territories.reduce((s,t)=>s+(t.area||0),0);
+  return Math.floor(totalArea/500)+territories.length*150+Math.floor(totalDistKm*100)+unlockedAchievements.size*200;
+}
+function fmtGold(g){return g>=1000?Math.round(g).toLocaleString():g>=10?Math.round(g).toString():g.toFixed(1);}
+function provinceIncome(t){
+  if(!t.area) return 0;
+  let base=t.area/500000;
+  const tm={'Coastal Plains':1.5,'Rolling Hills':1.2,'Highland':1.0,'Mountain':0.8};
+  base*=(tm[t.terrain]||1.0);
+  const tagM={merchant:2.0,farmland:1.5,harbor:1.4,forest:1.2,highlands:1.1,citadel:1.0};
+  if(t.tag&&tagM[t.tag]) base*=tagM[t.tag];
+  if(t.id===capitalId) base*=1.5;
+  const days=t.lastVisited?(Date.now()-t.lastVisited)/86400000:999;
+  if(days>=30) base*=0.25;
+  else if(days>=8) base*=0.6;
+  if(t.investedUntil>Date.now()) base*=1.5;
+  return Math.max(0,base);
+}
+function totalDailyIncome(){return territories.reduce((s,t)=>s+provinceIncome(t),0);}
+function collectGold(){
+  const now=Date.now();
+  const elapsedDays=(now-lastCollect)/86400000;
+  if(elapsedDays<0.001) return;
+  const earned=totalDailyIncome()*elapsedDays;
+  if(earned>0){
+    gold+=earned;
+    localStorage.setItem('tv-gold',gold.toFixed(4));
+    if(gold>=1) checkAchievements({event:'tax'});
+    if(earned>=1) pushLedger('⚜','Treasury collected',earned);
+  }
+  lastCollect=now;
+  localStorage.setItem('tv-last-collect',String(lastCollect));
+}
+function unlockAchievement(id){
+  if(unlockedAchievements.has(id))return;
+  unlockedAchievements.add(id);
+  localStorage.setItem('tv-achievements',JSON.stringify([...unlockedAchievements]));
+  const a=ACHIEVEMENTS.find(x=>x.id===id);
+  if(a)setStatus(`${a.icon} Achievement: ${a.name}!`,'alert');
+}
+function checkAchievements(ctx){
+  if(ctx.event==='claim'){
+    unlockAchievement('first_claim');
+    if(territories.length>=5)unlockAchievement('five_prov');
+    if(territories.length>=10)unlockAchievement('ten_prov');
+    const h=new Date().getHours();
+    if(h>=22||h<5)unlockAchievement('night_owl');
+    if(h>=5&&h<7)unlockAchievement('dawn_patrol');
+    if((ctx.area||0)>=1000000)unlockAchievement('vast_domain');
+    if(computeRank().title==='Sovereign')unlockAchievement('sovereign');
+  }
+  if(ctx.event==='expedition'){
+    if(ctx.distKm/1.609344>=10)unlockAchievement('marathon');
+    if(totalDistKm/1.609344>=50)unlockAchievement('wanderer_50');
+  }
+  if(ctx.event==='tax') unlockAchievement('first_tax');
+}
+function renderAchievements(){
+  document.getElementById('achievement-grid').innerHTML=ACHIEVEMENTS.map(a=>{
+    const ok=unlockedAchievements.has(a.id);
+    return `<div class="achievement-card ${ok?'unlocked':'locked'}">
+      <div class="ach-icon">${ok?a.icon:'🔒'}</div>
+      <div class="ach-name">${a.name}</div>
+      <div class="ach-desc">${ok?a.desc:'Conditions unknown'}</div>
+    </div>`;
+  }).join('');
 }
 
 // ═══════════════════ KINGDOM ═══════════════════
 function openKingdom(){renderKingdom();document.getElementById('kingdom-screen').classList.add('open');}
 function closeKingdom(){document.getElementById('kingdom-screen').classList.remove('open');}
 function renderKingdom(){
+  collectGold();
   document.getElementById('unit-mi').classList.toggle('active',!useMetric);
   document.getElementById('unit-km').classList.toggle('active',useMetric);
   document.getElementById('player-name-display').textContent=playerName;
@@ -990,38 +1389,151 @@ function renderKingdom(){
   document.getElementById('k-area').textContent=formatArea(territories.reduce((s,t)=>s+(t.area||0),0));
   document.getElementById('k-dist').textContent=fmtDistLong(totalDistKm);
   document.getElementById('k-dist-lbl').textContent=useMetric?'Km Walked':'Miles Walked';
+  const rank=computeRank();
+  document.getElementById('kingdom-rank-icon').textContent=rank.icon;
+  document.getElementById('kingdom-rank-title').textContent=rank.title;
+  document.getElementById('power-score-val').textContent=computePowerScore().toLocaleString();
+  const dailyIncome=totalDailyIncome();
+  document.getElementById('treasury-gold').textContent=`⚜ ${fmtGold(gold)}`;
+  document.getElementById('treasury-rate').textContent=`+${fmtGold(dailyIncome)} / day`;
   renderKingdomCrest();
   const list=document.getElementById('kingdom-list');
   if(!territories.length){list.innerHTML=`<div id="empty-realm"><span class="big">🗺</span>No territories claimed.<br>Venture forth and conquer the unknown.</div>`;}
-  else{list.innerHTML=territories.map((t,i)=>`
-    <div class="kingdom-territory" onclick="flyTo(${i})">
-      <div class="kt-crest-wrap">${buildCrestSVG(playerCrest,42)}</div>
-      <div class="kt-info"><div class="kt-name" style="color:${t.color.text}">${t.name}</div><div class="kt-details">${t.date} · ${formatArea(t.area||0)}</div></div>
-      <button class="kt-del" onclick="event.stopPropagation();delT(${i})">Cede</button>
-    </div>`).join('');}
+  else{list.innerHTML=territories.map((t,i)=>{
+    const tag=TAGS.find(x=>x.id===t.tag);
+    const isCap=capitalId===t.id;
+    return `<div class="kingdom-territory">
+      <div class="kt-top" onclick="flyTo(${i})">
+        <div class="kt-crest-wrap">${buildCrestSVG(playerCrest,42)}</div>
+        <div class="kt-info">
+          <div class="kt-name" style="color:${t.color.text}">
+            <span class="kt-name-text">${t.name}</span>
+            <button class="kt-rename" onclick="event.stopPropagation();renameTerritory(${i})">✎</button>
+            ${isCap?'<span style="font-size:13px;line-height:1">♛</span>':''}
+          </div>
+          <div class="kt-details">${t.date} · ${formatArea(t.area||0)}${tag?` · ${tag.icon} ${tag.label}`:''}${t.terrain?` · ${t.terrain}`:''} · +${fmtGold(provinceIncome(t))} ⚜/day</div>
+        </div>
+        <div class="kt-actions">
+          <button class="kt-set-capital${isCap?' is-capital':''}" onclick="event.stopPropagation();setCapital(${i})">${isCap?'♛ Capital':'Make Capital'}</button>
+          <button class="kt-del" onclick="event.stopPropagation();delT(${i})">Cede</button>
+        </div>
+      </div>
+      <div class="kt-bottom">
+        <div class="tag-row">${TAGS.map(tg=>`<button class="tag-btn${t.tag===tg.id?' active':''}" onclick="setTag(${i},'${tg.id}')">${tg.icon} ${tg.label}</button>`).join('')}</div>
+        ${(()=>{
+          const investCost=Math.max(10,Math.round(provinceIncome(t)*3));
+          const wallCost=Math.max(25,Math.round(provinceIncome(t)*30));
+          const investDaysLeft=t.investedUntil>Date.now()?Math.ceil((t.investedUntil-Date.now())/86400000):0;
+          const investBtn=investDaysLeft>0
+            ?`<button class="prov-act active-state" disabled>📈 +50% income (${investDaysLeft}d left)</button>`
+            :`<button class="prov-act" onclick="event.stopPropagation();investProvince(${i})">📈 Invest (${fmtGold(investCost)} ⚜)</button>`;
+          const wallBtn=t.walled
+            ?`<button class="prov-act active-state" disabled>🧱 Walled</button>`
+            :`<button class="prov-act" onclick="event.stopPropagation();buildWall(${i})">🧱 Build Wall (${fmtGold(wallCost)} ⚜)</button>`;
+          return `<div class="province-actions">${investBtn}${wallBtn}</div>`;
+        })()}
+        <textarea class="kt-notes" placeholder="Field notes…" rows="2" oninput="autoResizeNotes(this)" onblur="saveNotes(${i},this.value)">${escHtml(t.notes||'')}</textarea>
+      </div>
+    </div>`;
+  }).join('');}
+  updateInstabilityDisplay();
+  renderLeaderboard();
+  renderDiplomacy();
   renderLog();
+  renderRecords();
+  renderLedger();
+  renderAchievements();
+  renderDiscoveries();
+  renderTrails();
 }
 function flyTo(i){const t=territories[i];if(!t?.points?.length)return;closeKingdom();map.fitBounds(L.latLngBounds(t.points),{padding:[60,60],animate:true});}
-function editRealmName(){const n=prompt('Name your realm:',realmName);if(n?.trim()){realmName=n.trim();localStorage.setItem('tv-realm-name',realmName);document.getElementById('realm-name-display').textContent=realmName;}}
-function editPlayerName(){const n=prompt('Your explorer name:',playerName);if(n?.trim()){playerName=n.trim();localStorage.setItem('tv-player-name',playerName);document.getElementById('player-name-display').textContent=playerName;}}
+function renameTerritory(i){
+  const t=territories[i];const n=prompt('Rename province:',t.name);if(!n?.trim())return;
+  t.name=n.trim();saveTerritories();
+  const l=polygonLayers.find(l=>l.id===t.id);if(l)l.centroidMarker.setIcon(buildCentroidIcon(t));
+  renderKingdom();renderDrawer();
+}
+function setCapital(i){
+  const t=territories[i];
+  capitalId=capitalId===t.id?null:t.id;
+  if(capitalId)localStorage.setItem('tv-capital-id',capitalId);else localStorage.removeItem('tv-capital-id');
+  updateCentroidMarkers();renderKingdom();
+}
+function setTag(i,tagId){
+  territories[i].tag=territories[i].tag===tagId?null:tagId;
+  saveTerritories();renderKingdom();
+}
+function investProvince(i){
+  const t=territories[i];
+  if(t.investedUntil>Date.now()){setStatus('Province already invested.','');return;}
+  const cost=Math.max(10,Math.round(provinceIncome(t)*3));
+  if(gold<cost){setStatus(`Not enough gold — need ${fmtGold(cost)} ⚜`,'danger');return;}
+  gold-=cost;localStorage.setItem('tv-gold',gold.toFixed(4));
+  t.investedUntil=Date.now()+14*86400000;
+  pushLedger('📈',`Invested in ${t.name}`,-cost);
+  saveTerritories();renderKingdom();
+  setStatus(`📈 ${t.name} invested — income boosted for 14 days`,'alert');
+}
+function buildWall(i){
+  const t=territories[i];
+  if(t.walled){setStatus('Province already walled.','');return;}
+  const cost=Math.max(25,Math.round(provinceIncome(t)*30));
+  if(gold<cost){setStatus(`Not enough gold — need ${fmtGold(cost)} ⚜`,'danger');return;}
+  if(!confirm(`Build walls around "${t.name}" for ${fmtGold(cost)} ⚜?\n\nFortified provinces impose a gold penalty if ceded.`)) return;
+  gold-=cost;localStorage.setItem('tv-gold',gold.toFixed(4));
+  t.walled=true;
+  pushLedger('🧱',`Built walls around ${t.name}`,-cost);
+  saveTerritories();renderKingdom();
+  setStatus(`🧱 ${t.name} fortified`,'alert');
+}
+function saveNotes(i,val){territories[i].notes=val.trim();saveTerritories();}
+function autoResizeNotes(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function editRealmName(){const n=prompt('Name your realm:',realmName);if(n?.trim()){realmName=n.trim();localStorage.setItem('tv-realm-name',realmName);document.getElementById('realm-name-display').textContent=realmName;updateCentroidMarkers();syncMyRealm();}}
+function editPlayerName(){const n=prompt('Your explorer name:',playerName);if(n?.trim()){playerName=n.trim();localStorage.setItem('tv-player-name',playerName);document.getElementById('player-name-display').textContent=playerName;syncMyRealm();}}
 function toggleDrawer(){document.getElementById('territories-drawer').classList.toggle('open');}
 function renderDrawer(){
   document.getElementById('territories-toggle').textContent=`⚜ My Provinces (${territories.length}) ⚜`;
   const list=document.getElementById('drawer-list');
   if(!territories.length){list.innerHTML=`<div style="font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.3);padding:12px 0;text-align:center">No lands claimed yet…</div>`;return;}
-  list.innerHTML=territories.map((t,i)=>`
-    <div class="t-entry">
-      <div><div class="t-name" style="color:${t.color.text}">${t.emoji} ${t.name}</div><div class="t-meta">${t.date} · ${formatArea(t.area||0)}</div></div>
+  list.innerHTML=territories.map((t,i)=>{
+    const tag=TAGS.find(x=>x.id===t.tag);
+    return `<div class="t-entry">
+      <div><div class="t-name" style="color:${t.color.text}">${t.emoji} ${t.name}${capitalId===t.id?' ♛':''}</div><div class="t-meta">${t.date} · ${formatArea(t.area||0)}${tag?` · ${tag.icon}`:''}</div></div>
       <button class="t-del" onclick="delT(${i})">Cede</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 function delT(i){
-  const id=territories[i].id;territories.splice(i,1);saveTerritories();
+  const t=territories[i];
+  const id=t.id;
+  const isHub=t.tag==='merchant';
+  const hubPenalty=isHub?Math.round(provinceIncome(t)*30):0;
+  const wallPenalty=t.walled?Math.round(provinceIncome(t)*20):0;
+  const totalPenalty=hubPenalty+wallPenalty;
+  let msg=`Cede "${t.name}"?`;
+  if(isHub&&t.walled) msg+=`\n\nWARNING: This is a walled Merchant Hub — losing it will destabilize your realm and cost ${fmtGold(totalPenalty)} ⚜ (${fmtGold(hubPenalty)} hub + ${fmtGold(wallPenalty)} fortifications).`;
+  else if(isHub) msg+=`\n\nWARNING: This is a Merchant Hub — losing it will destabilize your realm and cost ${fmtGold(hubPenalty)} ⚜.`;
+  else if(t.walled) msg+=`\n\nWARNING: This province is walled — abandoning the fortifications will cost ${fmtGold(wallPenalty)} ⚜.`;
+  else msg+=' This cannot be undone.';
+  if(!confirm(msg)) return;
+  if(totalPenalty>0){
+    gold=Math.max(0,gold-totalPenalty);
+    localStorage.setItem('tv-gold',gold.toFixed(4));
+    const reason=isHub&&t.walled?'Walled Merchant Hub lost':isHub?'Merchant Hub lost':'Fortified province ceded';
+    setStatus(`⚠ ${reason} — realm destabilized (-${fmtGold(totalPenalty)} ⚜)`,'danger');
+  }
+  pushLedger('💀',`Ceded ${t.emoji} ${t.name}`,totalPenalty>0?-totalPenalty:null);
+  const instDelta=isHub&&t.walled?30:isHub?20:t.walled?12:8;
+  changeInstability(instDelta,`Ceded ${t.name} — realm destabilized`);
+  if(db&&myUid&&gameCode) db.collection(`games/${gameCode}/territories`).doc(`${myUid}_${id}`).delete().catch(()=>{});
+  if(capitalId===id){capitalId=null;localStorage.removeItem('tv-capital-id');}
+  territories.splice(i,1);saveTerritories();
   const li=polygonLayers.findIndex(l=>l.id===id);
-  if(li>=0){map.removeLayer(polygonLayers[li].poly);if(polygonLayers[li].label)map.removeLayer(polygonLayers[li].label);polygonLayers.splice(li,1);}
+  if(li>=0){map.removeLayer(polygonLayers[li].poly);if(polygonLayers[li].centroidMarker)map.removeLayer(polygonLayers[li].centroidMarker);polygonLayers.splice(li,1);}
   updateHeader();renderDrawer();renderKingdom();
 }
-function saveTerritories(){localStorage.setItem('tv-territories',JSON.stringify(territories));}
+function saveTerritories(){localStorage.setItem('tv-territories',JSON.stringify(territories));if(db&&gameCode) queueSync();}
 
 // ═══════════════════ UTILS ═══════════════════
 function dist(a,b){const R=6371000,f1=a[0]*Math.PI/180,f2=b[0]*Math.PI/180,df=(b[0]-a[0])*Math.PI/180,dl=(b[1]-a[1])*Math.PI/180;return R*2*Math.atan2(Math.sqrt(Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2),Math.sqrt(1-(Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2)));}
@@ -1029,13 +1541,13 @@ function polyArea(pts){if(!pts||pts.length<3)return 0;const R=6371000;let a=0;fo
 function formatArea(m2){return fmtArea(m2);}
 function setStatus(msg,type=''){document.getElementById('status-text').textContent=msg;document.getElementById('status-scroll').className=type;}
 function centerOnUser(){if(currentPos)map.setView(currentPos,17,{animate:true});else setStatus('No position fix yet. Patience…','danger');}
-function updateHeader(){document.getElementById('stat-zones').textContent=territories.length;const t=territories.reduce((s,t)=>s+(t.area||0),0);document.getElementById('stat-area').textContent=t>0?formatArea(t):'—';}
+function updateHeader(){document.getElementById('stat-zones').textContent=territories.length;const t=territories.reduce((s,t)=>s+(t.area||0),0);document.getElementById('stat-area').textContent=t>0?formatArea(t):'—';document.getElementById('stat-rank').textContent=computeRank().icon;}
 
 // ═══════════════════ GEOJSON EXPORT ═══════════════════
 function exportGeoJSON(){
   const cfm=document.getElementById('export-confirm');
   if(!territories.length){setStatus('No territories to export yet.','danger');return;}
-  const features=territories.map(t=>{const coords=t.points.map(p=>[p[1],p[0]]);coords.push([t.points[0][1],t.points[0][0]]);return{type:'Feature',properties:{name:t.name,emoji:t.emoji,date:t.date,area_m2:Math.round(t.area||0),area_ha:parseFloat(((t.area||0)/10000).toFixed(4)),realm:realmName,player:playerName},geometry:{type:'Polygon',coordinates:[coords]}};});
+  const features=territories.map(t=>{const coords=t.points.map(p=>[p[1],p[0]]);coords.push([t.points[0][1],t.points[0][0]]);return{type:'Feature',properties:{name:t.name,emoji:t.emoji,date:t.date,area_m2:Math.round(t.area||0),area_ha:parseFloat(((t.area||0)/10000).toFixed(4)),realm:realmName,player:playerName,tag:t.tag||null,notes:t.notes||'',is_capital:t.id===capitalId},geometry:{type:'Polygon',coordinates:[coords]}};});
   const fogFeatures=fogCircles.map((c,i)=>({type:'Feature',properties:{index:i,is_water:waterPts.has(i),radius_m:Math.round((c.r||130)*0.85)},geometry:{type:'Point',coordinates:[c.lng,c.lat]}}));
   const geojson={type:'FeatureCollection',name:`${realmName} — Terranova Export`,crs:{type:'name',properties:{name:'urn:ogc:def:crs:OGC:1.3:CRS84'}},metadata:{realm:realmName,player:playerName,exported:new Date().toISOString(),total_provinces:territories.length,total_area_m2:Math.round(territories.reduce((s,t)=>s+(t.area||0),0)),distance_km:parseFloat(totalDistKm.toFixed(2)),distance_mi:parseFloat((totalDistKm/1.609344).toFixed(2)),app:'Terranova'},features,exploration_points:fogFeatures};
   const blob=new Blob([JSON.stringify(geojson,null,2)],{type:'application/geo+json'});
@@ -1043,6 +1555,7 @@ function exportGeoJSON(){
   const a=document.createElement('a');a.href=url;a.download=`terranova_${realmName.toLowerCase().replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.geojson`;
   document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),2000);
   cfm.classList.add('show');setTimeout(()=>cfm.classList.remove('show'),3500);
+  unlockAchievement('cartographer');
 }
 
 // ═══════════════════ UNITS ═══════════════════
@@ -1060,16 +1573,324 @@ function tickTimer(){if(!sessionStart)return;const e=Math.floor((Date.now()-sess
 function sessionElapsedMs(){return sessionStart?Date.now()-sessionStart:0;}
 function fmtDuration(ms){const t=Math.floor(ms/1000),h=Math.floor(t/3600),m=Math.floor((t%3600)/60);return h>0?`${h}h ${m}m`:`${m}m ${t%60}s`;}
 
+// ═══════════════════ POI / DISCOVERIES ═══════════════════
+function dropPin(){
+  if(!currentPos){setStatus('No position fix yet.','danger');return;}
+  pendingPinPos=currentPos.slice();selectedPinEmoji=POI_CATS[0].icon;
+  document.getElementById('poi-cat-row').innerHTML=POI_CATS.map(c=>`<button class="poi-cat-btn${selectedPinEmoji===c.icon?' selected':''}" onclick="selectPinCat('${c.icon}')">${c.icon}</button>`).join('');
+  document.getElementById('poi-input').value='';
+  document.getElementById('poi-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('poi-input').focus(),150);
+}
+function selectPinCat(icon){
+  selectedPinEmoji=icon;
+  document.querySelectorAll('.poi-cat-btn').forEach(b=>b.classList.toggle('selected',b.textContent===icon));
+}
+function cancelPin(){pendingPinPos=null;document.getElementById('poi-modal').classList.remove('open');}
+function savePin(){
+  const name=document.getElementById('poi-input').value.trim();
+  if(!name){document.getElementById('poi-input').focus();return;}
+  document.getElementById('poi-modal').classList.remove('open');
+  const p={id:Date.now(),name,emoji:selectedPinEmoji,lat:pendingPinPos[0],lng:pendingPinPos[1],
+    date:new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})};
+  pois.push(p);localStorage.setItem('tv-pois',JSON.stringify(pois));
+  placePOI(p);pendingPinPos=null;
+  setStatus(`${selectedPinEmoji} "${name}" marked!`,'alert');
+}
+function placePOI(p){
+  const icon=L.divIcon({className:'',html:`<div style="display:flex;flex-direction:column;align-items:center"><div class="poi-pin">${p.emoji}</div><div class="poi-needle"></div></div>`,iconSize:[28,38],iconAnchor:[14,38]});
+  const mk=L.marker([p.lat,p.lng],{icon,zIndexOffset:900}).addTo(map);
+  mk.bindTooltip(`${p.emoji} ${p.name}`,{className:'territory-tooltip',direction:'top',offset:[0,-6]});
+  mk.on('click',()=>{if(confirm(`Remove "${p.name}"?`)){map.removeLayer(mk);poiMarkers=poiMarkers.filter(m=>m.id!==p.id);pois=pois.filter(x=>x.id!==p.id);localStorage.setItem('tv-pois',JSON.stringify(pois));}});
+  poiMarkers.push({id:p.id,mk});
+}
+function renderDiscoveries(){
+  const el=document.getElementById('discoveries-list');
+  if(!pois.length){el.innerHTML=`<div style="font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.25);text-align:center;padding:16px 0">No discoveries marked yet.</div>`;return;}
+  el.innerHTML=pois.map(p=>`<div class="disc-entry"><div class="disc-icon">${p.emoji}</div><div class="disc-info"><div class="disc-name">${p.name}</div><div class="disc-date">${p.date}</div></div><button class="kt-del" onclick="closeKingdom();map.setView([${p.lat},${p.lng}],17,{animate:true})">Visit</button></div>`).join('');
+}
+
+// ═══════════════════ NAMED TRAILS ═══════════════════
+function nameTrail(){
+  const name=prompt('Name this trail:');
+  if(!name?.trim()){restoreFindMe();return;}
+  const nt={id:Date.now(),name:name.trim(),points:[...trail],date:new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}),distKm:trailDist()/1000};
+  namedTrails.push(nt);localStorage.setItem('tv-named-trails',JSON.stringify(namedTrails));
+  drawNamedTrail(nt);
+  if(trailLine){map.removeLayer(trailLine);trailLine=null;}
+  trail=[];localStorage.removeItem('tv-active-trail');
+  restoreFindMe();
+  setStatus(`"${nt.name}" — trail recorded! ✦`,'alert');
+}
+function drawNamedTrail(nt){
+  const line=L.polyline(nt.points,{color:'#c9920a',weight:2,opacity:0.45,dashArray:'10 8'}).addTo(map);
+  line.bindTooltip(`🗺 ${nt.name}`,{className:'territory-tooltip',sticky:true});
+  namedTrailLines.push({id:nt.id,line});
+}
+function renderTrails(){
+  const el=document.getElementById('trails-list');
+  if(!namedTrails.length){el.innerHTML=`<div style="font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.25);text-align:center;padding:16px 0">No trails named yet.</div>`;return;}
+  el.innerHTML=namedTrails.map((nt,i)=>`<div class="t-entry"><div><div class="t-name" style="color:var(--gold-lt)">🗺 ${nt.name}</div><div class="t-meta">${nt.date} · ${fmtDistLong(nt.distKm)}</div></div><button class="t-del" onclick="delTrail(${i})">Remove</button></div>`).join('');
+}
+function delTrail(i){
+  const id=namedTrails[i].id;namedTrails.splice(i,1);localStorage.setItem('tv-named-trails',JSON.stringify(namedTrails));
+  const li=namedTrailLines.findIndex(l=>l.id===id);
+  if(li>=0){map.removeLayer(namedTrailLines[li].line);namedTrailLines.splice(li,1);}
+  renderKingdom();
+}
+
+// ═══════════════════ ELEVATION ═══════════════════
+function fetchElevation(t){
+  const lats=t.points.map(p=>p[0]),lngs=t.points.map(p=>p[1]);
+  const clat=(lats.reduce((a,b)=>a+b,0)/lats.length).toFixed(6);
+  const clng=(lngs.reduce((a,b)=>a+b,0)/lngs.length).toFixed(6);
+  fetch(`https://api.open-meteo.com/v1/elevation?latitude=${clat}&longitude=${clng}`)
+  .then(r=>r.json()).then(d=>{
+    const e=d.elevation?.[0];if(e==null)return;
+    t.elevation=Math.round(e);
+    t.terrain=e<100?'Coastal Plains':e<300?'Rolling Hills':e<700?'Highland':'Mountain';
+    saveTerritories();
+  }).catch(()=>{});
+}
+
+// ═══════════════════ TERRA INCOGNITA ═══════════════════
+function posTM(m){const p=map.latLngToContainerPoint([m.lat,m.lng]);m.el.style.left=p.x+'px';m.el.style.top=p.y+'px';}
+function updateTerraIncognita(){
+  terraMarkers.forEach(m=>m.el.parentNode?.removeChild(m.el));terraMarkers=[];
+  if(!fogCircles.length) return;
+  const OFFSET=200,MINDIST=220,mPerLat=111000;
+  const dirs=[[1,0],[0,1],[-1,0],[0,-1],[0.707,0.707],[0.707,-0.707],[-0.707,0.707],[-0.707,-0.707]];
+  const candidates=[];
+  fogCircles.forEach(c=>{
+    dirs.forEach(([dlat,dlng])=>{
+      const lat=c.lat+dlat*OFFSET/mPerLat;
+      const lng=c.lng+dlng*OFFSET/(mPerLat*Math.cos(c.lat*Math.PI/180));
+      if(fogCircles.some(fc=>dist([fc.lat,fc.lng],[lat,lng])<(fc.r||130)*0.9)) return;
+      if(candidates.some(ca=>dist([ca.lat,ca.lng],[lat,lng])<MINDIST)) return;
+      candidates.push({lat,lng});
+    });
+  });
+  candidates.slice(0,24).forEach(({lat,lng})=>{
+    const el=document.createElement('div');
+    el.style.cssText='position:absolute;font-family:serif;font-size:22px;font-weight:bold;color:rgba(242,232,204,0.18);pointer-events:none;text-shadow:0 2px 10px rgba(0,0,0,0.6);transform:translate(-50%,-50%);user-select:none;';
+    el.textContent='?';
+    document.getElementById('creatures-layer').appendChild(el);
+    const m={el,lat,lng};posTM(m);terraMarkers.push(m);
+  });
+}
+
 // ═══════════════════ CONQUEST LOG ═══════════════════
 let conquestLog=JSON.parse(localStorage.getItem('tv-conquest-log')||'[]');
-function logExpedition(claimed){const entry={id:Date.now(),date:new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'}),time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),durationMs:sessionElapsedMs(),distKm:trailDist()/1000,claimed:claimed?{name:claimed.name,emoji:claimed.emoji,area:claimed.area}:null};conquestLog.unshift(entry);if(conquestLog.length>100)conquestLog=conquestLog.slice(0,100);localStorage.setItem('tv-conquest-log',JSON.stringify(conquestLog));}
+function logExpedition(claimed){const distKm=trailDist()/1000;const entry={id:Date.now(),date:new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'}),time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),durationMs:sessionElapsedMs(),distKm,claimed:claimed?{name:claimed.name,emoji:claimed.emoji,area:claimed.area}:null};conquestLog.unshift(entry);if(conquestLog.length>100)conquestLog=conquestLog.slice(0,100);localStorage.setItem('tv-conquest-log',JSON.stringify(conquestLog));checkAchievements({event:'expedition',distKm});}
 function renderLog(){const el=document.getElementById('conquest-log');if(!conquestLog.length){el.innerHTML='<div id="log-empty">No expeditions recorded yet.<br>Begin your first march.</div>';return;}el.innerHTML=conquestLog.map((e,i)=>`<div class="log-entry"><button class="log-del" onclick="deleteLogEntry(${i})" title="Remove">✕</button><div class="log-entry-header"><div class="log-date">${e.date} · ${e.time}</div>${e.claimed?`<div class="log-claimed">${e.claimed.emoji} ${e.claimed.name}</div>`:`<div class="log-no-claim">No claim</div>`}</div><div class="log-stats"><div class="log-stat">⏱ <span>${fmtDuration(e.durationMs)}</span></div><div class="log-stat">📍 <span>${fmtDistLong(e.distKm)}</span></div>${e.claimed?`<div class="log-stat">⚜ <span>${fmtArea(e.claimed.area||0)}</span></div>`:''}</div></div>`).join('');}
 function deleteLogEntry(i){conquestLog.splice(i,1);localStorage.setItem('tv-conquest-log',JSON.stringify(conquestLog));renderLog();}
+function pushLedger(icon,desc,amount){
+  ledger.unshift({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),icon,desc,amount});
+  if(ledger.length>300) ledger=ledger.slice(0,300);
+  localStorage.setItem('tv-ledger',JSON.stringify(ledger));
+}
+function computeRecords(){
+  const withDist=conquestLog.filter(e=>e.distKm>0);
+  const withDur=conquestLog.filter(e=>e.durationMs>0);
+  const withClaim=conquestLog.filter(e=>e.claimed?.area);
+  return{
+    furthest:withDist.length?withDist.reduce((a,b)=>b.distKm>a.distKm?b:a):null,
+    longest:withDur.length?withDur.reduce((a,b)=>b.durationMs>a.durationMs?b:a):null,
+    greatest:withClaim.length?withClaim.reduce((a,b)=>b.claimed.area>a.claimed.area?b:a):null,
+    totalDist:conquestLog.reduce((s,e)=>s+(e.distKm||0),0),
+    total:conquestLog.length,
+    totalClaims:conquestLog.filter(e=>e.claimed).length,
+  };
+}
+function renderRecords(){
+  const el=document.getElementById('records-grid');
+  if(!conquestLog.length){el.innerHTML='<div style="grid-column:1/-1;font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.25);text-align:center;padding:12px 0">No expeditions recorded yet.</div>';return;}
+  const r=computeRecords();
+  const cards=[
+    {icon:'🗺',val:fmtDistLong(r.totalDist),label:'Total Distance',date:'all time'},
+    {icon:'📜',val:r.total,label:'Expeditions Led',date:'all time'},
+    {icon:'⚑',val:r.totalClaims,label:'Territories Claimed',date:'all time'},
+    r.furthest?{icon:'🏃',val:fmtDistLong(r.furthest.distKm),label:'Furthest March',date:r.furthest.date}:null,
+    r.longest?{icon:'⏱',val:fmtDuration(r.longest.durationMs),label:'Longest Expedition',date:r.longest.date}:null,
+    r.greatest?{icon:'⚜',val:fmtArea(r.greatest.claimed.area),label:'Greatest Conquest',date:r.greatest.date}:null,
+  ].filter(Boolean);
+  el.innerHTML=cards.map(c=>`<div class="record-card"><div class="rec-icon">${c.icon}</div><div class="rec-val">${c.val}</div><div class="rec-label">${c.label}</div><div class="rec-date">${c.date}</div></div>`).join('');
+}
+function renderLedger(){
+  const el=document.getElementById('ledger-list');
+  if(!ledger.length){el.innerHTML='<div style="font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.25);text-align:center;padding:16px 0">The ledger is empty.</div>';return;}
+  el.innerHTML=ledger.slice(0,60).map(e=>{
+    const amtHtml=e.amount!=null?`<span class="ledger-amount ${e.amount>=0?'gain':'loss'}">${e.amount>=0?'+':''}${fmtGold(Math.abs(e.amount))} ⚜</span>`:'';
+    return `<div class="ledger-entry"><span class="ledger-icon">${e.icon}</span><span class="ledger-desc">${e.desc}</span>${amtHtml}<span class="ledger-date">${e.date}</span></div>`;
+  }).join('');
+}
+
+// ═══════════════════ MULTIPLAYER ═══════════════════
+function initFirebase(){
+  if(!MULTIPLAYER_ENABLED) return;
+  try{ firebase.app(); }catch(_){ firebase.initializeApp(FIREBASE_CONFIG); }
+  fbAuth=firebase.auth();
+  db=firebase.firestore();
+  fbAuth.signInAnonymously().then(cred=>{
+    myUid=cred.user.uid;
+    localStorage.setItem('tv-player-uid',myUid);
+    if(gameCode) startMultiplayerSync();
+    else if(!localStorage.getItem('tv-solo-mode')) showGameModal();
+  }).catch(e=>console.warn('Firebase auth:',e));
+}
+function showGameModal(){document.getElementById('game-modal').classList.add('open');}
+function closeGameModal(){document.getElementById('game-modal').classList.remove('open');}
+function playSolo(){localStorage.setItem('tv-solo-mode','true');closeGameModal();}
+function createGame(){
+  const code=Math.random().toString(36).substring(2,8).toUpperCase();
+  document.getElementById('game-code-input').value=code;
+  const d=document.getElementById('game-code-display');
+  d.style.display='';d.textContent=`Share this code: ${code}`;
+}
+function joinGame(){
+  const code=document.getElementById('game-code-input').value.trim().toUpperCase();
+  if(code.length<4){setStatus('Enter a valid game code','danger');return;}
+  gameCode=code;
+  localStorage.setItem('tv-game-code',gameCode);
+  localStorage.removeItem('tv-solo-mode');
+  closeGameModal();
+  if(myUid) startMultiplayerSync();
+  else initFirebase();
+}
+function leaveGame(){
+  if(mpUnsubTerritories) mpUnsubTerritories();
+  if(mpUnsubPlayers) mpUnsubPlayers();
+  gameCode=null;myUid=null;
+  localStorage.removeItem('tv-game-code');localStorage.removeItem('tv-solo-mode');
+  otherPolyLayers.forEach(l=>map.removeLayer(l));otherPolyLayers=[];
+  knownRealms=[];
+  setMpBadge('');renderDiplomacy();
+}
+function startMultiplayerSync(){
+  if(!db||!myUid||!gameCode) return;
+  syncMyRealm();
+  syncMyTerritories();
+  setMpBadge(`⚔ ${gameCode}`);
+  if(mpUnsubPlayers) mpUnsubPlayers();
+  mpUnsubPlayers=db.collection(`games/${gameCode}/players`).onSnapshot(snap=>{
+    knownRealms=snap.docs.filter(d=>d.id!==myUid).map(d=>({uid:d.id,...d.data()}));
+    localStorage.setItem('tv-known-realms',JSON.stringify(knownRealms));
+    renderLeaderboard();renderDiplomacy();
+  });
+  if(mpUnsubTerritories) mpUnsubTerritories();
+  mpUnsubTerritories=db.collection(`games/${gameCode}/territories`).onSnapshot(snap=>{
+    renderOtherTerritories(snap.docs.filter(d=>!d.id.startsWith(myUid+'_')));
+  });
+}
+function syncMyRealm(){
+  if(!db||!myUid||!gameCode) return;
+  db.collection(`games/${gameCode}/players`).doc(myUid).set({
+    playerName,realmName,crest:playerCrest,instability,
+    powerScore:computePowerScore(),
+    provinceCount:territories.length,
+    rank:computeRank().title,
+    rankIcon:computeRank().icon,
+    lastSeen:Date.now()
+  }).catch(()=>{});
+}
+function syncMyTerritories(){
+  if(!db||!myUid||!gameCode||!territories.length) return;
+  const batch=db.batch();
+  territories.forEach(t=>{
+    const ref=db.collection(`games/${gameCode}/territories`).doc(`${myUid}_${t.id}`);
+    batch.set(ref,{...t,ownerUid:myUid,ownerName:playerName,realmName});
+  });
+  batch.commit().catch(()=>{});
+}
+function queueSync(){
+  clearTimeout(syncTimer);
+  syncTimer=setTimeout(syncMyTerritories,3000);
+}
+function renderOtherTerritories(docs){
+  otherPolyLayers.forEach(l=>map.removeLayer(l));
+  otherPolyLayers=[];otherTerritories=[];
+  docs.forEach(doc=>{
+    const d=doc.data();
+    if(!d.points?.length||!d.color) return;
+    otherTerritories.push(d);
+    const poly=L.polygon(d.points,{
+      color:d.color.stroke,weight:1.5,opacity:0.6,
+      fillColor:d.color.fill,fillOpacity:0.15,dashArray:'5 4'
+    }).addTo(map);
+    poly.bindTooltip(`${d.emoji||'⚑'} ${d.name}<br><small style="opacity:0.7">${d.realmName||d.ownerName||'Unknown Realm'}</small>`,{sticky:true,className:'territory-tooltip'});
+    otherPolyLayers.push(poly);
+  });
+}
+function setMpBadge(txt){document.getElementById('mp-status-badge').textContent=txt;}
+
+// ═══════════════════ INSTABILITY / DIPLOMACY ═══════════════════
+function instabilityStatus(){
+  if(instability<=20) return{label:'Serene',    color:'rgba(100,200,80,0.85)'};
+  if(instability<=40) return{label:'Stable',    color:'rgba(170,200,60,0.85)'};
+  if(instability<=60) return{label:'Unsettled', color:'rgba(220,170,40,0.85)'};
+  if(instability<=80) return{label:'Volatile',  color:'rgba(220,110,40,0.85)'};
+  return                    {label:'Crisis',    color:'rgba(210,60,50,0.85)'};
+}
+function changeInstability(delta,reason){
+  const prev=instability;
+  instability=Math.max(0,Math.min(100,instability+delta));
+  if(instability===prev) return;
+  localStorage.setItem('tv-instability',instability.toFixed(1));
+  if(reason&&Math.abs(delta)>=5) pushLedger(delta>0?'⚠':'🕊',reason,null);
+  if(db&&gameCode) syncMyRealm();
+}
+function updateInstabilityDisplay(){
+  const s=instabilityStatus();
+  document.getElementById('instability-status').textContent=s.label;
+  document.getElementById('instability-status').style.color=s.color;
+  document.getElementById('instability-val').textContent=`${Math.round(instability)} / 100`;
+  document.getElementById('instability-fill').style.width=instability+'%';
+  document.getElementById('instability-fill').style.backgroundColor=s.color;
+}
+function renderLeaderboard(){
+  const el=document.getElementById('leaderboard-list');
+  const myScore=computePowerScore();
+  const myRank=computeRank();
+  const all=[
+    {uid:'me',playerName,realmName,powerScore:myScore,provinceCount:territories.length,rankIcon:myRank.icon,rank:myRank.title,isMe:true},
+    ...knownRealms.map(r=>({...r,isMe:false}))
+  ].sort((a,b)=>(b.powerScore||0)-(a.powerScore||0));
+  if(all.length===1&&!knownRealms.length){
+    el.innerHTML='<div style="font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.25);text-align:center;padding:14px 0">No rivals in this game yet.</div>';
+    return;
+  }
+  const medals=['♛','⚔','⚑'];
+  el.innerHTML=all.map((r,i)=>`
+    <div class="lb-row${r.isMe?' lb-me':''}">
+      <div class="lb-rank${i<3?' lb-top':''}">${medals[i]||i+1}</div>
+      <div class="lb-icon">${r.rankIcon||'🧭'}</div>
+      <div class="lb-names">
+        <div class="lb-realm">${r.realmName||'Unknown Realm'}${r.isMe?' <span style="font-size:8px;opacity:0.4">(you)</span>':''}</div>
+        <div class="lb-player">${r.playerName||'Unknown'} · ${r.rank||'Wanderer'}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div class="lb-score">${(r.powerScore||0).toLocaleString()}</div>
+        <div class="lb-provinces">${r.provinceCount||0} provinces</div>
+      </div>
+    </div>`).join('');
+}
+function renderDiplomacy(){
+  const el=document.getElementById('known-realms-list');
+  if(!knownRealms.length){
+    el.innerHTML='<div id="known-realms-empty">No rival realms discovered.<br><span style="font-size:10px">Venture beyond your borders to encounter other kingdoms.</span></div>';
+    return;
+  }
+  el.innerHTML=knownRealms.map(r=>`<div class="realm-card">
+    <div class="realm-card-name">${r.realmName||'Unknown Realm'}</div>
+    <div class="realm-card-meta">${r.playerName||'Unknown'} · Instability ${Math.round(r.instability||0)}/100</div>
+  </div>`).join('');
+}
 
 // ═══════════════════ KEYBOARD ═══════════════════
 document.getElementById('territory-input').addEventListener('keydown',e=>{if(e.key==='Enter')saveClaim();if(e.key==='Escape')cancelClaim();});
 document.getElementById('kingdom-screen').addEventListener('keydown',e=>{if(e.key==='Escape')closeKingdom();});
 document.getElementById('crest-modal').addEventListener('keydown',e=>{if(e.key==='Escape')closeCrestModal();});
+document.getElementById('poi-input').addEventListener('keydown',e=>{if(e.key==='Enter')savePin();if(e.key==='Escape')cancelPin();});
 
 // ═══════════════════ BOOT ═══════════════════
 territories.forEach(t=>drawPoly(t,false));
@@ -1078,8 +1899,13 @@ setUnits(useMetric?'km':'mi');
 document.getElementById('player-name-display').textContent=playerName;
 document.getElementById('realm-name-display').textContent=realmName;
 renderKingdomCrest();
+pois.forEach(p=>placePOI(p));
+namedTrails.forEach(nt=>drawNamedTrail(nt));
+setTimeout(updateTerraIncognita,1000);
+territories.forEach(t=>{if(t.elevation==null)fetchElevation(t);});
 setTimeout(()=>{fogCircles.forEach((c,i)=>{if(!waterPts.has(i))sampleWater(c.lat,c.lng,i);});},2500);
 startGPS();
+if(MULTIPLAYER_ENABLED) initFirebase();
 setStatus('Consulting the stars for your position…');
 setTimeout(()=>{if(!currentPos)setStatus('Grant location access to begin your expedition.','danger');},5000);
 </script>
