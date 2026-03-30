@@ -415,6 +415,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
     <div id="game-modal-btns">
       <button class="modal-btn" onclick="joinGame()">⚑ Join Realm War</button>
       <button class="modal-btn" style="opacity:0.65" onclick="createGame()">✦ Create New Game</button>
+      <button class="modal-btn" id="copy-code-btn" style="display:none;opacity:0.75" onclick="navigator.clipboard?.writeText(gameCode||'');setStatus('Code copied: '+gameCode,'alert');closeGameModal()">⎘ Copy Code &amp; Close</button>
       <button class="modal-btn" style="opacity:0.35;font-size:10px;margin-top:4px" onclick="playSolo()">Continue Solo</button>
     </div>
   </div>
@@ -531,7 +532,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
       <div id="instability-track"><div id="instability-fill"></div></div>
     </div>
     <div id="diplomacy-section">
-      <h3>Known Realms</h3>
+      <h3>Known Realms <button onclick="openGameModal()" style="float:right;background:none;border:1px solid rgba(201,146,10,0.3);border-radius:5px;color:rgba(201,146,10,0.7);font-family:var(--font-body);font-size:9px;letter-spacing:0.05em;padding:3px 9px;cursor:pointer;margin-top:2px">⚔ Game</button></h3>
       <div id="known-realms-list"><div id="known-realms-empty">No rival realms discovered.<br><span style="font-size:10px">Venture beyond your borders to encounter other kingdoms.</span></div></div>
     </div>
     <div id="achievements-section">
@@ -1772,6 +1773,15 @@ function initFirebase(){
 }
 function showGameModal(){document.getElementById('game-modal').classList.add('open');}
 function closeGameModal(){document.getElementById('game-modal').classList.remove('open');}
+function openGameModal(){
+  if(gameCode){
+    document.getElementById('game-code-input').value=gameCode;
+    document.getElementById('copy-code-btn').style.display='';
+  } else {
+    document.getElementById('copy-code-btn').style.display='none';
+  }
+  showGameModal();
+}
 function playSolo(){localStorage.setItem('tv-solo-mode','true');closeGameModal();}
 function createGame(){
   const code=Math.random().toString(36).substring(2,8).toUpperCase();
