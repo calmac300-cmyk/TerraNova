@@ -1352,7 +1352,9 @@ function buildCentroidIcon(t){
 function updateCentroidMarkers(){
   polygonLayers.forEach(l=>{if(l.centroidMarker)l.centroidMarker.setIcon(buildCentroidIcon(l.territory));});
 }
+function validPoints(pts){return pts?.length>=3&&typeof pts[0][0]==='number'&&isFinite(pts[0][0]);}
 function drawPoly(t,animate){
+  if(!validPoints(t.points)) return; // skip corrupt territory — still cedable from Kingdom screen
   const poly=L.polygon(t.points,{color:t.color.stroke,weight:2,opacity:0.9,fillColor:t.color.fill,fillOpacity:animate?0:visitOpacity(t),dashArray:'6 3'}).addTo(map);
   poly.bindTooltip(t.emoji+' '+t.name,{permanent:false,sticky:true,className:'territory-tooltip'});
   // Crest + province/realm label marker
@@ -1393,8 +1395,9 @@ function computeRank(){
   return rank;
 }
 function computePowerScore(){
-  const totalArea=territories.reduce((s,t)=>s+(t.area||0),0);
-  return Math.floor(totalArea/500)+territories.length*150+Math.floor(totalDistKm*100)+unlockedAchievements.size*200;
+  const valid=territories.filter(t=>validPoints(t.points));
+  const totalArea=valid.reduce((s,t)=>s+(t.area||0),0);
+  return Math.floor(totalArea/500)+valid.length*150+Math.floor(totalDistKm*100)+unlockedAchievements.size*200;
 }
 function fmtGold(g){return g>=1000?Math.round(g).toLocaleString():g>=10?Math.round(g).toString():g.toFixed(1);}
 function provinceIncome(t){
@@ -1487,6 +1490,17 @@ function renderKingdom(){
   else{list.innerHTML=territories.map((t,i)=>{
     const tag=TAGS.find(x=>x.id===t.tag);
     const isCap=capitalId===t.id;
+    const isCorrupt=!validPoints(t.points);
+    if(isCorrupt) return `<div class="kingdom-territory" style="border-color:rgba(200,60,60,0.4);background:rgba(100,20,20,0.25)">
+      <div class="kt-top">
+        <div class="kt-info">
+          <div class="kt-name" style="color:#e88">⚠ ${t.name} <span style="font-size:9px;opacity:0.6">(corrupt — map data unreadable)</span></div>
+          <div class="kt-details">${t.date}</div>
+        </div>
+        <div class="kt-actions">
+          <button class="kt-del" onclick="event.stopPropagation();delT(${i})">Remove</button>
+        </div>
+      </div></div>`;
     return `<div class="kingdom-territory">
       <div class="kt-top" onclick="flyTo(${i})">
         <div class="kt-crest-wrap">${buildCrestSVG(playerCrest,42)}</div>
