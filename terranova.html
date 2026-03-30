@@ -47,7 +47,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 #status-scroll.alert{color:var(--gold-lt);}
 #status-scroll.danger{color:#e07070;}
 /* HUD */
-#trail-hud{position:absolute;top:110px;left:50%;transform:translateX(-50%);z-index:200;pointer-events:none;background:rgba(20,13,5,0.82);border:1px solid rgba(201,146,10,0.25);border-radius:20px;padding:5px 16px;display:none;gap:18px;align-items:center;}
+#trail-hud{position:absolute;top:110px;left:14px;z-index:200;pointer-events:none;background:rgba(20,13,5,0.82);border:1px solid rgba(201,146,10,0.25);border-radius:20px;padding:5px 16px;display:none;gap:18px;align-items:center;}
 #trail-hud.visible{display:flex;}
 .hud-item{text-align:center;}
 .hud-val{font-family:var(--font-body);font-size:15px;font-weight:600;color:var(--gold-lt);}
@@ -334,8 +334,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 #game-code-input::placeholder{letter-spacing:0.04em;text-transform:none;opacity:0.35;}
 #game-modal-btns{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
 #game-code-display{font-family:var(--font-body);font-size:11px;color:var(--gold-lt);letter-spacing:0.08em;margin-top:8px;padding:8px;background:rgba(201,146,10,0.08);border-radius:6px;}
-#mp-status-badge{position:fixed;bottom:60px;left:14px;font-family:var(--font-body);font-size:11px;letter-spacing:0.08em;color:var(--gold-lt);background:rgba(14,10,4,0.75);border:1px solid rgba(201,146,10,0.35);border-radius:6px;padding:4px 10px;z-index:900;display:none;}
-#mp-status-badge.active{display:block;}
+#mp-status-badge{display:none;}
 .ach-icon{font-size:22px;margin-bottom:5px;}
 .ach-name{font-family:var(--font-body);font-size:11px;font-weight:600;color:var(--gold-lt);letter-spacing:0.04em;margin-bottom:3px;}
 .ach-desc{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.45);line-height:1.4;}
@@ -892,6 +891,14 @@ function drawFog(){
     const g=fogCtx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,r);
     g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(0.55,'rgba(0,0,0,0.9)');g.addColorStop(1,'rgba(0,0,0,0)');
     fogCtx.fillStyle=g;fogCtx.beginPath();fogCtx.arc(pt.x,pt.y,r,0,Math.PI*2);fogCtx.fill();
+  });
+  // Owned territories are fully revealed
+  fogCtx.fillStyle='rgba(0,0,0,1)';
+  territories.forEach(t=>{
+    if(!validPoints(t.points)) return;
+    fogCtx.beginPath();
+    t.points.forEach((p,i)=>{const pt=map.latLngToContainerPoint([p[0],p[1]]);i===0?fogCtx.moveTo(pt.x,pt.y):fogCtx.lineTo(pt.x,pt.y);});
+    fogCtx.closePath();fogCtx.fill();
   });
   fogCtx.globalCompositeOperation='source-over';
   fogCircles.forEach((c,i)=>{
