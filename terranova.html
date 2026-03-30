@@ -281,7 +281,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 #power-score-val{font-family:var(--font-gothic);font-size:44px;color:var(--gold-lt);line-height:1;text-shadow:0 2px 12px rgba(201,146,10,0.3);}
 #power-score-lbl{font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.45);letter-spacing:0.1em;margin-top:4px;}
 #rank-display-wrap{display:flex;align-items:center;gap:6px;justify-content:center;margin:6px 0 2px;}
-#kingdom-rank-icon{font-size:16px;}
+#kingdom-rank-icon{font-size:15px;font-family:var(--font-gothic);color:var(--gold);letter-spacing:0.05em;}
 #kingdom-rank-title{font-family:var(--font-text);font-style:italic;font-size:13px;color:var(--gold-lt);}
 #achievements-section{margin-bottom:28px;}
 #achievement-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
@@ -354,7 +354,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
   <div id="header-stats">
     <div class="hstat"><div class="hstat-label">Provinces</div><div class="hstat-value" id="stat-zones">0</div></div>
     <div class="hstat"><div class="hstat-label">Domain</div><div class="hstat-value" id="stat-area">—</div></div>
-    <div class="hstat"><div class="hstat-label">Rank</div><div class="hstat-value" id="stat-rank">🧭</div></div>
+    <div class="hstat"><div class="hstat-label">Rank</div><div class="hstat-value" id="stat-rank">I</div></div>
   </div>
 </div>
 
@@ -500,7 +500,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
         <div id="player-name-display">Explorer</div>
         <button id="edit-player-btn" onclick="editPlayerName()">✎</button>
       </div>
-      <div id="rank-display-wrap"><span id="kingdom-rank-icon">🧭</span><span id="kingdom-rank-title">Wanderer</span></div>
+      <div id="rank-display-wrap"><span id="kingdom-rank-icon">I</span><span id="kingdom-rank-title">Wanderer</span></div>
       <div id="kingdom-title-text">The Kingdom of</div>
       <div id="realm-name-row">
         <div id="realm-name-display">My Realm</div>
@@ -1395,10 +1395,15 @@ function updateCentroidMarkers(){
 function validPoints(pts){
   if(!pts||pts.length<3) return false;
   const p=pts[0];
-  // p must be [lat,lng]: lat in (-85,85), lng in (-180,180)
-  return Array.isArray(p)&&typeof p[0]==='number'&&typeof p[1]==='number'
-    &&isFinite(p[0])&&isFinite(p[1])
-    &&Math.abs(p[0])<=85&&Math.abs(p[1])<=180;
+  if(!Array.isArray(p)||typeof p[0]!=='number'||typeof p[1]!=='number') return false;
+  if(!isFinite(p[0])||!isFinite(p[1])||Math.abs(p[0])>85||Math.abs(p[1])>180) return false;
+  // If we have any fog circles, territory centroid must be within 100 km of at least one
+  if(fogCircles.length){
+    const cLat=pts.reduce((s,q)=>s+q[0],0)/pts.length;
+    const cLng=pts.reduce((s,q)=>s+q[1],0)/pts.length;
+    if(!fogCircles.some(c=>dist([c.lat,c.lng],[cLat,cLng])<100000)) return false;
+  }
+  return true;
 }
 function drawPoly(t,animate){
   if(!validPoints(t.points)) return; // skip corrupt territory — still cedable from Kingdom screen
@@ -1413,12 +1418,12 @@ function drawPoly(t,animate){
 
 // ═══════════════════ PROGRESSION ═══════════════════
 const RANKS=[
-  {title:'Wanderer',   minP:0,  minA:0,       icon:'🧭'},
-  {title:'Landholder', minP:1,  minA:0,       icon:'⚑'},
-  {title:'Baron',      minP:3,  minA:0,       icon:'🏰'},
-  {title:'Count',      minP:5,  minA:100000,  icon:'⚔'},
-  {title:'Duke',       minP:10, minA:500000,  icon:'👑'},
-  {title:'Sovereign',  minP:20, minA:2000000, icon:'♛'},
+  {title:'Wanderer',   minP:0,  minA:0,       icon:'I'},
+  {title:'Landholder', minP:1,  minA:0,       icon:'II'},
+  {title:'Baron',      minP:3,  minA:0,       icon:'III'},
+  {title:'Count',      minP:5,  minA:100000,  icon:'IV'},
+  {title:'Duke',       minP:10, minA:500000,  icon:'V'},
+  {title:'Sovereign',  minP:20, minA:2000000, icon:'VI'},
 ];
 const ACHIEVEMENTS=[
   {id:'first_claim',  icon:'🏆',name:'First Conquest',    desc:'Claim your first territory'},
@@ -2075,7 +2080,7 @@ function renderLeaderboard(){
   el.innerHTML=all.map((r,i)=>`
     <div class="lb-row${r.isMe?' lb-me':''}" ${!r.isMe?`onclick="flyToRival('${r.uid}')" style="cursor:pointer" title="Fly to ${r.realmName||'rival'}'s territory"`:''}>
       <div class="lb-rank${i<3?' lb-top':''}">${medals[i]||i+1}</div>
-      <div class="lb-icon">${r.rankIcon||'🧭'}</div>
+      <div class="lb-icon" style="font-family:var(--font-gothic);color:var(--gold);font-size:11px">${r.rankIcon||'I'}</div>
       <div class="lb-names">
         <div class="lb-realm">${r.realmName||'Unknown Realm'}${r.isMe?' <span style="font-size:8px;opacity:0.4">(you)</span>':'<span style="font-size:8px;opacity:0.35"> · tap to locate</span>'}</div>
         <div class="lb-player">${r.playerName||'Unknown'} · ${r.rank||'Wanderer'}</div>
