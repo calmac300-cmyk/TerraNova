@@ -1392,7 +1392,14 @@ function buildCentroidIcon(t){
 function updateCentroidMarkers(){
   polygonLayers.forEach(l=>{if(l.centroidMarker)l.centroidMarker.setIcon(buildCentroidIcon(l.territory));});
 }
-function validPoints(pts){return pts?.length>=3&&typeof pts[0][0]==='number'&&isFinite(pts[0][0]);}
+function validPoints(pts){
+  if(!pts||pts.length<3) return false;
+  const p=pts[0];
+  // p must be [lat,lng]: lat in (-85,85), lng in (-180,180)
+  return Array.isArray(p)&&typeof p[0]==='number'&&typeof p[1]==='number'
+    &&isFinite(p[0])&&isFinite(p[1])
+    &&Math.abs(p[0])<=85&&Math.abs(p[1])<=180;
+}
 function drawPoly(t,animate){
   if(!validPoints(t.points)) return; // skip corrupt territory — still cedable from Kingdom screen
   const poly=L.polygon(t.points,{color:t.color.stroke,weight:2,opacity:0.9,fillColor:t.color.fill,fillOpacity:animate?0:visitOpacity(t),dashArray:'6 3'}).addTo(map);
