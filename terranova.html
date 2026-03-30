@@ -57,6 +57,9 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 /* LAYER TOGGLE */
 #layer-toggle{position:absolute;top:76px;right:14px;z-index:200;background:rgba(20,13,5,0.88);border:1px solid rgba(201,146,10,0.3);border-radius:8px;padding:6px 12px;font-family:var(--font-text);font-style:italic;font-size:11px;color:var(--parchment-dk);cursor:pointer;touch-action:manipulation;transition:border-color 0.2s;}
 #layer-toggle:active{border-color:rgba(201,146,10,0.6);}
+#marker-filters{position:absolute;top:116px;right:14px;z-index:200;display:flex;flex-direction:column;gap:4px;}
+.mf-btn{background:rgba(20,13,5,0.88);border:1px solid rgba(201,146,10,0.2);border-radius:6px;padding:4px 9px;font-family:var(--font-body);font-size:10px;color:rgba(242,232,204,0.35);cursor:pointer;touch-action:manipulation;transition:all 0.2s;text-align:center;white-space:nowrap;}
+.mf-btn.on{border-color:rgba(201,146,10,0.55);color:var(--gold-lt);background:rgba(201,146,10,0.1);}
 /* TERRITORY ENTRY LABEL */
 #territory-label{font-family:var(--font-text);font-style:italic;font-size:10px;color:var(--gold-lt);text-align:center;line-height:1.35;padding:8px 4px;opacity:0;transition:opacity 0.6s;}
 #territory-label.visible{opacity:1;}
@@ -373,6 +376,11 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 </div>
 
 <button id="layer-toggle" onclick="cycleLayer()">🎨 Watercolor</button>
+<div id="marker-filters">
+  <button class="mf-btn on" id="mf-settlement" onclick="toggleMarkerFilter('settlement')">⚑ Towns</button>
+  <button class="mf-btn on" id="mf-park"       onclick="toggleMarkerFilter('park')">🌿 Parks</button>
+  <button class="mf-btn on" id="mf-church"     onclick="toggleMarkerFilter('church')">⛪ Churches</button>
+</div>
 
 <div id="wake-banner">
   <div id="wake-banner-icon">🕯</div>
@@ -1018,7 +1026,32 @@ function fetchCastles(lat,lng){
       castleMarkers[id]={mk,la,lo,sk,label};
     });
     updateTownCrests();
+    applyMarkerFilters();
   }).catch(()=>{});
+}
+
+const SETTLEMENT_TYPES=new Set(['townhall','city','town','village']);
+let markerFilters=JSON.parse(localStorage.getItem('tv-marker-filters')||'{"settlement":true,"park":true,"church":true}');
+function markerFilterKey(sk){
+  if(SETTLEMENT_TYPES.has(sk)) return 'settlement';
+  if(sk==='park') return 'park';
+  if(sk==='church') return 'church';
+  return 'settlement';
+}
+function applyMarkerFilters(){
+  Object.values(castleMarkers).forEach(({mk,sk})=>{
+    if(!mk) return;
+    const key=markerFilterKey(sk);
+    if(markerFilters[key]) mk.addTo(map); else map.removeLayer(mk);
+  });
+  ['settlement','park','church'].forEach(k=>{
+    document.getElementById('mf-'+k)?.classList.toggle('on',!!markerFilters[k]);
+  });
+}
+function toggleMarkerFilter(key){
+  markerFilters[key]=!markerFilters[key];
+  localStorage.setItem('tv-marker-filters',JSON.stringify(markerFilters));
+  applyMarkerFilters();
 }
 
 // ═══════════════════ WAKE LOCK ═══════════════════
@@ -1954,6 +1987,7 @@ territories.forEach(t=>{if(t.elevation==null)fetchElevation(t);});
 setTimeout(()=>{fogCircles.forEach((c,i)=>{if(!waterPts.has(i))sampleWater(c.lat,c.lng,i);});},2500);
 startGPS();
 if(MULTIPLAYER_ENABLED) initFirebase();
+applyMarkerFilters();
 setStatus('Consulting the stars for your position…');
 setTimeout(()=>{if(!currentPos)setStatus('Grant location access to begin your expedition.','danger');},5000);
 </script>
