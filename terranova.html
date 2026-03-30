@@ -1941,6 +1941,11 @@ function joinGame(){
   if(myUid) startMultiplayerSync();
   else initFirebase();
 }
+function hardReset(){
+  if(!confirm('Reset ALL province, fog, and exploration data? Player name, realm name, and crest are kept.')) return;
+  ['tv-territories','tv-fog-circles','tv-water-points','tv-conquest-log','tv-capital-id','tv-gold','tv-last-collect','tv-ledger','tv-instability','tv-achievements','tv-active-trail','tv-pois','tv-named-trails','tv-total-dist'].forEach(k=>localStorage.removeItem(k));
+  location.reload();
+}
 function leaveGame(){
   if(mpUnsubTerritories) mpUnsubTerritories();
   if(mpUnsubPlayers) mpUnsubPlayers();
