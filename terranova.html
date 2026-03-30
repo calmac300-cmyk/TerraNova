@@ -827,7 +827,7 @@ let pendingPinPos=null,selectedPinEmoji='⭐';
 let gold=parseFloat(localStorage.getItem('tv-gold')||'0');
 let lastCollect=parseFloat(localStorage.getItem('tv-last-collect')||String(Date.now()));
 let ledger=JSON.parse(localStorage.getItem('tv-ledger')||'[]');
-let instability=parseFloat(localStorage.getItem('tv-instability')||'0');
+let instability=parseFloat(localStorage.getItem('tv-instability')||'100');
 let knownRealms=JSON.parse(localStorage.getItem('tv-known-realms')||'[]');
 let gameCode=localStorage.getItem('tv-game-code')||null;
 let db=null,fbAuth=null,myUid=localStorage.getItem('tv-player-uid')||null;
@@ -1055,7 +1055,7 @@ function checkTerritoryEntry(lat,lng){
     if(found){
       found.lastVisited=Date.now();
       updatePolyOpacity(found);
-      if(instability>0) changeInstability(-2,'');
+      if(instability<100) changeInstability(2,'');
       clearTimeout(checkTerritoryEntry._st);
       checkTerritoryEntry._st=setTimeout(()=>saveTerritories(),8000);
     }
@@ -1201,7 +1201,7 @@ function saveClaim(){
   const t={id:Date.now(),name,emoji,points:pendingPoints,color,area:polyArea(pendingPoints),
     date:new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})};
   territories.push(t);saveTerritories();drawPoly(t,true);
-  fetchElevation(t);logExpedition(t);checkAchievements({event:'claim',area:t.area});pushLedger('⚑',`Claimed ${t.emoji} ${name}`,null);changeInstability(-5,`Claimed ${name} — realm consolidated`);finishClaim();setStatus(`"${name}" — claimed for the realm! ✦`,'alert');
+  fetchElevation(t);logExpedition(t);checkAchievements({event:'claim',area:t.area});pushLedger('⚑',`Claimed ${t.emoji} ${name}`,null);changeInstability(5,`Claimed ${name} — realm consolidated`);finishClaim();setStatus(`"${name}" — claimed for the realm! ✦`,'alert');
 }
 
 function saveMerge(){
@@ -1524,7 +1524,7 @@ function delT(i){
   }
   pushLedger('💀',`Ceded ${t.emoji} ${t.name}`,totalPenalty>0?-totalPenalty:null);
   const instDelta=isHub&&t.walled?30:isHub?20:t.walled?12:8;
-  changeInstability(instDelta,`Ceded ${t.name} — realm destabilized`);
+  changeInstability(-instDelta,`Ceded ${t.name} — realm destabilized`);
   if(db&&myUid&&gameCode) db.collection(`games/${gameCode}/territories`).doc(`${myUid}_${id}`).delete().catch(()=>{});
   if(capitalId===id){capitalId=null;localStorage.removeItem('tv-capital-id');}
   territories.splice(i,1);saveTerritories();
@@ -1664,7 +1664,15 @@ function updateTerraIncognita(){
     dirs.forEach(([dlat,dlng])=>{
       const lat=c.lat+dlat*OFFSET/mPerLat;
       const lng=c.lng+dlng*OFFSET/(mPerLat*Math.cos(c.lat*Math.PI/180));
-      if(fogCircles.some(fc=>dist([fc.lat,fc.lng],[lat,lng])<(fc.r||130)*0.9)) return;
+      // Check in screen space so the threshold matches the actual visible fog radius
+      const pt=map.latLngToContainerPoint([lat,lng]);
+      const covered=fogCircles.some(fc=>{
+        const fp=map.latLngToContainerPoint([fc.lat,fc.lng]);
+        return Math.hypot(pt.x-fp.x,pt.y-fp.y)<(fc.r||130)*0.9;
+      });
+      if(covered) return;
+      // Skip if inside own claimed territory
+      if(territories.some(t=>pointInPoly([lng,lat],t.points))) return;
       if(candidates.some(ca=>dist([ca.lat,ca.lng],[lat,lng])<MINDIST)) return;
       candidates.push({lat,lng});
     });
@@ -1820,14 +1828,19 @@ function renderOtherTerritories(docs){
     otherPolyLayers.push(poly);
   });
 }
-function setMpBadge(txt){document.getElementById('mp-status-badge').textContent=txt;}
+function setMpBadge(txt){
+  const el=document.getElementById('mp-status-badge');
+  el.textContent=txt;
+  el.style.cursor=txt?'pointer':'';
+  el.onclick=txt?()=>{navigator.clipboard?.writeText(gameCode||'');setStatus(`Code copied: ${gameCode}`,'alert');}:null;
+}
 
 // ═══════════════════ INSTABILITY / DIPLOMACY ═══════════════════
 function instabilityStatus(){
-  if(instability<=20) return{label:'Serene',    color:'rgba(100,200,80,0.85)'};
-  if(instability<=40) return{label:'Stable',    color:'rgba(170,200,60,0.85)'};
-  if(instability<=60) return{label:'Unsettled', color:'rgba(220,170,40,0.85)'};
-  if(instability<=80) return{label:'Volatile',  color:'rgba(220,110,40,0.85)'};
+  if(instability>=80) return{label:'Serene',    color:'rgba(100,200,80,0.85)'};
+  if(instability>=60) return{label:'Stable',    color:'rgba(170,200,60,0.85)'};
+  if(instability>=40) return{label:'Unsettled', color:'rgba(220,170,40,0.85)'};
+  if(instability>=20) return{label:'Volatile',  color:'rgba(220,110,40,0.85)'};
   return                    {label:'Crisis',    color:'rgba(210,60,50,0.85)'};
 }
 function changeInstability(delta,reason){
@@ -1835,7 +1848,7 @@ function changeInstability(delta,reason){
   instability=Math.max(0,Math.min(100,instability+delta));
   if(instability===prev) return;
   localStorage.setItem('tv-instability',instability.toFixed(1));
-  if(reason&&Math.abs(delta)>=5) pushLedger(delta>0?'⚠':'🕊',reason,null);
+  if(reason&&Math.abs(delta)>=5) pushLedger(delta<0?'⚠':'🕊',reason,null);
   if(db&&gameCode) syncMyRealm();
 }
 function updateInstabilityDisplay(){
@@ -1881,7 +1894,7 @@ function renderDiplomacy(){
   }
   el.innerHTML=knownRealms.map(r=>`<div class="realm-card">
     <div class="realm-card-name">${r.realmName||'Unknown Realm'}</div>
-    <div class="realm-card-meta">${r.playerName||'Unknown'} · Instability ${Math.round(r.instability||0)}/100</div>
+    <div class="realm-card-meta">${r.playerName||'Unknown'} · Stability ${Math.round(r.instability??100)}/100</div>
   </div>`).join('');
 }
 
