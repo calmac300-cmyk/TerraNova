@@ -411,7 +411,6 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
     <div class="card-title">⚔ Realm War ⚔</div>
     <div class="card-sub">Join an existing game or forge a new conflict</div>
     <input id="game-code-input" type="text" placeholder="Enter game code…" maxlength="8" autocomplete="off" oninput="this.value=this.value.toUpperCase()"/>
-    <div id="game-code-display" style="display:none"></div>
     <div id="game-modal-btns">
       <button class="modal-btn" onclick="joinGame()">⚑ Join Realm War</button>
       <button class="modal-btn" style="opacity:0.65" onclick="createGame()">✦ Create New Game</button>
@@ -1744,8 +1743,8 @@ function playSolo(){localStorage.setItem('tv-solo-mode','true');closeGameModal()
 function createGame(){
   const code=Math.random().toString(36).substring(2,8).toUpperCase();
   document.getElementById('game-code-input').value=code;
-  const d=document.getElementById('game-code-display');
-  d.style.display='';d.textContent=`Share this code: ${code}`;
+  joinGame();
+  setStatus(`⚔ Game created — share code: ${code}`,'alert');
 }
 function joinGame(){
   const code=document.getElementById('game-code-input').value.trim().toUpperCase();
