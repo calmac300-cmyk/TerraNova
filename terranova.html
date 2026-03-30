@@ -816,8 +816,6 @@ let recording=false,routeMode=false,trail=[],trailLine=null,startMarker=null;
 let userMarker=null,currentPos=null,pendingPoints=null;
 let wakeLock=null,wakeLockDismissed=false;
 let territories=JSON.parse(localStorage.getItem('tv-territories')||'[]');
-// Purge territories with corrupt coordinates (e.g. nested arrays from a bad MultiPolygon merge)
-(()=>{const before=territories.length;territories=territories.filter(t=>{if(!t.points?.length)return false;const p=t.points[0];return Array.isArray(p)&&typeof p[0]==='number'&&typeof p[1]==='number';});if(territories.length<before)localStorage.setItem('tv-territories',JSON.stringify(territories));})();
 let realmName=localStorage.getItem('tv-realm-name')||'My Realm';
 let playerName=localStorage.getItem('tv-player-name')||'Explorer';
 let totalDistKm=parseFloat(localStorage.getItem('tv-total-dist')||'0');
@@ -1618,6 +1616,22 @@ function delT(i){
   territories.splice(i,1);saveTerritories();
   const li=polygonLayers.findIndex(l=>l.id===id);
   if(li>=0){map.removeLayer(polygonLayers[li].poly);if(polygonLayers[li].centroidMarker)map.removeLayer(polygonLayers[li].centroidMarker);polygonLayers.splice(li,1);}
+  // Re-fog circles inside the ceded territory (only if coordinates are valid numbers)
+  if(t.points?.length>=3&&typeof t.points[0][0]==='number'){
+    const newFog=[],newWater=new Set();
+    fogCircles.forEach((c,oldIdx)=>{
+      if(!pointInPoly([c.lng,c.lat],t.points)){
+        if(waterPts.has(oldIdx)) newWater.add(newFog.length);
+        newFog.push(c);
+      }
+    });
+    if(newFog.length<fogCircles.length){
+      fogCircles=newFog;waterPts=newWater;
+      localStorage.setItem('tv-fog-circles',JSON.stringify(fogCircles));
+      localStorage.setItem('tv-water-points',JSON.stringify([...waterPts]));
+      drawFog();
+    }
+  }
   updateHeader();renderDrawer();renderKingdom();
 }
 function saveTerritories(){localStorage.setItem('tv-territories',JSON.stringify(territories));if(db&&gameCode) queueSync();updateTownCrests();}
@@ -1874,6 +1888,7 @@ function startMultiplayerSync(){
   if(!db||!myUid||!gameCode) return;
   syncMyRealm();
   syncMyTerritories();
+  setTimeout(pruneMyFirebaseTerritories,5000);
   setMpBadge(`⚔ ${gameCode}`);
   if(mpUnsubPlayers) mpUnsubPlayers();
   mpUnsubPlayers=db.collection(`games/${gameCode}/players`).onSnapshot(snap=>{
@@ -1905,6 +1920,19 @@ function syncMyTerritories(){
     batch.set(ref,{...t,ownerUid:myUid,ownerName:playerName,realmName});
   });
   batch.commit().catch(()=>{});
+}
+function pruneMyFirebaseTerritories(){
+  if(!db||!myUid||!gameCode) return;
+  const localIds=new Set(territories.map(t=>String(t.id)));
+  db.collection(`games/${gameCode}/territories`)
+    .get().then(snap=>{
+      const batch=db.batch();let dirty=false;
+      snap.docs.filter(d=>d.id.startsWith(myUid+'_')).forEach(doc=>{
+        const tid=doc.id.slice(myUid.length+1);
+        if(!localIds.has(tid)){batch.delete(doc.ref);dirty=true;}
+      });
+      if(dirty) batch.commit().catch(()=>{});
+    }).catch(()=>{});
 }
 function queueSync(){
   clearTimeout(syncTimer);
