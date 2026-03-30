@@ -824,6 +824,8 @@ let recording=false,routeMode=false,trail=[],trailLine=null,startMarker=null;
 let userMarker=null,currentPos=null,pendingPoints=null;
 let wakeLock=null,wakeLockDismissed=false;
 let territories=JSON.parse(localStorage.getItem('tv-territories')||'[]');
+// Purge territories with corrupt coordinates (e.g. nested arrays from a bad MultiPolygon merge)
+(()=>{const before=territories.length;territories=territories.filter(t=>{if(!t.points?.length)return false;const p=t.points[0];return Array.isArray(p)&&typeof p[0]==='number'&&typeof p[1]==='number';});if(territories.length<before)localStorage.setItem('tv-territories',JSON.stringify(territories));})();
 let realmName=localStorage.getItem('tv-realm-name')||'My Realm';
 let playerName=localStorage.getItem('tv-player-name')||'Explorer';
 let totalDistKm=parseFloat(localStorage.getItem('tv-total-dist')||'0');
