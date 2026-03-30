@@ -335,7 +335,8 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 #game-code-input::placeholder{letter-spacing:0.04em;text-transform:none;opacity:0.35;}
 #game-modal-btns{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
 #game-code-display{font-family:var(--font-body);font-size:11px;color:var(--gold-lt);letter-spacing:0.08em;margin-top:8px;padding:8px;background:rgba(201,146,10,0.08);border-radius:6px;}
-#mp-status-badge{position:fixed;bottom:60px;left:14px;font-family:var(--font-body);font-size:9px;letter-spacing:0.06em;color:rgba(201,146,10,0.55);pointer-events:none;z-index:900;}
+#mp-status-badge{position:fixed;bottom:60px;left:14px;font-family:var(--font-body);font-size:11px;letter-spacing:0.08em;color:var(--gold-lt);background:rgba(14,10,4,0.75);border:1px solid rgba(201,146,10,0.35);border-radius:6px;padding:4px 10px;z-index:900;display:none;}
+#mp-status-badge.active{display:block;}
 .ach-icon{font-size:22px;margin-bottom:5px;}
 .ach-name{font-family:var(--font-body);font-size:11px;font-weight:600;color:var(--gold-lt);letter-spacing:0.04em;margin-bottom:3px;}
 .ach-desc{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.45);line-height:1.4;}
@@ -963,10 +964,32 @@ function castleSVG(s){
     <text x="20" y="33" text-anchor="middle" dominant-baseline="central" font-size="15" fill="${s.fg}" font-family="serif">${s.glyph}</text>
   </svg>`;
 }
+const TOWN_TIER={
+  townhall:{outline:'#ffd700',glow:'rgba(255,215,0,0.6)'},
+  city:    {outline:'#ffd700',glow:'rgba(255,215,0,0.6)'},
+  town:    {outline:'#d0d0d0',glow:'rgba(200,200,200,0.5)'},
+  village: {outline:'#cd7f32',glow:'rgba(180,110,40,0.5)'},
+  park:    {outline:'#80c050',glow:'rgba(100,180,60,0.4)'},
+  church:  {outline:'#b0b0d8',glow:'rgba(150,150,200,0.4)'},
+};
 function makeCastleIcon(label,sk){
   const s=CASTLE_STYLES[sk],h=Math.round(s.w*1.15);
   return L.divIcon({className:'',iconSize:[s.w,h+18],iconAnchor:[s.w/2,h+18],
     html:`<div class="town-shield-wrap"><div class="town-shield" style="width:${s.w}px;height:${h}px">${castleSVG(s)}</div><div class="town-label" style="font-size:${s.ls};color:${s.lc}">${label}</div></div>`});
+}
+function makeCrestTownIcon(label,sk){
+  const s=CASTLE_STYLES[sk],tier=TOWN_TIER[sk]||TOWN_TIER.village;
+  const h=Math.round(s.w*1.15);
+  const svg=buildCrestSVG(playerCrest,s.w);
+  return L.divIcon({className:'',iconSize:[s.w,h+18],iconAnchor:[s.w/2,h+18],
+    html:`<div class="town-shield-wrap"><div class="town-shield" style="width:${s.w}px;height:${h}px;filter:drop-shadow(0 0 5px ${tier.glow}) drop-shadow(0 0 2px ${tier.outline})">${svg}</div><div class="town-label" style="font-size:${s.ls};color:${tier.outline}">${label}</div></div>`});
+}
+function updateTownCrests(){
+  Object.values(castleMarkers).forEach(({mk,la,lo,sk,label})=>{
+    if(!mk||la==null||lo==null) return;
+    const owned=territories.some(t=>pointInPoly([lo,la],t.points));
+    mk.setIcon(owned?makeCrestTownIcon(label,sk):makeCastleIcon(label,sk));
+  });
 }
 function fetchCastles(lat,lng){
   if(lastCastlePos&&dist(lastCastlePos,[lat,lng])<800) return;lastCastlePos=[lat,lng];
@@ -991,8 +1014,9 @@ function fetchCastles(lat,lng){
       if(!la||!lo) return;
       const mk=L.marker([la,lo],{icon:makeCastleIcon(label,sk),zIndexOffset:800}).addTo(map);
       mk.bindTooltip(label,{className:'territory-tooltip',direction:'top',offset:[0,-4]});
-      castleMarkers[id]=mk;
+      castleMarkers[id]={mk,la,lo,sk,label};
     });
+    updateTownCrests();
   }).catch(()=>{});
 }
 
@@ -1021,6 +1045,7 @@ function onPos(pos){
     userMarker=L.marker([lat,lng],{icon,zIndexOffset:2000}).addTo(map);
     map.setView([lat,lng],16);setStatus('Position fixed. The expedition begins.','alert');
     document.getElementById('pin-row').style.display='';
+    fetchCastles(lat,lng);
     if(trail.length>=2){
       trailLine=L.polyline(trail,{color:'#c9920a',weight:3,opacity:0.9,dashArray:'8 5'}).addTo(map);
       placeStartDot(trail[0]);recording=true;
@@ -1532,7 +1557,7 @@ function delT(i){
   if(li>=0){map.removeLayer(polygonLayers[li].poly);if(polygonLayers[li].centroidMarker)map.removeLayer(polygonLayers[li].centroidMarker);polygonLayers.splice(li,1);}
   updateHeader();renderDrawer();renderKingdom();
 }
-function saveTerritories(){localStorage.setItem('tv-territories',JSON.stringify(territories));if(db&&gameCode) queueSync();}
+function saveTerritories(){localStorage.setItem('tv-territories',JSON.stringify(territories));if(db&&gameCode) queueSync();updateTownCrests();}
 
 // ═══════════════════ UTILS ═══════════════════
 function dist(a,b){const R=6371000,f1=a[0]*Math.PI/180,f2=b[0]*Math.PI/180,df=(b[0]-a[0])*Math.PI/180,dl=(b[1]-a[1])*Math.PI/180;return R*2*Math.atan2(Math.sqrt(Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2),Math.sqrt(1-(Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2)));}
@@ -1831,6 +1856,7 @@ function renderOtherTerritories(docs){
 function setMpBadge(txt){
   const el=document.getElementById('mp-status-badge');
   el.textContent=txt;
+  el.classList.toggle('active',!!txt);
   el.style.cursor=txt?'pointer':'';
   el.onclick=txt?()=>{navigator.clipboard?.writeText(gameCode||'');setStatus(`Code copied: ${gameCode}`,'alert');}:null;
 }
