@@ -251,7 +251,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 .town-shield-wrap{display:flex;flex-direction:column;align-items:center;pointer-events:all;cursor:pointer;}
 .town-shield{filter:drop-shadow(0 2px 6px rgba(0,0,0,0.75));transition:transform 0.18s;}
 .town-shield:active{transform:scale(0.9);}
-.town-label{font-family:var(--font-body);font-weight:600;letter-spacing:0.04em;color:var(--parchment);text-shadow:0 1px 4px rgba(0,0,0,0.95),0 0 10px rgba(0,0,0,0.9);margin-top:2px;max-width:80px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;line-height:1.2;}
+.town-label{font-family:var(--font-body);font-weight:600;letter-spacing:0.04em;color:var(--parchment);background:rgba(10,7,3,0.72);border-radius:4px;padding:1px 6px;margin-top:2px;max-width:90px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;line-height:1.5;}
 .territory-tooltip{font-family:var(--font-body)!important;font-size:11px!important;background:rgba(20,13,5,0.9)!important;border:1px solid rgba(201,146,10,0.4)!important;color:var(--gold-lt)!important;border-radius:4px!important;padding:4px 10px!important;box-shadow:none!important;}
 .territory-tooltip::before{display:none!important;}
 /* POI MARKERS */
@@ -393,6 +393,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
     <div id="gps-line">Awaiting celestial fix…</div>
     <div id="main-controls">
       <button class="scroll-btn" id="btn-find-me" onclick="centerOnUser()">Find Me</button>
+      <button class="scroll-btn" id="btn-route" onclick="startRoute()" style="display:none">🛤 Route</button>
       <button class="scroll-btn" id="btn-name-trail" style="display:none" onclick="nameTrail()">Name Trail</button>
       <button id="seal-btn" onclick="toggleRecording()">
         <div id="seal-pulse"></div>
@@ -819,7 +820,7 @@ function renderKingdomCrest(){
 }
 
 // ═══════════════════ STATE ═══════════════════
-let recording=false,trail=[],trailLine=null,startMarker=null;
+let recording=false,routeMode=false,trail=[],trailLine=null,startMarker=null;
 let userMarker=null,currentPos=null,pendingPoints=null;
 let wakeLock=null,wakeLockDismissed=false;
 let territories=JSON.parse(localStorage.getItem('tv-territories')||'[]');
@@ -877,12 +878,18 @@ let fogCircles=JSON.parse(localStorage.getItem('tv-fog-circles')||'[]');
 let waterPts=new Set(JSON.parse(localStorage.getItem('tv-water-points')||'[]'));
 
 function resizeFog(){fogCanvas.width=window.innerWidth;fogCanvas.height=window.innerHeight;drawFog();}
+function fogPixelRadius(){
+  const lat=map.getCenter().lat;
+  const mpp=40075016.686*Math.abs(Math.cos(lat*Math.PI/180))/Math.pow(2,map.getZoom()+8);
+  return Math.max(8, 80/mpp); // 80m geographic radius, min 8px
+}
 function drawFog(){
   const W=fogCanvas.width,H=fogCanvas.height;
   fogCtx.clearRect(0,0,W,H);fogCtx.fillStyle='rgba(18,11,4,0.80)';fogCtx.fillRect(0,0,W,H);
+  const r=fogPixelRadius();
   fogCtx.globalCompositeOperation='destination-out';
   fogCircles.forEach(c=>{
-    const pt=map.latLngToContainerPoint([c.lat,c.lng]),r=c.r||130;
+    const pt=map.latLngToContainerPoint([c.lat,c.lng]);
     const g=fogCtx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,r);
     g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(0.55,'rgba(0,0,0,0.9)');g.addColorStop(1,'rgba(0,0,0,0)');
     fogCtx.fillStyle=g;fogCtx.beginPath();fogCtx.arc(pt.x,pt.y,r,0,Math.PI*2);fogCtx.fill();
@@ -890,7 +897,7 @@ function drawFog(){
   fogCtx.globalCompositeOperation='source-over';
   fogCircles.forEach((c,i)=>{
     if(!waterPts.has(i)) return;
-    const pt=map.latLngToContainerPoint([c.lat,c.lng]),r=c.r||130;
+    const pt=map.latLngToContainerPoint([c.lat,c.lng]);
     const h=fogCtx.createRadialGradient(pt.x,pt.y,r*0.5,pt.x,pt.y,r*1.15);
     h.addColorStop(0,'rgba(20,60,100,0)');h.addColorStop(0.6,'rgba(20,60,100,0.18)');h.addColorStop(1,'rgba(20,60,100,0)');
     fogCtx.fillStyle=h;fogCtx.beginPath();fogCtx.arc(pt.x,pt.y,r*1.15,0,Math.PI*2);fogCtx.fill();
@@ -1079,6 +1086,7 @@ function onPos(pos){
     userMarker=L.marker([lat,lng],{icon,zIndexOffset:2000}).addTo(map);
     map.setView([lat,lng],16);setStatus('Position fixed. The expedition begins.','alert');
     document.getElementById('pin-row').style.display='';
+    document.getElementById('btn-route').style.display='';
     fetchCastles(lat,lng);
     if(trail.length>=2){
       trailLine=L.polyline(trail,{color:'#c9920a',weight:3,opacity:0.9,dashArray:'8 5'}).addTo(map);
@@ -1165,6 +1173,13 @@ function removeStartDot(){if(startMarker){map.removeLayer(startMarker);startMark
 
 // ═══════════════════ RECORDING ═══════════════════
 function toggleRecording(){recording?stopRecording():startRecording();}
+function startRoute(){
+  if(!currentPos){setStatus('Awaiting position fix…','danger');return;}
+  routeMode=true;
+  startRecording();
+  document.getElementById('seal-btn').style.borderColor='rgba(60,120,180,0.7)';
+  setStatus('Route recording started. Walk your path.','alert');
+}
 function startRecording(){
   if(!currentPos){setStatus('Awaiting position fix…','danger');return;}
   recording=true;wakeLockDismissed=false;
@@ -1175,6 +1190,7 @@ function startRecording(){
   document.getElementById('seal-btn').classList.add('recording');document.getElementById('seal-inner').textContent='◼';
   document.getElementById('btn-stop').style.display='';document.getElementById('btn-claim').style.display='none';
   document.getElementById('btn-find-me').style.display='';document.getElementById('btn-name-trail').style.display='none';
+  document.getElementById('btn-route').style.display='none';
   showHUD();acquireWL();startTimer();
   localStorage.setItem('tv-active-trail',JSON.stringify(trail));
   setStatus('The expedition has begun. Mark your trail.','alert');
@@ -1183,7 +1199,20 @@ function stopRecording(){
   if(trail.length>=3) logExpedition(null);
   recording=false;releaseWL();removeStartDot();hideHUD();stopTimer();clearTerritoryLabel();
   document.getElementById('seal-btn').classList.remove('recording');document.getElementById('seal-inner').textContent='⚑';
+  document.getElementById('seal-btn').style.borderColor='';
   document.getElementById('btn-stop').style.display='none';document.getElementById('territory-label').style.display='none';
+  if(routeMode){
+    routeMode=false;
+    if(trail.length>=2){
+      document.getElementById('btn-find-me').style.display='none';
+      document.getElementById('btn-name-trail').style.display='';
+      setStatus('Route complete. Name your road or trail.','');
+    } else {
+      setStatus('Too short to save as a route.','danger');
+      restoreFindMe();
+    }
+    return;
+  }
   if(trail.length>=3){
     document.getElementById('btn-claim').style.display='';
     document.getElementById('btn-find-me').style.display='none';
@@ -1197,6 +1226,7 @@ function stopRecording(){
 }
 function restoreFindMe(){
   document.getElementById('btn-find-me').style.display='';
+  document.getElementById('btn-route').style.display='';
   document.getElementById('btn-name-trail').style.display='none';
   document.getElementById('btn-claim').style.display='none';
 }
@@ -1273,7 +1303,13 @@ function saveMerge(){
       const r1=[...target.points.map(p=>[p[1],p[0]])];r1.push(r1[0]);
       const r2=[...pendingPoints.map(p=>[p[1],p[0]])];r2.push(r2[0]);
       const merged=turf.union(turf.polygon([r1]),turf.polygon([r2]));
-      newPoints=merged.geometry.coordinates[0].slice(0,-1).map(c=>[c[1],c[0]]);
+      let ring;
+      if(merged.geometry.type==='MultiPolygon'){
+        ring=merged.geometry.coordinates.reduce((a,b)=>a[0].length>b[0].length?a:b)[0];
+      } else {
+        ring=merged.geometry.coordinates[0];
+      }
+      newPoints=ring.slice(0,-1).map(c=>[c[1],c[0]]);
       newArea=turf.area(merged);
     }catch(e){newPoints=[...target.points,...pendingPoints];newArea=polyArea(newPoints);}
   }else{newPoints=[...target.points,...pendingPoints];newArea=polyArea(newPoints);}
@@ -1281,7 +1317,7 @@ function saveMerge(){
   const li=polygonLayers.findIndex(l=>l.id===target.id);
   if(li>=0){map.removeLayer(polygonLayers[li].poly);if(polygonLayers[li].centroidMarker)map.removeLayer(polygonLayers[li].centroidMarker);polygonLayers.splice(li,1);}
   drawPoly(territories[mergeTargetIdx],true);
-  fetchElevation(territories[mergeTargetIdx]);logExpedition(territories[mergeTargetIdx]);checkAchievements({event:'claim',area:territories[mergeTargetIdx].area});pushLedger('⚑',`Expanded ${target.emoji} ${target.name}`,null);finishClaim();setStatus(`"${target.name}" expanded! ✦`,'alert');
+  fetchElevation(territories[mergeTargetIdx]);logExpedition(territories[mergeTargetIdx]);checkAchievements({event:'claim',area:territories[mergeTargetIdx].area});pushLedger('⚑',`Expanded ${target.emoji} ${target.name}`,null);changeInstability(5,`Expanded ${target.name} — realm consolidated`);finishClaim();setStatus(`"${target.name}" expanded! ✦`,'alert');
 }
 
 function finishClaim(){
@@ -1837,7 +1873,7 @@ function leaveGame(){
   if(mpUnsubPlayers) mpUnsubPlayers();
   gameCode=null;myUid=null;
   localStorage.removeItem('tv-game-code');localStorage.removeItem('tv-solo-mode');
-  otherPolyLayers.forEach(l=>map.removeLayer(l));otherPolyLayers=[];
+  otherPolyLayers.forEach(({poly})=>map.removeLayer(poly));otherPolyLayers=[];
   knownRealms=[];
   setMpBadge('');renderDiplomacy();
 }
@@ -1882,7 +1918,7 @@ function queueSync(){
   syncTimer=setTimeout(syncMyTerritories,3000);
 }
 function renderOtherTerritories(docs){
-  otherPolyLayers.forEach(l=>map.removeLayer(l));
+  otherPolyLayers.forEach(({poly})=>map.removeLayer(poly));
   otherPolyLayers=[];otherTerritories=[];
   docs.forEach(doc=>{
     const d=doc.data();
@@ -1893,7 +1929,20 @@ function renderOtherTerritories(docs){
       fillColor:d.color.fill,fillOpacity:0.15,dashArray:'5 4'
     }).addTo(map);
     poly.bindTooltip(`${d.emoji||'⚑'} ${d.name}<br><small style="opacity:0.7">${d.realmName||d.ownerName||'Unknown Realm'}</small>`,{sticky:true,className:'territory-tooltip'});
-    otherPolyLayers.push(poly);
+    otherPolyLayers.push({poly, uid: d.ownerUid});
+  });
+}
+function flyToRival(uid){
+  const layers=otherPolyLayers.filter(o=>o.uid===uid);
+  if(!layers.length) return;
+  closeKingdom();
+  const group=L.featureGroup(layers.map(o=>o.poly));
+  map.fitBounds(group.getBounds().pad(0.3));
+  // briefly highlight
+  layers.forEach(({poly})=>{
+    const orig=poly.options.fillOpacity;
+    poly.setStyle({fillOpacity:0.55,weight:3});
+    setTimeout(()=>poly.setStyle({fillOpacity:orig,weight:1.5}),1800);
   });
 }
 function setMpBadge(txt){
@@ -1942,11 +1991,11 @@ function renderLeaderboard(){
   }
   const medals=['♛','⚔','⚑'];
   el.innerHTML=all.map((r,i)=>`
-    <div class="lb-row${r.isMe?' lb-me':''}">
+    <div class="lb-row${r.isMe?' lb-me':''}" ${!r.isMe?`onclick="flyToRival('${r.uid}')" style="cursor:pointer" title="Fly to ${r.realmName||'rival'}'s territory"`:''}>
       <div class="lb-rank${i<3?' lb-top':''}">${medals[i]||i+1}</div>
       <div class="lb-icon">${r.rankIcon||'🧭'}</div>
       <div class="lb-names">
-        <div class="lb-realm">${r.realmName||'Unknown Realm'}${r.isMe?' <span style="font-size:8px;opacity:0.4">(you)</span>':''}</div>
+        <div class="lb-realm">${r.realmName||'Unknown Realm'}${r.isMe?' <span style="font-size:8px;opacity:0.4">(you)</span>':'<span style="font-size:8px;opacity:0.35"> · tap to locate</span>'}</div>
         <div class="lb-player">${r.playerName||'Unknown'} · ${r.rank||'Wanderer'}</div>
       </div>
       <div style="text-align:right;flex-shrink:0">
