@@ -78,7 +78,8 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 #control-parchment::before{content:'⸻ ✦ ⸻';position:absolute;top:-1px;left:50%;transform:translateX(-50%);font-family:var(--font-body);font-size:10px;color:var(--gold);background:rgba(30,20,8,0.92);padding:0 8px;letter-spacing:4px;}
 #gps-line{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.4);text-align:center;margin-bottom:12px;min-height:14px;}
 #main-controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:center;margin-bottom:12px;}
-.scroll-btn{font-family:var(--font-body);font-weight:600;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;border-radius:6px;border:1px solid rgba(201,146,10,0.35);background:rgba(201,146,10,0.08);color:var(--parchment-dk);padding:10px 8px;cursor:pointer;transition:all 0.18s;touch-action:manipulation;}
+.scroll-btn{font-family:var(--font-body);font-weight:600;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;border-radius:6px;border:1px solid rgba(201,146,10,0.35);background:rgba(201,146,10,0.08);color:var(--parchment-dk);padding:10px 8px;cursor:pointer;transition:all 0.18s;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.btn-sub{font-family:var(--font-text);font-style:italic;font-size:8px;letter-spacing:0;text-transform:none;font-weight:400;opacity:0.55;line-height:1.2;}
 .scroll-btn:active{background:rgba(201,146,10,0.2);transform:scale(0.97);}
 .scroll-btn.claim-btn{background:rgba(45,90,39,0.3);border-color:rgba(90,128,56,0.55);color:#a8d890;}
 .scroll-btn.stop-btn{background:rgba(100,30,30,0.3);border-color:rgba(160,60,60,0.4);color:#e8a0a0;}
@@ -388,9 +389,9 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
     <div id="gps-line">Awaiting celestial fix…</div>
     <div id="main-controls">
       <button class="scroll-btn" id="btn-find-me" onclick="centerOnUser()">Find Me</button>
-      <button class="scroll-btn" id="btn-route" onclick="startRoute()" style="display:none">🛤 Route</button>
+      <button class="scroll-btn" id="btn-route" onclick="startRoute()" style="display:none">🛤 Route<span class="btn-sub">Point-to-point trail</span></button>
       <button class="scroll-btn" id="btn-name-trail" style="display:none" onclick="nameTrail()">Name Trail</button>
-      <button id="seal-btn" onclick="toggleRecording()">⚑ Conquer</button>
+      <button id="seal-btn" onclick="toggleRecording()">⚑ Conquer<span class="btn-sub" id="seal-sub">Walk a loop · Claim land</span></button>
       <div id="territory-label">
         <span id="territory-label-top"></span>
         <span id="territory-label-name"></span>
@@ -1089,7 +1090,7 @@ function onPos(pos){
     if(trail.length>=2){
       trailLine=L.polyline(trail,{color:'#c9920a',weight:3,opacity:0.9,dashArray:'8 5'}).addTo(map);
       placeStartDot(trail[0]);recording=true;
-      const _sb=document.getElementById('seal-btn');_sb.classList.add('recording');_sb.textContent='◼ Stop';
+      const _sb=document.getElementById('seal-btn');_sb.classList.add('recording');_sb.innerHTML='◼ Stop';
       document.getElementById('btn-stop').style.display='';showHUD();startTimer();acquireWL();
       setStatus(`Trail recovered — ${trail.length} waypoints restored.`,'alert');
     }
@@ -1189,7 +1190,7 @@ function startRecording(){
   if(trailLine){map.removeLayer(trailLine);trailLine=null;}
   trailLine=L.polyline(trail,{color:'#c9920a',weight:3,opacity:0.9,dashArray:'8 5'}).addTo(map);
   placeStartDot(currentPos);
-  const _sb=document.getElementById('seal-btn');_sb.classList.add('recording');_sb.textContent='◼ Stop';
+  const _sb=document.getElementById('seal-btn');_sb.classList.add('recording');_sb.innerHTML='◼ Stop';
   document.getElementById('btn-stop').style.display='';document.getElementById('btn-claim').style.display='none';document.getElementById('btn-close-border').style.display='none';
   document.getElementById('btn-find-me').style.display='';document.getElementById('btn-name-trail').style.display='none';
   document.getElementById('btn-route').style.display='none';
@@ -1200,7 +1201,7 @@ function startRecording(){
 function stopRecording(){
   if(trail.length>=3) logExpedition(null);
   recording=false;releaseWL();removeStartDot();hideHUD();stopTimer();clearTerritoryLabel();
-  const _sb2=document.getElementById('seal-btn');_sb2.classList.remove('recording');_sb2.textContent='⚑ Conquer';_sb2.style.borderColor='';
+  const _sb2=document.getElementById('seal-btn');_sb2.classList.remove('recording');_sb2.innerHTML='⚑ Conquer<span class="btn-sub">Walk a loop · Claim land</span>';_sb2.style.borderColor='';
   document.getElementById('btn-stop').style.display='none';document.getElementById('btn-close-border').style.display='none';document.getElementById('territory-label').style.display='none';
   if(routeMode){
     routeMode=false;
@@ -1360,7 +1361,7 @@ function finishClaim(){
   removeStartDot();clearTerritoryLabel();trail=[];pendingPoints=null;recording=false;
   releaseWL();hideHUD();stopTimer();
   localStorage.removeItem('tv-active-trail');localStorage.setItem('tv-total-dist',totalDistKm.toFixed(3));
-  const _sb3=document.getElementById('seal-btn');_sb3.classList.remove('recording');_sb3.textContent='⚑ Conquer';
+  const _sb3=document.getElementById('seal-btn');_sb3.classList.remove('recording');_sb3.innerHTML='⚑ Conquer<span class="btn-sub">Walk a loop · Claim land</span>';
   document.getElementById('btn-stop').style.display='none';
   document.getElementById('territory-label').style.display='none';
   restoreFindMe();updateHeader();renderDrawer();
