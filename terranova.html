@@ -830,7 +830,7 @@ let totalDistKm=parseFloat(localStorage.getItem('tv-total-dist')||'0');
 let polygonLayers=[];
 let mergeTargetIdx=null;
 let insideTerritory=null;
-let capitalId=localStorage.getItem('tv-capital-id')||null;
+let capitalId=Number(localStorage.getItem('tv-capital-id'))||null;
 let pois=JSON.parse(localStorage.getItem('tv-pois')||'[]');
 let namedTrails=JSON.parse(localStorage.getItem('tv-named-trails')||'[]');
 let poiMarkers=[],namedTrailLines=[],terraMarkers=[],terraUpdateTimer=null;
