@@ -101,6 +101,8 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 .start-dot{width:14px;height:14px;border-radius:50%;background:rgba(230,180,40,0.9);border:2px solid rgba(255,220,80,0.6);}
 .start-dot.pulsing{animation:loop-pulse 1.2s ease-out infinite;}
 @keyframes loop-pulse{0%{box-shadow:0 0 0 0 rgba(230,180,40,0.7);}70%{box-shadow:0 0 0 10px rgba(230,180,40,0);}100%{box-shadow:0 0 0 0 rgba(230,180,40,0);}}
+.border-pulse{animation:border-btn-pulse 1.4s ease-out infinite;}
+@keyframes border-btn-pulse{0%{box-shadow:0 0 0 0 rgba(168,216,144,0.6);}70%{box-shadow:0 0 0 8px rgba(168,216,144,0);}100%{box-shadow:0 0 0 0 rgba(168,216,144,0);}}
 /* CLAIM MODAL */
 #name-modal{position:absolute;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(10,7,3,0.82);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity 0.25s;}
 #name-modal.open{opacity:1;pointer-events:all;}
@@ -171,6 +173,99 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 #crest-save{background:rgba(45,90,39,0.4);border:1px solid rgba(90,128,56,0.6);color:#a8d890;}
 #crest-save:active{background:rgba(45,90,39,0.6);}
 
+/* ONBOARDING */
+#onboard-overlay{position:fixed;inset:0;z-index:800;background:rgba(8,5,2,0.92);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;transition:opacity 0.5s;}
+#onboard-overlay.visible{opacity:1;}
+#onboard-card{background:#1a1106;border:1px solid rgba(201,146,10,0.35);border-radius:14px;padding:32px 24px 24px;width:min(380px,100%);text-align:center;box-shadow:0 12px 60px rgba(0,0,0,0.8);}
+#onboard-card::before{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin-bottom:28px;opacity:0.4;}
+.onboard-step{display:none;}.onboard-step.active{display:block;}
+.onboard-icon{font-size:44px;margin-bottom:16px;line-height:1;}
+.onboard-title{font-family:var(--font-gothic);font-size:20px;color:var(--gold-lt);letter-spacing:1px;margin-bottom:12px;}
+.onboard-body{font-family:var(--font-text);font-style:italic;font-size:13px;color:rgba(242,232,204,0.6);line-height:1.75;margin-bottom:24px;}
+.onboard-body strong{font-style:normal;color:var(--parchment);font-family:var(--font-body);}
+#onboard-dots{display:flex;justify-content:center;gap:8px;margin-bottom:22px;}
+.onboard-dot{width:6px;height:6px;border-radius:50%;background:rgba(201,146,10,0.2);transition:background 0.3s;}
+.onboard-dot.active{background:var(--gold);}
+#onboard-next{width:100%;padding:13px;border-radius:8px;font-family:var(--font-body);font-weight:600;font-size:13px;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;touch-action:manipulation;background:rgba(45,90,39,0.4);border:1px solid rgba(90,128,56,0.6);color:#a8d890;transition:all 0.18s;}
+#onboard-next:active{background:rgba(45,90,39,0.6);}
+#onboard-skip{background:none;border:none;font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.2);cursor:pointer;margin-top:12px;padding:4px;display:block;width:100%;}
+/* PROVINCE DETAIL SHEET */
+#province-sheet{position:fixed;bottom:0;left:0;right:0;z-index:450;background:#14100a;border-top:1px solid rgba(201,146,10,0.3);border-radius:18px 18px 0 0;padding:20px 20px 36px;transform:translateY(100%);transition:transform 0.32s cubic-bezier(0.4,0,0.2,1);box-shadow:0 -8px 40px rgba(0,0,0,0.7);max-width:480px;margin:0 auto;}
+#province-sheet.open{transform:translateY(0);}
+#province-sheet-handle{width:36px;height:4px;background:rgba(201,146,10,0.25);border-radius:2px;margin:0 auto 18px;}
+#ps-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+#ps-crest{flex-shrink:0;}
+#ps-title{flex:1;}
+#ps-name{font-family:var(--font-gothic);font-size:18px;color:var(--gold-lt);letter-spacing:1px;}
+#ps-sub{font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.4);margin-top:2px;}
+#ps-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.ps-badge{font-family:var(--font-body);font-size:10px;letter-spacing:0.04em;padding:3px 10px;border-radius:12px;border:1px solid rgba(201,146,10,0.25);color:rgba(242,232,204,0.55);background:rgba(201,146,10,0.06);}
+.ps-badge.gold{border-color:rgba(201,146,10,0.5);color:var(--gold-lt);background:rgba(201,146,10,0.1);}
+#ps-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px;}
+.ps-stat{background:rgba(20,14,5,0.7);border:1px solid rgba(201,146,10,0.12);border-radius:8px;padding:10px;text-align:center;}
+.ps-stat-val{font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--gold-lt);}
+.ps-stat-lbl{font-family:var(--font-text);font-style:italic;font-size:9px;color:rgba(242,232,204,0.35);margin-top:2px;}
+#ps-actions{display:flex;gap:8px;}
+.ps-act{flex:1;padding:10px;border-radius:7px;font-family:var(--font-body);font-size:11px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;touch-action:manipulation;transition:all 0.18s;border:1px solid rgba(201,146,10,0.3);background:rgba(201,146,10,0.07);color:var(--parchment-dk);}
+.ps-act.danger{border-color:rgba(160,60,60,0.4);background:rgba(100,30,30,0.25);color:#e8a0a0;}
+.ps-act:active{transform:scale(0.97);}
+#ps-overlay{position:fixed;inset:0;z-index:449;background:rgba(0,0,0,0);pointer-events:none;transition:background 0.32s;}
+#ps-overlay.open{background:rgba(0,0,0,0.45);pointer-events:all;}
+/* REALM WAR */
+#war-screen{position:absolute;inset:0;z-index:400;background:#0e0a04;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity 0.35s;}
+#war-screen.open{opacity:1;pointer-events:all;}
+#war-inner{min-height:100%;padding:24px 18px 40px;max-width:480px;margin:0 auto;}
+#war-header{text-align:center;padding-bottom:22px;border-bottom:1px solid rgba(180,40,40,0.25);margin-bottom:24px;position:relative;}
+#war-header::before{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,rgba(180,40,40,0.5),transparent);margin-bottom:20px;opacity:0.7;}
+#war-close{position:absolute;top:0;right:0;background:none;border:1px solid rgba(242,232,204,0.15);border-radius:6px;color:rgba(242,232,204,0.4);font-family:var(--font-body);font-size:11px;padding:5px 12px;cursor:pointer;touch-action:manipulation;}
+#war-title{font-family:var(--font-gothic);font-size:22px;color:rgba(220,80,60,0.9);letter-spacing:2px;text-shadow:0 2px 10px rgba(180,40,40,0.4);}
+#war-game-meta{font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.35);margin-top:6px;line-height:1.7;}
+#war-game-meta span{color:var(--gold-lt);font-style:normal;}
+#war-solo-prompt{text-align:center;padding:40px 20px;}
+#war-solo-prompt p{font-family:var(--font-text);font-style:italic;color:rgba(242,232,204,0.35);font-size:12px;margin-bottom:18px;line-height:1.7;}
+.war-realm-card{background:rgba(20,14,5,0.7);border:1px solid rgba(201,146,10,0.18);border-radius:10px;padding:14px;margin-bottom:10px;transition:border-color 0.2s;}
+.war-realm-card.me{border-color:rgba(201,146,10,0.35);background:rgba(201,146,10,0.05);}
+.war-realm-card.ally{border-color:rgba(60,140,80,0.4);}
+.war-realm-card.rival{border-color:rgba(180,50,50,0.4);}
+.wrc-top{display:flex;align-items:center;gap:12px;}
+.wrc-crest{flex-shrink:0;}
+.wrc-info{flex:1;min-width:0;}
+.wrc-realm{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--parchment);letter-spacing:0.03em;}
+.wrc-player{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.4);margin-top:1px;}
+.wrc-stats{display:flex;gap:14px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(201,146,10,0.08);}
+.wrc-stat{text-align:center;flex:1;}
+.wrc-stat-val{font-family:var(--font-body);font-size:12px;font-weight:600;color:var(--gold-lt);}
+.wrc-stat-lbl{font-family:var(--font-text);font-style:italic;font-size:8px;color:rgba(242,232,204,0.3);margin-top:1px;}
+.wrc-dipl{display:flex;gap:6px;margin-top:10px;}
+.dipl-btn{flex:1;padding:5px 4px;border-radius:5px;font-family:var(--font-body);font-size:9px;letter-spacing:0.04em;cursor:pointer;touch-action:manipulation;transition:all 0.18s;border:1px solid rgba(201,146,10,0.2);background:rgba(201,146,10,0.04);color:rgba(242,232,204,0.35);}
+.dipl-btn.active-ally{background:rgba(40,100,60,0.35);border-color:rgba(60,160,90,0.5);color:#7dd890;}
+.dipl-btn.active-rival{background:rgba(100,30,30,0.35);border-color:rgba(180,60,60,0.5);color:#e88080;}
+.dipl-btn.active-neutral{background:rgba(201,146,10,0.12);border-color:rgba(201,146,10,0.4);color:var(--gold-lt);}
+.wrc-fly{background:none;border:1px solid rgba(201,146,10,0.25);border-radius:5px;color:rgba(201,146,10,0.5);font-family:var(--font-body);font-size:9px;padding:4px 10px;cursor:pointer;touch-action:manipulation;flex-shrink:0;align-self:flex-start;}
+.wrc-fly:active{background:rgba(201,146,10,0.1);}
+.war-feed-entry{padding:8px 0;border-bottom:1px solid rgba(201,146,10,0.07);font-family:var(--font-text);font-size:11px;color:rgba(242,232,204,0.5);line-height:1.5;}
+.war-feed-entry:last-child{border-bottom:none;}
+.war-feed-time{font-size:9px;color:rgba(242,232,204,0.25);margin-top:2px;}
+#war-feed-empty{font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.2);text-align:center;padding:14px 0;}
+/* WAR TABS */
+#war-tabs{display:flex;gap:0;margin-bottom:20px;border:1px solid rgba(180,40,40,0.25);border-radius:7px;overflow:hidden;}
+.war-tab{flex:1;padding:9px 4px;text-align:center;cursor:pointer;touch-action:manipulation;font-family:var(--font-body);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:rgba(242,232,204,0.35);background:transparent;border:none;transition:all 0.18s;}
+.war-tab.active{background:rgba(180,40,40,0.2);color:rgba(220,120,100,0.9);}
+.war-tab-panel{display:none;}.war-tab-panel.active{display:block;}
+/* WAR CHAT */
+#war-chat-list{max-height:340px;overflow-y:auto;margin-bottom:12px;}
+.chat-msg{padding:8px 0;border-bottom:1px solid rgba(201,146,10,0.07);}
+.chat-msg:last-child{border-bottom:none;}
+.chat-realm{font-family:var(--font-body);font-size:11px;font-weight:600;color:var(--parchment);}
+.chat-realm.ally{color:#7dd890;}.chat-realm.rival{color:#e88080;}.chat-realm.me{color:var(--gold-lt);}
+.chat-text{font-family:var(--font-text);font-style:italic;font-size:12px;color:rgba(242,232,204,0.6);line-height:1.5;margin-top:2px;}
+.chat-time{font-size:9px;color:rgba(242,232,204,0.2);margin-top:2px;}
+#war-chat-empty{font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.2);text-align:center;padding:24px 0;}
+#war-chat-input-row{display:flex;gap:8px;align-items:stretch;}
+#war-chat-input{flex:1;background:rgba(20,14,5,0.8);border:1px solid rgba(180,40,40,0.25);border-radius:6px;padding:10px 12px;font-family:var(--font-text);font-style:italic;font-size:12px;color:var(--parchment);outline:none;}
+#war-chat-input::placeholder{color:rgba(242,232,204,0.2);}
+#war-chat-send{background:rgba(180,40,40,0.2);border:1px solid rgba(180,40,40,0.4);border-radius:6px;color:rgba(220,120,100,0.8);font-family:var(--font-body);font-size:10px;letter-spacing:0.05em;padding:0 16px;cursor:pointer;touch-action:manipulation;white-space:nowrap;}
+#war-chat-send:active{background:rgba(180,40,40,0.4);}
 /* KINGDOM */
 #kingdom-screen{position:absolute;inset:0;z-index:400;background:#0e0a04;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity 0.35s;}
 #kingdom-screen.open{opacity:1;pointer-events:all;}
@@ -355,6 +450,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
     <div class="hstat"><div class="hstat-label">Provinces</div><div class="hstat-value" id="stat-zones">0</div></div>
     <div class="hstat"><div class="hstat-label">Domain</div><div class="hstat-value" id="stat-area">—</div></div>
     <div class="hstat"><div class="hstat-label">Rank</div><div class="hstat-value" id="stat-rank">I</div></div>
+    <div class="hstat" style="cursor:pointer;pointer-events:all" onclick="openRealmWar()"><div class="hstat-label">War</div><div class="hstat-value" style="color:rgba(220,80,60,0.85)">⚔</div></div>
   </div>
 </div>
 
@@ -491,6 +587,85 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
   </div>
 </div>
 
+<!-- ONBOARDING OVERLAY -->
+<div id="onboard-overlay">
+  <div id="onboard-card">
+    <div class="onboard-step active" id="onboard-step-0">
+      <div class="onboard-icon">🗺</div>
+      <div class="onboard-title">Welcome to Terranova</div>
+      <div class="onboard-body">You are an <strong>Explorer</strong> — venture out into the world and claim the land you walk.<br><br>Your realm grows with every step. Build an empire from your daily adventures.</div>
+    </div>
+    <div class="onboard-step" id="onboard-step-1">
+      <div class="onboard-icon">⚑</div>
+      <div class="onboard-title">Conquer Territory</div>
+      <div class="onboard-body">Tap <strong>Start Recording</strong> and walk a loop outdoors. When you return close to where you started, tap <strong>Claim Province</strong> to seal your territory.<br><br>The bigger the loop, the mightier the realm.</div>
+    </div>
+    <div class="onboard-step" id="onboard-step-2">
+      <div class="onboard-icon">🧭</div>
+      <div class="onboard-title">Explore the Unknown</div>
+      <div class="onboard-body">The <strong>fog of war</strong> lifts as you move through the world. Tap the map icon to switch between <strong>Territory</strong> and <strong>Route</strong> modes.<br><br>Discover Terra Incognita — ancient wonders hidden beyond the mist.</div>
+    </div>
+    <div id="onboard-dots">
+      <div class="onboard-dot active"></div>
+      <div class="onboard-dot"></div>
+      <div class="onboard-dot"></div>
+    </div>
+    <button id="onboard-next" onclick="onboardNext()">Begin</button>
+    <button id="onboard-skip" onclick="closeOnboarding()">skip</button>
+  </div>
+</div>
+
+<!-- PROVINCE DETAIL SHEET -->
+<div id="ps-overlay" onclick="closeProvinceSheet()"></div>
+<div id="province-sheet">
+  <div id="province-sheet-handle"></div>
+  <div id="ps-header">
+    <div id="ps-crest"></div>
+    <div id="ps-title">
+      <div id="ps-name"></div>
+      <div id="ps-sub"></div>
+    </div>
+  </div>
+  <div id="ps-badges"></div>
+  <div id="ps-stats"></div>
+  <div id="ps-actions"></div>
+</div>
+
+<!-- REALM WAR SCREEN -->
+<div id="war-screen">
+  <div id="war-inner">
+    <div id="war-header">
+      <button id="war-close" onclick="closeRealmWar()">✕ Close</button>
+      <div id="war-title">⚔ Realm War</div>
+      <div id="war-game-meta"></div>
+    </div>
+    <div id="war-solo-prompt" style="display:none">
+      <p>You are playing solo.<br>Create a game and invite friends to begin the conquest.</p>
+      <button class="modal-btn" style="width:auto;padding:10px 28px" onclick="closeRealmWar();openGameModal()">⚔ Join or Create a Game</button>
+    </div>
+    <div id="war-mp-content">
+      <div id="war-tabs">
+        <button class="war-tab active" data-tab="realms" onclick="switchWarTab('realms')">Realms</button>
+        <button class="war-tab" data-tab="feed" onclick="switchWarTab('feed')">War Feed</button>
+        <button class="war-tab" data-tab="chat" onclick="switchWarTab('chat')">Chat</button>
+      </div>
+      <div id="war-panel-realms" class="war-tab-panel active">
+        <div id="war-realms-list"></div>
+      </div>
+      <div id="war-panel-feed" class="war-tab-panel">
+        <div id="war-feed-list"></div>
+      </div>
+      <div id="war-panel-chat" class="war-tab-panel">
+        <div id="war-chat-list"></div>
+        <div id="war-chat-input-row">
+          <input id="war-chat-input" type="text" placeholder="Proclaim to the realm…" maxlength="200" onkeydown="if(event.key==='Enter')sendWarChat()">
+          <button id="war-chat-send" onclick="sendWarChat()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- KINGDOM SCREEN -->
 <div id="kingdom-screen">
   <div id="kingdom-inner">
@@ -571,9 +746,6 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
     <div id="trails-section">
       <h3>Named Trails</h3>
       <div id="trails-list"></div>
-    </div>
-    <div style="text-align:center;margin-top:32px;padding-top:16px;border-top:1px solid rgba(201,146,10,0.1)">
-      <button onclick="hardReset()" style="background:none;border:none;font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.2);cursor:pointer;padding:8px">⚠ Reset All Data</button>
     </div>
   </div>
 </div>
@@ -840,7 +1012,11 @@ let instability=parseFloat(localStorage.getItem('tv-instability')||'100');
 let knownRealms=JSON.parse(localStorage.getItem('tv-known-realms')||'[]');
 let gameCode=localStorage.getItem('tv-game-code')||null;
 let db=null,fbAuth=null,myUid=localStorage.getItem('tv-player-uid')||null;
-let otherPolyLayers=[],otherTerritories=[],syncTimer=null,mpUnsubTerritories=null,mpUnsubPlayers=null;
+let diplomaticStatus=JSON.parse(localStorage.getItem('tv-diplomatic-status')||'{}');
+let warFeed=JSON.parse(localStorage.getItem('tv-war-feed')||'[]');
+let gameStartDate=parseInt(localStorage.getItem('tv-game-start-date')||'0');
+let otherPolyLayers=[],otherTerritories=[],syncTimer=null,mpUnsubTerritories=null,mpUnsubPlayers=null,mpUnsubChat=null,contestedLayers=[];
+let warMessages=[],warTab='realms';
 const POI_CATS=[{icon:'☕',label:'Food & Drink'},{icon:'🌳',label:'Nature'},{icon:'👻',label:'Spooky'},{icon:'🗿',label:'Landmark'},{icon:'⭐',label:'Notable'},{icon:'🎣',label:'Activity'},{icon:'🎵',label:'Culture'},{icon:'📸',label:'View'}];
 
 // Crash recovery
@@ -891,6 +1067,15 @@ function drawFog(){
     const g=fogCtx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,r);
     g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(0.55,'rgba(0,0,0,0.9)');g.addColorStop(1,'rgba(0,0,0,0)');
     fogCtx.fillStyle=g;fogCtx.beginPath();fogCtx.arc(pt.x,pt.y,r,0,Math.PI*2);fogCtx.fill();
+  });
+  // Named trail fog corridors (~30m radius per point)
+  const rCorridor=Math.max(3,r*0.375);
+  fogCtx.fillStyle='rgba(0,0,0,0.82)';
+  namedTrails.forEach(nt=>{
+    nt.points.forEach(p=>{
+      const pt=map.latLngToContainerPoint([p[0],p[1]]);
+      fogCtx.beginPath();fogCtx.arc(pt.x,pt.y,rCorridor,0,Math.PI*2);fogCtx.fill();
+    });
   });
   // Owned territories are fully revealed
   fogCtx.fillStyle='rgba(0,0,0,1)';
@@ -1109,12 +1294,20 @@ function onPos(pos){
   trail.push([lat,lng]);if(trailLine) trailLine.setLatLngs(trail);
   if(!onPos._t) onPos._t=setTimeout(()=>{localStorage.setItem('tv-active-trail',JSON.stringify(trail));onPos._t=null;},5000);
   updateHUD();
-  if(trail.length>=6){
+  if(trail.length>=10){
     const ds=dist(trail[0],[lat,lng]),canClose=ds<65;
     const segLen=trail.length-trailSegmentStart;
-    const canBorderClose=!!(insideTerritory&&segLen>=6);
+    const canBorderClose=!!(insideTerritory&&segLen>=10);
+    // Signal first detection of border-close opportunity
+    if(canBorderClose&&!onPos._prevBorderClose){
+      navigator.vibrate?.([100,60,120]);
+      setStatus('Loop detected — tap Close Province to seal your territory! ✦','alert');
+    }
+    onPos._prevBorderClose=canBorderClose;
     // Border-close takes priority over normal close when inside own territory
-    document.getElementById('btn-close-border').style.display=canBorderClose?'':'none';
+    const bcBtn=document.getElementById('btn-close-border');
+    bcBtn.style.display=canBorderClose?'':'none';
+    bcBtn.classList.toggle('border-pulse',canBorderClose);
     document.getElementById('btn-claim').style.display=(!canBorderClose&&canClose)?'':'none';
     document.getElementById('territory-label').style.display=(!canBorderClose&&!canClose&&insideTerritory)?'':'none';
     document.getElementById('hud-loop').textContent=fmtDist(ds);
@@ -1322,14 +1515,22 @@ function dSeg(p,a,b){const dx=b[0]-a[0],dy=b[1]-a[1];if(!dx&&!dy) return dist(p,
 function cancelClaim(){pendingPoints=null;mergeTargetIdx=null;document.getElementById('name-modal').classList.remove('open');}
 
 function saveClaim(){
+  const area=polyArea(pendingPoints);
+  if(area<4000){
+    document.getElementById('name-modal').classList.remove('open');
+    setStatus('Province too small — walk a larger loop to claim land.','danger');
+    if(borderCloseMode){borderCloseMode=false;}else{finishClaim();}
+    return;
+  }
   const name=document.getElementById('territory-input').value.trim()||'Unknown Lands';
   document.getElementById('name-modal').classList.remove('open');
   const pal=PALETTE[playerCrest.colorIdx];
   const color={fill:pal.fill,stroke:pal.stroke,text:pal.text};
   const emoji=T_EMOJIS[territories.length%T_EMOJIS.length];
-  const t={id:Date.now(),name,emoji,points:pendingPoints,color,area:polyArea(pendingPoints),
+  const t={id:Date.now(),name,emoji,points:pendingPoints,color,area,
     date:new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})};
   territories.push(t);saveTerritories();drawPoly(t,true);
+  carveEnemyOverlap(t);
   fetchElevation(t);logExpedition(t);checkAchievements({event:'claim',area:t.area});pushLedger('⚑',`Claimed ${t.emoji} ${name}`,null);changeInstability(5,`Claimed ${name} — realm consolidated`);
   if(borderCloseMode){continueBorderRecording();}else{finishClaim();setStatus(`"${name}" — claimed for the realm! ✦`,'alert');}
 }
@@ -1358,10 +1559,37 @@ function saveMerge(){
   const li=polygonLayers.findIndex(l=>l.id===target.id);
   if(li>=0){map.removeLayer(polygonLayers[li].poly);if(polygonLayers[li].centroidMarker)map.removeLayer(polygonLayers[li].centroidMarker);polygonLayers.splice(li,1);}
   drawPoly(territories[mergeTargetIdx],true);
+  carveEnemyOverlap(territories[mergeTargetIdx]);
   fetchElevation(territories[mergeTargetIdx]);logExpedition(territories[mergeTargetIdx]);checkAchievements({event:'claim',area:territories[mergeTargetIdx].area});pushLedger('⚑',`Expanded ${target.emoji} ${target.name}`,null);changeInstability(5,`Expanded ${target.name} — realm consolidated`);
   if(borderCloseMode){continueBorderRecording();}else{finishClaim();setStatus(`"${target.name}" expanded! ✦`,'alert');}
 }
 
+function carveEnemyOverlap(myT){
+  if(!gameCode||!myUid||typeof turf==='undefined'||!otherTerritories.length) return;
+  const myRing=[...myT.points.map(p=>[p[1],p[0]])];myRing.push(myRing[0]);
+  let myPoly;try{myPoly=turf.polygon([myRing]);}catch(e){return;}
+  otherTerritories.forEach(otherT=>{
+    if(!validPoints(otherT.points)) return;
+    const otherRing=[...otherT.points.map(p=>[p[1],p[0]])];otherRing.push(otherRing[0]);
+    let otherPoly;try{otherPoly=turf.polygon([otherRing]);}catch(e){return;}
+    let intersection;try{intersection=turf.intersect(myPoly,otherPoly);}catch(e){return;}
+    if(!intersection) return;
+    const areaLost=turf.area(intersection);
+    const docId=`${otherT.ownerUid}_${otherT.id}`;
+    let carved;try{carved=turf.difference(otherPoly,myPoly);}catch(e){return;}
+    if(!carved||turf.area(carved)<100){
+      db.collection(`games/${gameCode}/territories`).doc(docId).delete().catch(()=>{});
+    } else {
+      let ring;
+      if(carved.geometry.type==='MultiPolygon'){
+        ring=carved.geometry.coordinates.reduce((a,b)=>a[0].length>b[0].length?a:b)[0];
+      } else {ring=carved.geometry.coordinates[0];}
+      const newPoints=ring.slice(0,-1).map(c=>[c[1],c[0]]);
+      db.collection(`games/${gameCode}/territories`).doc(docId).update({points:newPoints,area:turf.area(carved)}).catch(()=>{});
+    }
+    pushWarFeed(`⚔ ${realmName} seized ${formatArea(Math.round(areaLost))} from ${otherT.realmName||otherT.ownerName||'Unknown Realm'}`);
+  });
+}
 function finishClaim(){
   claimedPolylines.forEach(l=>map.removeLayer(l));claimedPolylines=[];trailSegmentStart=0;
   if(trailLine){map.removeLayer(trailLine);trailLine=null;}
@@ -1421,6 +1649,7 @@ function drawPoly(t,animate){
   if(!validPoints(t.points)) return; // skip corrupt territory — still cedable from Kingdom screen
   const poly=L.polygon(t.points,{color:t.color.stroke,weight:2,opacity:0.9,fillColor:t.color.fill,fillOpacity:animate?0:visitOpacity(t),dashArray:'6 3'}).addTo(map);
   poly.bindTooltip(t.emoji+' '+t.name,{permanent:false,sticky:true,className:'territory-tooltip'});
+  poly.on('click',()=>openProvinceSheet(t));
   // Crest + province/realm label marker
   const center=poly.getBounds().getCenter();
   const centroidMarker=L.marker(center,{icon:buildCentroidIcon(t),interactive:false,zIndexOffset:100}).addTo(map);
@@ -1464,6 +1693,20 @@ function computePowerScore(){
   return Math.floor(totalArea/500)+valid.length*150+Math.floor(totalDistKm*100)+unlockedAchievements.size*200;
 }
 function fmtGold(g){return g>=1000?Math.round(g).toLocaleString():g>=10?Math.round(g).toString():g.toFixed(1);}
+function trailConnectsOwned(nt){
+  const s=nt.points[0],e=nt.points[nt.points.length-1];
+  const sIn=territories.some(t=>validPoints(t.points)&&pointInPoly([s[1],s[0]],t.points));
+  const eIn=territories.some(t=>validPoints(t.points)&&pointInPoly([e[1],e[0]],t.points));
+  return sIn&&eIn;
+}
+function provinceHasRoad(t){
+  if(!validPoints(t.points)) return false;
+  return namedTrails.some(nt=>{
+    if(!trailConnectsOwned(nt)) return false;
+    const s=nt.points[0],e=nt.points[nt.points.length-1];
+    return pointInPoly([s[1],s[0]],t.points)||pointInPoly([e[1],e[0]],t.points);
+  });
+}
 function provinceIncome(t){
   if(!t.area) return 0;
   let base=t.area/500000;
@@ -1476,6 +1719,7 @@ function provinceIncome(t){
   if(days>=30) base*=0.25;
   else if(days>=8) base*=0.6;
   if(t.investedUntil>Date.now()) base*=1.5;
+  if(provinceHasRoad(t)) base*=1.15;
   return Math.max(0,base);
 }
 function totalDailyIncome(){return territories.reduce((s,t)=>s+provinceIncome(t),0);}
@@ -1712,7 +1956,7 @@ function delT(i){
   }
   updateHeader();renderDrawer();renderKingdom();
 }
-function saveTerritories(){localStorage.setItem('tv-territories',JSON.stringify(territories));if(db&&gameCode) queueSync();updateTownCrests();}
+function saveTerritories(){localStorage.setItem('tv-territories',JSON.stringify(territories));if(db&&gameCode) queueSync();updateTownCrests();updateContestedBorders();}
 
 // ═══════════════════ UTILS ═══════════════════
 function dist(a,b){const R=6371000,f1=a[0]*Math.PI/180,f2=b[0]*Math.PI/180,df=(b[0]-a[0])*Math.PI/180,dl=(b[1]-a[1])*Math.PI/180;return R*2*Math.atan2(Math.sqrt(Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2),Math.sqrt(1-(Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2)));}
@@ -1833,34 +2077,74 @@ function fetchElevation(t){
 }
 
 // ═══════════════════ TERRA INCOGNITA ═══════════════════
+let terraDiscovered=new Set(JSON.parse(localStorage.getItem('tv-terra-discovered')||'[]'));
+const TERRA_HINTS=[
+  'Ancient ruins whisper of forgotten realms beyond.',
+  'Travellers spoke of strange lights here — none returned.',
+  'The cartographer\'s quill trembled at this very edge.',
+  'Here the known world surrenders to the unknown.',
+  'Echoes of an older age drift in from beyond the veil.',
+  'The fog grows thick — your realm does not reach here.',
+  'Something vast and still watches from the other side.',
+  'No kingdom has ever laid claim to what lies beyond.',
+  'The stars look different past this boundary.',
+  'A great silence lies where the mist refuses to lift.',
+];
 function posTM(m){const p=map.latLngToContainerPoint([m.lat,m.lng]);m.el.style.left=p.x+'px';m.el.style.top=p.y+'px';}
+function discoverTerra(lat,lng){
+  const key=lat.toFixed(4)+'_'+lng.toFixed(4);
+  if(terraDiscovered.has(key)){setStatus('This land has already yielded its secrets.','alert');return;}
+  terraDiscovered.add(key);
+  localStorage.setItem('tv-terra-discovered',JSON.stringify([...terraDiscovered]));
+  gold+=5;localStorage.setItem('tv-gold',gold.toFixed(4));
+  pushLedger('🌫','Discovered Terra Incognita',5);
+  updateHeader();
+  setStatus('+5⚜  ·  '+TERRA_HINTS[Math.floor(Math.random()*TERRA_HINTS.length)],'alert');
+  updateTerraIncognita();
+}
 function updateTerraIncognita(){
   terraMarkers.forEach(m=>m.el.parentNode?.removeChild(m.el));terraMarkers=[];
   if(!fogCircles.length) return;
   const OFFSET=200,MINDIST=220,mPerLat=111000;
   const dirs=[[1,0],[0,1],[-1,0],[0,-1],[0.707,0.707],[0.707,-0.707],[-0.707,0.707],[-0.707,-0.707]];
   const candidates=[];
-  fogCircles.forEach(c=>{
+  fogCircles.forEach((c,cidx)=>{
     dirs.forEach(([dlat,dlng])=>{
       const lat=c.lat+dlat*OFFSET/mPerLat;
       const lng=c.lng+dlng*OFFSET/(mPerLat*Math.cos(c.lat*Math.PI/180));
-      // Check in screen space so the threshold matches the actual visible fog radius
       const pt=map.latLngToContainerPoint([lat,lng]);
       const covered=fogCircles.some(fc=>{
         const fp=map.latLngToContainerPoint([fc.lat,fc.lng]);
         return Math.hypot(pt.x-fp.x,pt.y-fp.y)<(fc.r||130)*0.9;
       });
       if(covered) return;
-      // Skip if inside own claimed territory
       if(territories.some(t=>pointInPoly([lng,lat],t.points))) return;
       if(candidates.some(ca=>dist([ca.lat,ca.lng],[lat,lng])<MINDIST)) return;
-      candidates.push({lat,lng});
+      const key=lat.toFixed(4)+'_'+lng.toFixed(4);
+      const discovered=terraDiscovered.has(key);
+      let sym;
+      if(discovered){
+        sym='✦';
+      } else if(waterPts.has(cidx)){
+        sym='〰';
+      } else {
+        const nearMountain=territories.some(t=>{
+          if(t.terrain!=='Mountain'&&t.terrain!=='Highland') return false;
+          const cLat=t.points.reduce((s,p)=>s+p[0],0)/t.points.length;
+          const cLng=t.points.reduce((s,p)=>s+p[1],0)/t.points.length;
+          return dist([cLat,cLng],[lat,lng])<8000;
+        });
+        if(nearMountain) sym='⛰';
+        else sym=['?','✦','☽','⁂'][Math.abs(Math.round(lat*137+lng*97))%4];
+      }
+      candidates.push({lat,lng,sym,discovered});
     });
   });
-  candidates.slice(0,24).forEach(({lat,lng})=>{
+  candidates.slice(0,24).forEach(({lat,lng,sym,discovered})=>{
     const el=document.createElement('div');
-    el.style.cssText='position:absolute;font-family:serif;font-size:22px;font-weight:bold;color:rgba(242,232,204,0.18);pointer-events:none;text-shadow:0 2px 10px rgba(0,0,0,0.6);transform:translate(-50%,-50%);user-select:none;';
-    el.textContent='?';
+    el.style.cssText=`position:absolute;font-family:serif;font-size:${discovered?16:22}px;font-weight:bold;color:rgba(242,232,204,${discovered?0.05:0.18});pointer-events:${discovered?'none':'all'};text-shadow:0 2px 10px rgba(0,0,0,0.6);transform:translate(-50%,-50%);user-select:none;cursor:pointer;`;
+    el.textContent=sym;
+    if(!discovered) el.addEventListener('click',()=>discoverTerra(lat,lng));
     document.getElementById('creatures-layer').appendChild(el);
     const m={el,lat,lng};posTM(m);terraMarkers.push(m);
   });
@@ -1949,18 +2233,20 @@ function joinGame(){
   gameCode=code;
   localStorage.setItem('tv-game-code',gameCode);
   localStorage.removeItem('tv-solo-mode');
+  if(!gameStartDate){gameStartDate=Date.now();localStorage.setItem('tv-game-start-date',gameStartDate);}
   closeGameModal();
   if(myUid) startMultiplayerSync();
   else initFirebase();
 }
 function hardReset(){
   if(!confirm('Reset ALL province, fog, and exploration data? Player name, realm name, and crest are kept.')) return;
-  ['tv-territories','tv-fog-circles','tv-water-points','tv-conquest-log','tv-capital-id','tv-gold','tv-last-collect','tv-ledger','tv-instability','tv-achievements','tv-active-trail','tv-pois','tv-named-trails','tv-total-dist'].forEach(k=>localStorage.removeItem(k));
+  ['tv-territories','tv-fog-circles','tv-water-points','tv-conquest-log','tv-capital-id','tv-gold','tv-last-collect','tv-ledger','tv-instability','tv-achievements','tv-active-trail','tv-pois','tv-named-trails','tv-total-dist','tv-terra-discovered'].forEach(k=>localStorage.removeItem(k));
   location.reload();
 }
 function leaveGame(){
   if(mpUnsubTerritories) mpUnsubTerritories();
   if(mpUnsubPlayers) mpUnsubPlayers();
+  if(mpUnsubChat) mpUnsubChat();
   gameCode=null;myUid=null;
   localStorage.removeItem('tv-game-code');localStorage.removeItem('tv-solo-mode');
   otherPolyLayers.forEach(({poly})=>map.removeLayer(poly));otherPolyLayers=[];
@@ -1978,18 +2264,21 @@ function startMultiplayerSync(){
     knownRealms=snap.docs.filter(d=>d.id!==myUid).map(d=>({uid:d.id,...d.data()}));
     localStorage.setItem('tv-known-realms',JSON.stringify(knownRealms));
     renderLeaderboard();renderDiplomacy();
+    if(document.getElementById('war-screen').classList.contains('open')) renderRealmWar();
   });
   if(mpUnsubTerritories) mpUnsubTerritories();
   mpUnsubTerritories=db.collection(`games/${gameCode}/territories`).onSnapshot(snap=>{
     renderOtherTerritories(snap.docs.filter(d=>!d.id.startsWith(myUid+'_')));
   });
+  subscribeWarChat();
 }
 function syncMyRealm(){
   if(!db||!myUid||!gameCode) return;
   db.collection(`games/${gameCode}/players`).doc(myUid).set({
     playerName,realmName,crest:playerCrest,instability,
     powerScore:computePowerScore(),
-    provinceCount:territories.length,
+    provinceCount:territories.filter(t=>validPoints(t.points)).length,
+    totalArea:territories.reduce((s,t)=>s+(t.area||0),0),
     rank:computeRank().title,
     rankIcon:computeRank().icon,
     lastSeen:Date.now()
@@ -2034,6 +2323,27 @@ function renderOtherTerritories(docs){
     }).addTo(map);
     poly.bindTooltip(`${d.emoji||'⚑'} ${d.name}<br><small style="opacity:0.7">${d.realmName||d.ownerName||'Unknown Realm'}</small>`,{sticky:true,className:'territory-tooltip'});
     otherPolyLayers.push({poly, uid: d.ownerUid});
+  });
+  updateContestedBorders();
+}
+function updateContestedBorders(){
+  contestedLayers.forEach(l=>map.removeLayer(l));contestedLayers=[];
+  if(!otherTerritories.length) return;
+  territories.forEach(myT=>{
+    if(!validPoints(myT.points)) return;
+    otherTerritories.forEach(otherT=>{
+      if(!validPoints(otherT.points)) return;
+      const pts=myT.points;
+      for(let i=0;i<pts.length;i++){
+        const p1=pts[i],p2=pts[(i+1)%pts.length];
+        const mid=[(p1[0]+p2[0])/2,(p1[1]+p2[1])/2];
+        const close=otherT.points.some(op=>dist([op[0],op[1]],mid)<150);
+        if(close){
+          const l=L.polyline([p1,p2],{color:'#c03030',weight:3.5,opacity:0.8,dashArray:'6 5'}).addTo(map);
+          contestedLayers.push(l);
+        }
+      }
+    });
   });
 }
 function flyToRival(uid){
@@ -2081,6 +2391,158 @@ function updateInstabilityDisplay(){
   document.getElementById('instability-fill').style.width=instability+'%';
   document.getElementById('instability-fill').style.backgroundColor=s.color;
 }
+// ═══════════════════ PROVINCE DETAIL SHEET ═══════════════════
+let _sheetTerritoryId=null;
+function openProvinceSheet(t){
+  _sheetTerritoryId=t.id;
+  const tag=TAGS.find(x=>x.id===t.tag);
+  const days=t.lastVisited?(Date.now()-t.lastVisited)/86400000:999;
+  const visitedStr=t.lastVisited?`${Math.floor(days)}d ago`:'Never';
+  const income=provinceIncome(t);
+  const investLeft=t.investedUntil>Date.now()?Math.ceil((t.investedUntil-Date.now())/86400000):0;
+  // Header
+  document.getElementById('ps-crest').innerHTML=buildCrestSVG(playerCrest,40);
+  document.getElementById('ps-name').textContent=`${t.emoji} ${t.name}`;
+  document.getElementById('ps-sub').textContent=`${t.date}${t.terrain?' · '+t.terrain:''}`;
+  // Badges
+  const badges=[];
+  if(t.id===capitalId) badges.push(`<span class="ps-badge gold">♛ Capital</span>`);
+  if(tag) badges.push(`<span class="ps-badge">${tag.icon} ${tag.label}</span>`);
+  if(t.walled) badges.push(`<span class="ps-badge">🧱 Walled</span>`);
+  if(provinceHasRoad(t)) badges.push(`<span class="ps-badge gold">🛤 Trade Road +15%</span>`);
+  if(investLeft>0) badges.push(`<span class="ps-badge gold">📈 Invested (${investLeft}d)</span>`);
+  document.getElementById('ps-badges').innerHTML=badges.join('')||'<span class="ps-badge">No tags</span>';
+  // Stats
+  document.getElementById('ps-stats').innerHTML=`
+    <div class="ps-stat"><div class="ps-stat-val">${formatArea(t.area||0)}</div><div class="ps-stat-lbl">Area</div></div>
+    <div class="ps-stat"><div class="ps-stat-val">+${fmtGold(income)} ⚜</div><div class="ps-stat-lbl">Per Day</div></div>
+    <div class="ps-stat"><div class="ps-stat-val">${visitedStr}</div><div class="ps-stat-lbl">Last Visit</div></div>`;
+  // Actions
+  const ti=territories.findIndex(x=>x.id===t.id);
+  const isCap=t.id===capitalId;
+  document.getElementById('ps-actions').innerHTML=`
+    <button class="ps-act" onclick="closeProvinceSheet();setTimeout(()=>flyTo(${ti}),200)">↗ Fly To</button>
+    <button class="ps-act" onclick="closeProvinceSheet();setTimeout(()=>openKingdom(),200)">${isCap?'♛ Capital':'⚑ Manage'}</button>
+    <button class="ps-act danger" onclick="closeProvinceSheet();setTimeout(()=>{openKingdom();delT(${ti})},300)">Cede</button>`;
+  document.getElementById('province-sheet').classList.add('open');
+  document.getElementById('ps-overlay').classList.add('open');
+}
+function closeProvinceSheet(){
+  document.getElementById('province-sheet').classList.remove('open');
+  document.getElementById('ps-overlay').classList.remove('open');
+  _sheetTerritoryId=null;
+}
+// ═══════════════════ REALM WAR SCREEN ═══════════════════
+function openRealmWar(){switchWarTab('realms');renderRealmWar();document.getElementById('war-screen').classList.add('open');}
+function closeRealmWar(){document.getElementById('war-screen').classList.remove('open');}
+function switchWarTab(tab){
+  warTab=tab;
+  document.querySelectorAll('.war-tab').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));
+  ['realms','feed','chat'].forEach(t=>document.getElementById('war-panel-'+t).classList.toggle('active',t===tab));
+  if(tab==='chat') renderWarChat();
+}
+function sendWarChat(){
+  const input=document.getElementById('war-chat-input');
+  const msg=input.value.trim();
+  if(!msg) return;
+  if(!db||!gameCode){setStatus('Join a game to use realm chat.','danger');return;}
+  input.value='';
+  db.collection(`games/${gameCode}/messages`).add({uid:myUid,playerName,realmName,msg,time:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});
+}
+function subscribeWarChat(){
+  if(!db||!gameCode) return;
+  if(mpUnsubChat) mpUnsubChat();
+  mpUnsubChat=db.collection(`games/${gameCode}/messages`).orderBy('time','desc').limit(60).onSnapshot(snap=>{
+    warMessages=snap.docs.map(d=>d.data()).reverse();
+    if(warTab==='chat'&&document.getElementById('war-screen').classList.contains('open')) renderWarChat();
+  });
+}
+function renderWarChat(){
+  const el=document.getElementById('war-chat-list');
+  const inputRow=document.getElementById('war-chat-input-row');
+  if(!gameCode){
+    el.innerHTML='<div id="war-chat-empty">Join a game to chat with rival realms.</div>';
+    inputRow.style.display='none';return;
+  }
+  inputRow.style.display='flex';
+  if(!warMessages.length){el.innerHTML='<div id="war-chat-empty">No messages yet — be the first to speak.</div>';return;}
+  el.innerHTML=warMessages.map(m=>{
+    const isMe=m.uid===myUid;
+    const ds=isMe?'me':(diplomaticStatus[m.uid]||'neutral');
+    const t=m.time?.toDate?m.time.toDate():new Date(m.time||Date.now());
+    const timeStr=t.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    const safeMsg=m.msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `<div class="chat-msg"><div class="chat-realm ${ds}">${(m.realmName||'Unknown').replace(/&/g,'&amp;').replace(/</g,'&lt;')}${isMe?' <span style="font-size:9px;opacity:0.4">(you)</span>':''}</div><div class="chat-text">${safeMsg}</div><div class="chat-time">${timeStr}</div></div>`;
+  }).join('');
+  el.scrollTop=el.scrollHeight;
+}
+function pushWarFeed(msg){
+  warFeed.unshift({msg,time:Date.now()});
+  if(warFeed.length>50) warFeed.pop();
+  localStorage.setItem('tv-war-feed',JSON.stringify(warFeed));
+  renderRealmWar();
+}
+function setDiplomatic(uid,status){
+  diplomaticStatus[uid]=diplomaticStatus[uid]===status?'neutral':status;
+  localStorage.setItem('tv-diplomatic-status',JSON.stringify(diplomaticStatus));
+  renderRealmWar();
+}
+function fmtGameAge(ts){
+  if(!ts) return '—';
+  const d=Math.floor((Date.now()-ts)/86400000);
+  if(d===0) return 'today';
+  if(d===1) return 'yesterday';
+  return `${d} days ago`;
+}
+function renderRealmWar(){
+  const solo=!gameCode;
+  document.getElementById('war-solo-prompt').style.display=solo?'':'none';
+  document.getElementById('war-mp-content').style.display=solo?'none':'';
+  const myScore=computePowerScore(),myRank=computeRank();
+  const all=[
+    {uid:'me',playerName,realmName,crest:playerCrest,powerScore:myScore,provinceCount:territories.length,
+     totalArea:territories.reduce((s,t)=>s+(t.area||0),0),rank:myRank.title,rankIcon:myRank.icon,instability,isMe:true},
+    ...knownRealms.map(r=>({...r,isMe:false}))
+  ].sort((a,b)=>(b.powerScore||0)-(a.powerScore||0));
+  const myPos=all.findIndex(r=>r.isMe)+1;
+  document.getElementById('war-game-meta').innerHTML=gameCode
+    ?`Game <span>${gameCode}</span> · <span>${all.length}</span> realm${all.length!==1?'s':''} · Active ${fmtGameAge(gameStartDate)} · You are <span>${myPos}${myPos===1?'st':myPos===2?'nd':myPos===3?'rd':'th'} of ${all.length}</span>`:'';
+  // Realm cards
+  document.getElementById('war-realms-list').innerHTML=all.map((r,i)=>{
+    const ds=r.isMe?'me':(diplomaticStatus[r.uid]||'neutral');
+    const crestSvg=r.crest?buildCrestSVG(r.crest,38):'';
+    const stabPct=Math.round(r.instability??100);
+    const area=r.totalArea?formatArea(r.totalArea):'—';
+    const diplBtns=r.isMe?'':`<div class="wrc-dipl">
+      <button class="dipl-btn${ds==='ally'?' active-ally':''}" onclick="setDiplomatic('${r.uid}','ally')">✦ Ally</button>
+      <button class="dipl-btn${ds==='neutral'?' active-neutral':''}" onclick="setDiplomatic('${r.uid}','neutral')">— Neutral</button>
+      <button class="dipl-btn${ds==='rival'?' active-rival':''}" onclick="setDiplomatic('${r.uid}','rival')">⚔ Rival</button>
+    </div>`;
+    const flyBtn=r.isMe?'':`<button class="wrc-fly" onclick="flyToRival('${r.uid}');closeRealmWar()">↗ Locate</button>`;
+    const medal=i===0?'♛':i===1?'⚔':i===2?'⚑':String(i+1);
+    return `<div class="war-realm-card ${r.isMe?'me':ds}">
+      <div class="wrc-top">
+        <div class="wrc-crest">${crestSvg}</div>
+        <div class="wrc-info">
+          <div class="wrc-realm">${medal} ${r.realmName||'Unknown Realm'}${r.isMe?' <span style="font-size:9px;opacity:0.4">(you)</span>':''}</div>
+          <div class="wrc-player">${r.playerName||'Unknown'} · Rank ${r.rankIcon||'I'} ${r.rank||'Wanderer'}</div>
+        </div>
+        ${flyBtn}
+      </div>
+      <div class="wrc-stats">
+        <div class="wrc-stat"><div class="wrc-stat-val">${(r.powerScore||0).toLocaleString()}</div><div class="wrc-stat-lbl">Power</div></div>
+        <div class="wrc-stat"><div class="wrc-stat-val">${r.provinceCount||0}</div><div class="wrc-stat-lbl">Provinces</div></div>
+        <div class="wrc-stat"><div class="wrc-stat-val">${area}</div><div class="wrc-stat-lbl">Domain</div></div>
+        <div class="wrc-stat"><div class="wrc-stat-val">${stabPct}</div><div class="wrc-stat-lbl">Stability</div></div>
+      </div>
+      ${diplBtns}
+    </div>`;
+  }).join('');
+  // War feed
+  const feedEl=document.getElementById('war-feed-list');
+  if(!warFeed.length){feedEl.innerHTML='<div id="war-feed-empty">No events yet — go conquer something.</div>';return;}
+  feedEl.innerHTML=warFeed.map(e=>`<div class="war-feed-entry">${e.msg}<div class="war-feed-time">${new Date(e.time).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</div></div>`).join('');
+}
 function renderLeaderboard(){
   const el=document.getElementById('leaderboard-list');
   const myScore=computePowerScore();
@@ -2120,9 +2582,41 @@ function renderDiplomacy(){
   </div>`).join('');
 }
 
+// ═══════════════════ ONBOARDING ═══════════════════
+let _onboardStep=0;
+const ONBOARD_STEPS=3;
+function openOnboarding(){
+  _onboardStep=0;
+  _syncOnboardStep();
+  const ov=document.getElementById('onboard-overlay');
+  ov.style.display='flex';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('visible')));
+}
+function closeOnboarding(){
+  localStorage.setItem('tv-onboarded','1');
+  const ov=document.getElementById('onboard-overlay');
+  ov.classList.remove('visible');
+  setTimeout(()=>{ov.style.display='none';},500);
+}
+function onboardNext(){
+  if(_onboardStep<ONBOARD_STEPS-1){
+    _onboardStep++;
+    _syncOnboardStep();
+  } else {
+    closeOnboarding();
+  }
+}
+function _syncOnboardStep(){
+  document.querySelectorAll('.onboard-step').forEach((el,i)=>el.classList.toggle('active',i===_onboardStep));
+  document.querySelectorAll('.onboard-dot').forEach((el,i)=>el.classList.toggle('active',i===_onboardStep));
+  document.getElementById('onboard-next').textContent=_onboardStep===ONBOARD_STEPS-1?'Enter the Realm →':'Next →';
+  document.getElementById('onboard-skip').style.visibility=_onboardStep===ONBOARD_STEPS-1?'hidden':'visible';
+}
+
 // ═══════════════════ KEYBOARD ═══════════════════
 document.getElementById('territory-input').addEventListener('keydown',e=>{if(e.key==='Enter')saveClaim();if(e.key==='Escape')cancelClaim();});
 document.getElementById('kingdom-screen').addEventListener('keydown',e=>{if(e.key==='Escape')closeKingdom();});
+document.getElementById('war-screen').addEventListener('keydown',e=>{if(e.key==='Escape')closeRealmWar();});
 document.getElementById('crest-modal').addEventListener('keydown',e=>{if(e.key==='Escape')closeCrestModal();});
 document.getElementById('poi-input').addEventListener('keydown',e=>{if(e.key==='Enter')savePin();if(e.key==='Escape')cancelPin();});
 
@@ -2143,6 +2637,7 @@ if(MULTIPLAYER_ENABLED) initFirebase();
 applyMarkerFilters();
 setStatus('Consulting the stars for your position…');
 setTimeout(()=>{if(!currentPos)setStatus('Grant location access to begin your expedition.','danger');},5000);
+if(!localStorage.getItem('tv-onboarded')) setTimeout(openOnboarding,1200);
 </script>
 </body>
 </html>
