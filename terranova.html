@@ -1201,9 +1201,9 @@ function updateTownCrests(){
 function fetchCastles(lat,lng){
   if(lastCastlePos&&dist(lastCastlePos,[lat,lng])<800) return;lastCastlePos=[lat,lng];
   const r=6000;
-  const q=`[out:json][timeout:15];(node["amenity"="town_hall"](around:${r},${lat},${lng});way["amenity"="town_hall"](around:${r},${lat},${lng});node["place"~"^(city|town|village|borough|hamlet)$"](around:${r},${lat},${lng});way["leisure"="park"](around:${r},${lat},${lng});node["leisure"="park"](around:${r},${lat},${lng});way["landuse"="forest"](around:${r},${lat},${lng});way["natural"="wood"](around:${r},${lat},${lng});node["amenity"="place_of_worship"](around:${r},${lat},${lng});way["amenity"="place_of_worship"](around:${r},${lat},${lng}););out center;`;
-  fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)})
-  .then(r=>r.json()).then(data=>{
+  const q=`[out:json][timeout:25];(node["amenity"="town_hall"](around:${r},${lat},${lng});way["amenity"="town_hall"](around:${r},${lat},${lng});node["place"~"^(city|town|village|borough|hamlet)$"](around:${r},${lat},${lng});way["leisure"="park"](around:${r},${lat},${lng});node["leisure"="park"](around:${r},${lat},${lng});way["landuse"="forest"](around:${r},${lat},${lng});way["natural"="wood"](around:${r},${lat},${lng});node["amenity"="place_of_worship"](around:${r},${lat},${lng});way["amenity"="place_of_worship"](around:${r},${lat},${lng}););out center;`;
+  fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(q)}`)
+  .then(r=>{if(!r.ok) throw new Error(r.status);return r.json();}).then(data=>{
     (data.elements||[]).forEach(el=>{
       const id=el.id+'_'+el.type;if(castleMarkers[id]) return;
       const name=el.tags?.name||el.tags?.['name:en'];if(!name) return;
@@ -1225,7 +1225,7 @@ function fetchCastles(lat,lng){
     });
     updateTownCrests();
     applyMarkerFilters();
-  }).catch(()=>{});
+  }).catch(e=>{if(!fetchCastles._err){fetchCastles._err=true;setStatus('Map markers unavailable — check connection.','danger');}});
 }
 
 const SETTLEMENT_TYPES=new Set(['townhall','city','town','village']);
