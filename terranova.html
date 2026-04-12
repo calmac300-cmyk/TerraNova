@@ -103,6 +103,45 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 @keyframes loop-pulse{0%{box-shadow:0 0 0 0 rgba(230,180,40,0.7);}70%{box-shadow:0 0 0 10px rgba(230,180,40,0);}100%{box-shadow:0 0 0 0 rgba(230,180,40,0);}}
 .border-pulse{animation:border-btn-pulse 1.4s ease-out infinite;}
 @keyframes border-btn-pulse{0%{box-shadow:0 0 0 0 rgba(168,216,144,0.6);}70%{box-shadow:0 0 0 8px rgba(168,216,144,0);}100%{box-shadow:0 0 0 0 rgba(168,216,144,0);}}
+/* BUILD MODE */
+#build-banner{position:absolute;top:112px;left:50%;transform:translateX(-50%);z-index:210;background:rgba(10,35,10,0.96);border:1px solid rgba(90,160,70,0.55);border-radius:6px;padding:9px 16px 10px;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 32px);box-shadow:0 3px 16px rgba(0,0,0,0.6);opacity:0;pointer-events:none;transition:opacity 0.3s;}
+#build-banner.visible{opacity:1;pointer-events:all;}
+#build-banner-text{font-family:var(--font-text);font-style:italic;font-size:11.5px;color:var(--parchment-dk);line-height:1.45;flex:1;}
+#build-banner-cancel{flex-shrink:0;background:none;border:1px solid rgba(200,100,80,0.45);border-radius:4px;color:rgba(220,130,110,0.8);font-family:var(--font-body);font-size:10px;padding:4px 9px;cursor:pointer;touch-action:manipulation;}
+#build-modal{position:fixed;inset:0;z-index:500;display:flex;align-items:flex-end;justify-content:center;background:rgba(10,7,3,0.78);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity 0.25s;}
+#build-modal.open{opacity:1;pointer-events:all;}
+#build-card{background:#1a1106;border:1px solid rgba(201,146,10,0.35);border-radius:14px 14px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;}
+#build-card h3{font-family:var(--font-gothic);font-size:17px;color:var(--gold-lt);text-align:center;margin-bottom:4px;letter-spacing:1px;}
+#build-slots-lbl{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.35);text-align:center;margin-bottom:14px;}
+.build-opt{display:flex;align-items:center;gap:12px;padding:11px 12px;border:1px solid rgba(201,146,10,0.15);border-radius:8px;margin-bottom:8px;cursor:pointer;touch-action:manipulation;background:rgba(201,146,10,0.04);transition:all 0.15s;}
+.build-opt:active{background:rgba(201,146,10,0.12);}
+.build-opt.disabled{opacity:0.28;pointer-events:none;}
+.build-opt-icon{font-size:22px;width:28px;text-align:center;flex-shrink:0;}
+.build-opt-info{flex:1;min-width:0;}
+.build-opt-name{font-family:var(--font-body);font-size:12px;font-weight:600;color:var(--parchment);}
+.build-opt-desc{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.4);margin-top:2px;line-height:1.4;}
+.build-opt-cost{font-family:var(--font-body);font-size:12px;color:var(--gold-lt);flex-shrink:0;font-weight:600;}
+#build-modal-cancel{width:100%;margin-top:8px;background:none;border:1px solid rgba(201,146,10,0.15);border-radius:6px;padding:11px;font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.35);cursor:pointer;touch-action:manipulation;}
+/* WALL MODE */
+#wall-toolbar{position:absolute;bottom:220px;left:50%;transform:translateX(-50%);z-index:210;background:rgba(20,14,5,0.95);border:1px solid rgba(139,105,20,0.5);border-radius:8px;padding:10px 14px;display:none;align-items:center;gap:8px;box-shadow:0 3px 16px rgba(0,0,0,0.6);white-space:nowrap;}
+#wall-toolbar.visible{display:flex;}
+#wall-type-toggle{font-family:var(--font-body);font-size:10px;letter-spacing:0.05em;background:rgba(201,146,10,0.1);border:1px solid rgba(201,146,10,0.35);border-radius:5px;color:var(--gold-lt);padding:5px 10px;cursor:pointer;touch-action:manipulation;}
+#wall-cost-lbl{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.45);min-width:80px;text-align:center;}
+#wall-done{background:rgba(45,90,39,0.4);border:1px solid rgba(90,128,56,0.6);border-radius:5px;color:#a8d890;font-family:var(--font-body);font-size:10px;letter-spacing:0.05em;padding:5px 12px;cursor:pointer;touch-action:manipulation;}
+#wall-cancel{background:none;border:1px solid rgba(160,60,60,0.4);border-radius:5px;color:rgba(200,100,100,0.7);font-family:var(--font-body);font-size:10px;padding:5px 10px;cursor:pointer;touch-action:manipulation;}
+/* BUILDING MARKERS */
+.bldg-marker{font-size:15px;line-height:1;filter:drop-shadow(0 1px 4px rgba(0,0,0,0.95));cursor:default;user-select:none;}
+/* PROVINCE SHEET BUILDINGS */
+#ps-buildings{margin-top:12px;padding-top:12px;border-top:1px solid rgba(201,146,10,0.1);}
+.ps-bldg-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;min-height:24px;}
+.ps-bldg-chip{font-size:15px;line-height:1;background:rgba(201,146,10,0.08);border:1px solid rgba(201,146,10,0.2);border-radius:4px;padding:3px 7px;}
+.ps-bldg-empty{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.25);}
+.ps-bldg-slots{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.35);margin-bottom:8px;}
+.ps-sub-btn{flex:1;padding:10px;border-radius:6px;font-family:var(--font-body);font-size:10px;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;touch-action:manipulation;margin-top:6px;transition:background 0.15s;}
+.ps-sub-btn.build{background:rgba(201,146,10,0.06);border:1px dashed rgba(201,146,10,0.3);color:rgba(201,146,10,0.6);}
+.ps-sub-btn.build:active{background:rgba(201,146,10,0.14);}
+.ps-sub-btn.wall{background:rgba(80,60,20,0.06);border:1px dashed rgba(139,105,20,0.3);color:rgba(180,140,60,0.6);}
+.ps-sub-btn.wall:active{background:rgba(139,105,20,0.12);}
 /* CLAIM MODAL */
 #name-modal{position:absolute;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(10,7,3,0.82);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity 0.25s;}
 #name-modal.open{opacity:1;pointer-events:all;}
@@ -615,6 +654,31 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
   </div>
 </div>
 
+<!-- BUILD MODE BANNER -->
+<div id="build-banner">
+  <span style="font-size:18px">🏛</span>
+  <span id="build-banner-text">Tap inside your territory to place a building.</span>
+  <button id="build-banner-cancel" onclick="cancelBuildMode()">✕ Cancel</button>
+</div>
+
+<!-- BUILD PICKER MODAL -->
+<div id="build-modal">
+  <div id="build-card">
+    <h3>Construct a Building</h3>
+    <div id="build-slots-lbl" style="font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.4);text-align:center;margin-bottom:16px;"></div>
+    <div id="build-opts"></div>
+    <button id="build-modal-cancel" onclick="closeBuildPicker()">Cancel</button>
+  </div>
+</div>
+
+<!-- WALL TOOLBAR -->
+<div id="wall-toolbar">
+  <button id="wall-type-toggle" onclick="cycleWallType()">🪨 Stone</button>
+  <span id="wall-cost-lbl">0m · 0 ⚜</span>
+  <button class="scroll-btn" style="padding:5px 12px;font-size:10px" onclick="finishWall()">Seal Wall</button>
+  <button class="t-del" style="padding:5px 10px;font-size:10px" onclick="cancelWall()">✕</button>
+</div>
+
 <!-- PROVINCE DETAIL SHEET -->
 <div id="ps-overlay" onclick="closeProvinceSheet()"></div>
 <div id="province-sheet">
@@ -628,6 +692,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
   </div>
   <div id="ps-badges"></div>
   <div id="ps-stats"></div>
+  <div id="ps-buildings"></div>
   <div id="ps-actions"></div>
 </div>
 
@@ -1016,6 +1081,10 @@ let diplomaticStatus=JSON.parse(localStorage.getItem('tv-diplomatic-status')||'{
 let warFeed=JSON.parse(localStorage.getItem('tv-war-feed')||'[]');
 let gameStartDate=parseInt(localStorage.getItem('tv-game-start-date')||'0');
 let otherPolyLayers=[],otherTerritories=[],syncTimer=null,mpUnsubTerritories=null,mpUnsubPlayers=null,mpUnsubChat=null,contestedLayers=[];
+let walls=JSON.parse(localStorage.getItem('tv-walls')||'[]');
+let wallLayers=[],buildingMarkerLayers=[];
+let _buildModeTid=null,_pendingBuildPos=null,_buildMapHandler=null;
+let _wallModeTid=null,_wallDraftPoints=[],_wallDraftType='palisade',_wallDraftLine=null,_wallDraftDotMarkers=[],_wallMapHandler=null;
 let warMessages=[],warTab='realms';
 const POI_CATS=[{icon:'☕',label:'Food & Drink'},{icon:'🌳',label:'Nature'},{icon:'👻',label:'Spooky'},{icon:'🗿',label:'Landmark'},{icon:'⭐',label:'Notable'},{icon:'🎣',label:'Activity'},{icon:'🎵',label:'Culture'},{icon:'📸',label:'View'}];
 
@@ -1041,6 +1110,16 @@ const TAGS=[
   {id:'citadel',  icon:'🏰',label:'Citadel'},
   {id:'farmland', icon:'🌾',label:'Farmland'},
   {id:'merchant', icon:'🏪',label:'Merchant Hub'},
+];
+const BUILDINGS={
+  market:{icon:'🏛',label:'Market',cost:15,desc:'Generates gold based on province area',income:(t)=>0.3+(t.area||0)/2000000},
+  port:{icon:'⚓',label:'Port',cost:40,desc:'Flat 2⚜/day — requires water within 600m',income:(t)=>2,requiresWater:true},
+  barracks:{icon:'🏹',label:'Barracks',cost:25,desc:'No income — fortifies against conquest',income:(t)=>0},
+  watchtower:{icon:'🗼',label:'Watchtower',cost:20,desc:'No income — reveals enemy land through fog within 5km',income:(t)=>0},
+};
+const WALL_TYPES=[
+  {id:'palisade',label:'Palisade',icon:'🪵',color:'#8B6914',dash:'8 5',costPerM:0.05,resistance:0.2},
+  {id:'stone',   label:'Stone',  icon:'🪨',color:'#9a9a9a',dash:null,  costPerM:0.25,resistance:0.45},
 ];
 const CREATURES=[{emoji:'🐉'},{emoji:'🦑'},{emoji:'🐋'},{emoji:'🦈'},{emoji:'🗺'},{emoji:'⚓'},{emoji:'☠'},{emoji:'🦅'}];
 let creatureMarkers=[];
@@ -1084,6 +1163,19 @@ function drawFog(){
     fogCtx.beginPath();
     t.points.forEach((p,i)=>{const pt=map.latLngToContainerPoint([p[0],p[1]]);i===0?fogCtx.moveTo(pt.x,pt.y):fogCtx.lineTo(pt.x,pt.y);});
     fogCtx.closePath();fogCtx.fill();
+  });
+  // Watchtower: reveal 5km radius around enemy territories visible from our watchtowers
+  territories.forEach(myT=>{
+    if(!validPoints(myT.points)||(myT.buildings||[]).every(b=>b.type!=='watchtower')) return;
+    const centroid=myT.points.reduce((a,p)=>[a[0]+p[0]/myT.points.length,a[1]+p[1]/myT.points.length],[0,0]);
+    otherTerritories.forEach(ot=>{
+      if(!validPoints(ot.points)) return;
+      const oCentroid=ot.points.reduce((a,p)=>[a[0]+p[0]/ot.points.length,a[1]+p[1]/ot.points.length],[0,0]);
+      if(dist(centroid,oCentroid)<5000){
+        const pt=map.latLngToContainerPoint(oCentroid);
+        fogCtx.beginPath();fogCtx.arc(pt.x,pt.y,r*2,0,Math.PI*2);fogCtx.fill();
+      }
+    });
   });
   fogCtx.globalCompositeOperation='source-over';
   fogCircles.forEach((c,i)=>{
@@ -1575,6 +1667,12 @@ function carveEnemyOverlap(myT){
     let intersection;try{intersection=turf.intersect(myPoly,otherPoly);}catch(e){return;}
     if(!intersection) return;
     const areaLost=turf.area(intersection);
+    // Barracks resistance check
+    const resistance=territoryBarracksResistance(otherT);
+    if(resistance>0){
+      const attackRatio=turf.area(myPoly)/areaLost;
+      if(attackRatio<1+resistance*3){pushWarFeed(`⚔ ${realmName}'s attack on ${otherT.realmName||'Unknown Realm'} was repelled by fortifications`);return;}
+    }
     const docId=`${otherT.ownerUid}_${otherT.id}`;
     let carved;try{carved=turf.difference(otherPoly,myPoly);}catch(e){return;}
     if(!carved||turf.area(carved)<100){
@@ -1709,20 +1807,26 @@ function provinceHasRoad(t){
 }
 function provinceIncome(t){
   if(!t.area) return 0;
-  let base=t.area/500000;
+  // Base land income (~1⚜/day per km²)
+  let base=t.area/1000000;
   const tm={'Coastal Plains':1.5,'Rolling Hills':1.2,'Highland':1.0,'Mountain':0.8};
   base*=(tm[t.terrain]||1.0);
-  const tagM={merchant:2.0,farmland:1.5,harbor:1.4,forest:1.2,highlands:1.1,citadel:1.0};
-  if(t.tag&&tagM[t.tag]) base*=tagM[t.tag];
   if(t.id===capitalId) base*=1.5;
   const days=t.lastVisited?(Date.now()-t.lastVisited)/86400000:999;
   if(days>=30) base*=0.25;
   else if(days>=8) base*=0.6;
-  if(t.investedUntil>Date.now()) base*=1.5;
-  if(provinceHasRoad(t)) base*=1.15;
+  // Building income
+  (t.buildings||[]).forEach(b=>{
+    const def=BUILDINGS[b.type];
+    if(def) base+=def.income(t);
+  });
   return Math.max(0,base);
 }
-function totalDailyIncome(){return territories.reduce((s,t)=>s+provinceIncome(t),0);}
+function totalDailyIncome(){
+  const landIncome=territories.reduce((s,t)=>s+provinceIncome(t),0);
+  const routeIncome=namedTrails.reduce((s,nt)=>s+(nt.distKm||0)*0.4,0);
+  return landIncome+routeIncome;
+}
 function collectGold(){
   const now=Date.now();
   const elapsedDays=(now-lastCollect)/86400000;
@@ -1826,19 +1930,7 @@ function renderKingdom(){
         </div>
       </div>
       <div class="kt-bottom">
-        <div class="tag-row">${TAGS.map(tg=>`<button class="tag-btn${t.tag===tg.id?' active':''}" onclick="setTag(${i},'${tg.id}')">${tg.icon} ${tg.label}</button>`).join('')}</div>
-        ${(()=>{
-          const investCost=Math.max(10,Math.round(provinceIncome(t)*3));
-          const wallCost=Math.max(25,Math.round(provinceIncome(t)*30));
-          const investDaysLeft=t.investedUntil>Date.now()?Math.ceil((t.investedUntil-Date.now())/86400000):0;
-          const investBtn=investDaysLeft>0
-            ?`<button class="prov-act active-state" disabled>📈 +50% income (${investDaysLeft}d left)</button>`
-            :`<button class="prov-act" onclick="event.stopPropagation();investProvince(${i})">📈 Invest (${fmtGold(investCost)} ⚜)</button>`;
-          const wallBtn=t.walled
-            ?`<button class="prov-act active-state" disabled>🧱 Walled</button>`
-            :`<button class="prov-act" onclick="event.stopPropagation();buildWall(${i})">🧱 Build Wall (${fmtGold(wallCost)} ⚜)</button>`;
-          return `<div class="province-actions">${investBtn}${wallBtn}</div>`;
-        })()}
+        <div class="tag-row">${(t.buildings||[]).length?t.buildings.map(b=>`<span class="tag-btn active" style="pointer-events:none">${BUILDINGS[b.type]?.icon||'?'} ${BUILDINGS[b.type]?.label||b.type}</span>`).join(''):'<span style="font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.3)">No buildings — tap a province on the map to construct</span>'}</div>
         <textarea class="kt-notes" placeholder="Field notes…" rows="2" oninput="autoResizeNotes(this)" onblur="saveNotes(${i},this.value)">${escHtml(t.notes||'')}</textarea>
       </div>
     </div>`;
@@ -1914,24 +2006,13 @@ function renderDrawer(){
 function delT(i){
   const t=territories[i];
   const id=t.id;
-  const isHub=t.tag==='merchant';
-  const hubPenalty=isHub?Math.round(provinceIncome(t)*30):0;
-  const wallPenalty=t.walled?Math.round(provinceIncome(t)*20):0;
-  const totalPenalty=hubPenalty+wallPenalty;
+  const hasBldgs=(t.buildings||[]).length>0;
   let msg=`Cede "${t.name}"?`;
-  if(isHub&&t.walled) msg+=`\n\nWARNING: This is a walled Merchant Hub — losing it will destabilize your realm and cost ${fmtGold(totalPenalty)} ⚜ (${fmtGold(hubPenalty)} hub + ${fmtGold(wallPenalty)} fortifications).`;
-  else if(isHub) msg+=`\n\nWARNING: This is a Merchant Hub — losing it will destabilize your realm and cost ${fmtGold(hubPenalty)} ⚜.`;
-  else if(t.walled) msg+=`\n\nWARNING: This province is walled — abandoning the fortifications will cost ${fmtGold(wallPenalty)} ⚜.`;
+  if(hasBldgs) msg+=`\n\nWARNING: This province has ${t.buildings.length} building(s) — they will be lost.`;
   else msg+=' This cannot be undone.';
   if(!confirm(msg)) return;
-  if(totalPenalty>0){
-    gold=Math.max(0,gold-totalPenalty);
-    localStorage.setItem('tv-gold',gold.toFixed(4));
-    const reason=isHub&&t.walled?'Walled Merchant Hub lost':isHub?'Merchant Hub lost':'Fortified province ceded';
-    setStatus(`⚠ ${reason} — realm destabilized (-${fmtGold(totalPenalty)} ⚜)`,'danger');
-  }
-  pushLedger('💀',`Ceded ${t.emoji} ${t.name}`,totalPenalty>0?-totalPenalty:null);
-  const instDelta=isHub&&t.walled?30:isHub?20:t.walled?12:8;
+  pushLedger('💀',`Ceded ${t.emoji} ${t.name}`,null);
+  const instDelta=hasBldgs?15:8;
   changeInstability(-instDelta,`Ceded ${t.name} — realm destabilized`);
   if(db&&myUid&&gameCode) db.collection(`games/${gameCode}/territories`).doc(`${myUid}_${id}`).delete().catch(()=>{});
   if(capitalId===id){capitalId=null;localStorage.removeItem('tv-capital-id');}
@@ -2240,7 +2321,7 @@ function joinGame(){
 }
 function hardReset(){
   if(!confirm('Reset ALL province, fog, and exploration data? Player name, realm name, and crest are kept.')) return;
-  ['tv-territories','tv-fog-circles','tv-water-points','tv-conquest-log','tv-capital-id','tv-gold','tv-last-collect','tv-ledger','tv-instability','tv-achievements','tv-active-trail','tv-pois','tv-named-trails','tv-total-dist','tv-terra-discovered'].forEach(k=>localStorage.removeItem(k));
+  ['tv-territories','tv-fog-circles','tv-water-points','tv-conquest-log','tv-capital-id','tv-gold','tv-last-collect','tv-ledger','tv-instability','tv-achievements','tv-active-trail','tv-pois','tv-named-trails','tv-total-dist','tv-terra-discovered','tv-walls'].forEach(k=>localStorage.removeItem(k));
   location.reload();
 }
 function leaveGame(){
@@ -2395,11 +2476,9 @@ function updateInstabilityDisplay(){
 let _sheetTerritoryId=null;
 function openProvinceSheet(t){
   _sheetTerritoryId=t.id;
-  const tag=TAGS.find(x=>x.id===t.tag);
   const days=t.lastVisited?(Date.now()-t.lastVisited)/86400000:999;
   const visitedStr=t.lastVisited?`${Math.floor(days)}d ago`:'Never';
   const income=provinceIncome(t);
-  const investLeft=t.investedUntil>Date.now()?Math.ceil((t.investedUntil-Date.now())/86400000):0;
   // Header
   document.getElementById('ps-crest').innerHTML=buildCrestSVG(playerCrest,40);
   document.getElementById('ps-name').textContent=`${t.emoji} ${t.name}`;
@@ -2407,18 +2486,27 @@ function openProvinceSheet(t){
   // Badges
   const badges=[];
   if(t.id===capitalId) badges.push(`<span class="ps-badge gold">♛ Capital</span>`);
-  if(tag) badges.push(`<span class="ps-badge">${tag.icon} ${tag.label}</span>`);
-  if(t.walled) badges.push(`<span class="ps-badge">🧱 Walled</span>`);
   if(provinceHasRoad(t)) badges.push(`<span class="ps-badge gold">🛤 Trade Road +15%</span>`);
-  if(investLeft>0) badges.push(`<span class="ps-badge gold">📈 Invested (${investLeft}d)</span>`);
-  document.getElementById('ps-badges').innerHTML=badges.join('')||'<span class="ps-badge">No tags</span>';
+  const slots=buildingSlots(t);
+  const used=(t.buildings||[]).length;
+  badges.push(`<span class="ps-badge">${used}/${slots} building slots</span>`);
+  document.getElementById('ps-badges').innerHTML=badges.join('');
   // Stats
   document.getElementById('ps-stats').innerHTML=`
     <div class="ps-stat"><div class="ps-stat-val">${formatArea(t.area||0)}</div><div class="ps-stat-lbl">Area</div></div>
     <div class="ps-stat"><div class="ps-stat-val">+${fmtGold(income)} ⚜</div><div class="ps-stat-lbl">Per Day</div></div>
     <div class="ps-stat"><div class="ps-stat-val">${visitedStr}</div><div class="ps-stat-lbl">Last Visit</div></div>`;
-  // Actions
+  // Buildings
   const ti=territories.findIndex(x=>x.id===t.id);
+  const bldgs=t.buildings||[];
+  document.getElementById('ps-buildings').innerHTML=`
+    <div style="font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.4);margin-bottom:6px;letter-spacing:0.05em">BUILDINGS</div>
+    <div class="ps-bldg-row">${bldgs.length?bldgs.map((b,bi)=>`<span class="ps-bldg-chip" title="${BUILDINGS[b.type]?.label||b.type}">${BUILDINGS[b.type]?.icon||'?'}</span>`).join(''):'<span style="font-size:10px;font-family:var(--font-text);font-style:italic;color:rgba(242,232,204,0.25)">None built</span>'}</div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="ps-sub-btn build" onclick="closeProvinceSheet();enterBuildMode(${ti})">🏗 Construct</button>
+      <button class="ps-sub-btn wall" onclick="closeProvinceSheet();enterWallMode()">🧱 Draw Wall</button>
+    </div>`;
+  // Actions
   const isCap=t.id===capitalId;
   document.getElementById('ps-actions').innerHTML=`
     <button class="ps-act" onclick="closeProvinceSheet();setTimeout(()=>flyTo(${ti}),200)">↗ Fly To</button>
@@ -2432,6 +2520,185 @@ function closeProvinceSheet(){
   document.getElementById('ps-overlay').classList.remove('open');
   _sheetTerritoryId=null;
 }
+// ═══════════════════ BUILDINGS & WALLS ═══════════════════
+function buildingSlots(t){
+  const km2=(t.area||0)/1000000;
+  return Math.min(6,Math.max(1,Math.floor(km2/0.4)));
+}
+function nearWater(lat,lng,cb){
+  // Use existing waterPts — any fog circle within 600m that's a water point counts
+  const found=fogCircles.some((c,i)=>waterPts.has(i)&&dist([c.lat,c.lng],[lat,lng])<600);
+  cb(found);
+}
+// ── Build Mode ──
+function enterBuildMode(ti){
+  if(ti==null||ti<0||ti>=territories.length){setStatus('Province not found.','danger');return;}
+  _buildModeTid=ti;
+  const t=territories[ti];
+  const slots=buildingSlots(t);
+  const used=(t.buildings||[]).length;
+  if(used>=slots){setStatus(`Province full — ${used}/${slots} building slots used. Claim more land to expand.`,'danger');return;}
+  document.getElementById('build-banner-text').textContent=`Tap inside ${t.name} to place a building (${used}/${slots} slots used).`;
+  document.getElementById('build-banner').classList.add('visible');
+  _buildMapHandler=function(e){onBuildMapTap(e.latlng.lat,e.latlng.lng);};
+  map.on('click',_buildMapHandler);
+  setStatus(`Build mode: tap inside ${t.name} to choose a building location.`,'alert');
+}
+function cancelBuildMode(){
+  document.getElementById('build-banner').classList.remove('visible');
+  if(_buildMapHandler){map.off('click',_buildMapHandler);_buildMapHandler=null;}
+  _buildModeTid=null;_pendingBuildPos=null;
+}
+function onBuildMapTap(lat,lng){
+  if(_buildModeTid==null) return;
+  const t=territories[_buildModeTid];
+  if(!validPoints(t.points)||!pointInPoly([lng,lat],t.points)){
+    setStatus('Tap inside your own territory to place a building.','danger');return;
+  }
+  _pendingBuildPos={lat,lng};
+  openBuildPicker(_buildModeTid);
+}
+function openBuildPicker(ti){
+  const t=territories[ti];
+  const used=(t.buildings||[]).length;
+  const slots=buildingSlots(t);
+  document.getElementById('build-slots-lbl').textContent=`${t.name} · ${used}/${slots} slots used`;
+  const keys=Object.keys(BUILDINGS);
+  document.getElementById('build-opts').innerHTML=keys.map(k=>{
+    const b=BUILDINGS[k];
+    const incomeStr=k==='market'?`~${fmtGold(b.income(t))} ⚜/day`:k==='port'?'2 ⚜/day':'No income';
+    const disabled=b.requiresWater?'data-requires-water="1"':'';
+    return `<div class="build-opt" ${disabled} onclick="confirmPlaceBuilding('${k}',${ti})" data-key="${k}">
+      <span class="build-opt-icon">${b.icon}</span>
+      <div class="build-opt-info">
+        <div class="build-opt-name">${b.label}</div>
+        <div class="build-opt-desc">${b.desc} · ${incomeStr}${b.requiresWater?' · <em style="color:#e0a070">Requires water</em>':''}</div>
+      </div>
+      <span class="build-opt-cost">${b.cost} ⚜</span>
+    </div>`;
+  }).join('');
+  // Async: check water for port availability
+  if(_pendingBuildPos){
+    nearWater(_pendingBuildPos.lat,_pendingBuildPos.lng,hasWater=>{
+      document.querySelectorAll('.build-opt[data-requires-water]').forEach(el=>{
+        if(!hasWater){el.style.opacity='0.35';el.style.pointerEvents='none';el.querySelector('.build-opt-desc').innerHTML+=' · <em style="color:#e07070">No water nearby</em>';}
+      });
+    });
+  }
+  document.getElementById('build-modal').classList.add('open');
+}
+function closeBuildPicker(){document.getElementById('build-modal').classList.remove('open');}
+function confirmPlaceBuilding(type,ti){
+  closeBuildPicker();cancelBuildMode();
+  const t=territories[ti];
+  const def=BUILDINGS[type];
+  if(!def) return;
+  if(gold<def.cost){setStatus(`Not enough gold — need ${def.cost} ⚜ to build a ${def.label}.`,'danger');return;}
+  gold-=def.cost;localStorage.setItem('tv-gold',gold.toFixed(4));
+  if(!t.buildings) t.buildings=[];
+  const bld={type,lat:_pendingBuildPos?.lat,lng:_pendingBuildPos?.lng,built:Date.now()};
+  t.buildings.push(bld);
+  pushLedger(def.icon,`Built ${def.label} in ${t.name}`,-def.cost);
+  saveTerritories();
+  drawBuildingMarkers(t);
+  updateHeader();
+  setStatus(`${def.icon} ${def.label} constructed in ${t.name}!`,'alert');
+  _pendingBuildPos=null;
+}
+function drawBuildingMarkers(t){
+  // Remove existing markers for this territory
+  buildingMarkerLayers=buildingMarkerLayers.filter(m=>{
+    if(m._territoryId===t.id){map.removeLayer(m);return false;}return true;
+  });
+  (t.buildings||[]).forEach(b=>{
+    if(!b.lat||!b.lng) return;
+    const icon=L.divIcon({className:'bldg-marker',html:BUILDINGS[b.type]?.icon||'?',iconSize:[24,24],iconAnchor:[12,12]});
+    const m=L.marker([b.lat,b.lng],{icon,interactive:false,zIndexOffset:600}).addTo(map);
+    m._territoryId=t.id;
+    buildingMarkerLayers.push(m);
+  });
+}
+function removeBuildingMarkers(){buildingMarkerLayers.forEach(m=>map.removeLayer(m));buildingMarkerLayers=[];}
+// ── Wall Mode ──
+function enterWallMode(){
+  _wallDraftPoints=[];_wallDraftType='palisade';
+  document.getElementById('wall-toolbar').classList.add('visible');
+  _wallMapHandler=function(e){onWallMapTap(e.latlng.lat,e.latlng.lng);};
+  map.on('click',_wallMapHandler);
+  updateWallToolbar();
+  setStatus('Wall mode: tap the map to draw wall points. Tap "Seal Wall" to finish.','alert');
+}
+function onWallMapTap(lat,lng){
+  _wallDraftPoints.push([lat,lng]);
+  // Draw/update draft dot
+  const dot=L.circleMarker([lat,lng],{radius:4,color:'#c9920a',fillColor:'#c9920a',fillOpacity:0.9,weight:1,interactive:false}).addTo(map);
+  _wallDraftDotMarkers.push(dot);
+  // Update draft polyline
+  if(_wallDraftLine) map.removeLayer(_wallDraftLine);
+  if(_wallDraftPoints.length>=2){
+    const wt=WALL_TYPES.find(w=>w.id===_wallDraftType)||WALL_TYPES[0];
+    _wallDraftLine=L.polyline(_wallDraftPoints,{color:wt.color,weight:3,opacity:0.7,dashArray:wt.dash||undefined,interactive:false}).addTo(map);
+  }
+  updateWallToolbar();
+}
+function updateWallToolbar(){
+  const len=wallDraftLength();
+  const wt=WALL_TYPES.find(w=>w.id===_wallDraftType)||WALL_TYPES[0];
+  const cost=Math.ceil(len*wt.costPerM);
+  document.getElementById('wall-type-toggle').textContent=`${wt.icon} ${wt.label}`;
+  document.getElementById('wall-cost-lbl').textContent=`${Math.round(len)}m · ${cost} ⚜`;
+}
+function wallDraftLength(){
+  let l=0;
+  for(let i=1;i<_wallDraftPoints.length;i++) l+=dist(_wallDraftPoints[i-1],_wallDraftPoints[i]);
+  return l;
+}
+function cycleWallType(){
+  const idx=WALL_TYPES.findIndex(w=>w.id===_wallDraftType);
+  _wallDraftType=WALL_TYPES[(idx+1)%WALL_TYPES.length].id;
+  // Redraw draft line in new color
+  if(_wallDraftLine) map.removeLayer(_wallDraftLine);
+  if(_wallDraftPoints.length>=2){
+    const wt=WALL_TYPES.find(w=>w.id===_wallDraftType);
+    _wallDraftLine=L.polyline(_wallDraftPoints,{color:wt.color,weight:3,opacity:0.7,dashArray:wt.dash||undefined,interactive:false}).addTo(map);
+  }
+  updateWallToolbar();
+}
+function finishWall(){
+  if(_wallDraftPoints.length<2){setStatus('Draw at least 2 points to build a wall.','danger');return;}
+  const len=wallDraftLength();
+  const wt=WALL_TYPES.find(w=>w.id===_wallDraftType)||WALL_TYPES[0];
+  const cost=Math.ceil(len*wt.costPerM);
+  if(gold<cost){setStatus(`Not enough gold — wall costs ${cost} ⚜.`,'danger');return;}
+  gold-=cost;localStorage.setItem('tv-gold',gold.toFixed(4));
+  const w={id:'w'+Date.now(),type:_wallDraftType,points:[..._wallDraftPoints],len:Math.round(len),built:Date.now()};
+  walls.push(w);
+  saveWalls();
+  drawWall(w);
+  pushLedger(wt.icon,`Built ${Math.round(len)}m ${wt.label} wall`,-cost);
+  updateHeader();
+  setStatus(`${wt.icon} ${wt.label} wall built (${Math.round(len)}m · −${cost} ⚜)`,'alert');
+  cancelWall();
+}
+function cancelWall(){
+  if(_wallDraftLine){map.removeLayer(_wallDraftLine);_wallDraftLine=null;}
+  _wallDraftDotMarkers.forEach(m=>map.removeLayer(m));_wallDraftDotMarkers=[];
+  _wallDraftPoints=[];
+  document.getElementById('wall-toolbar').classList.remove('visible');
+  if(_wallMapHandler){map.off('click',_wallMapHandler);_wallMapHandler=null;}
+}
+function drawWall(w){
+  const wt=WALL_TYPES.find(t=>t.id===w.type)||WALL_TYPES[0];
+  const layer=L.polyline(w.points,{color:wt.color,weight:3.5,opacity:0.85,dashArray:wt.dash||undefined,interactive:false}).addTo(map);
+  layer._wallId=w.id;
+  wallLayers.push(layer);
+}
+function saveWalls(){localStorage.setItem('tv-walls',JSON.stringify(walls));}
+// Barracks resistance uses buildings array on territory — exposed for carveEnemyOverlap
+function territoryBarracksResistance(t){
+  return (t.buildings||[]).filter(b=>b.type==='barracks').length*0.5;
+}
+
 // ═══════════════════ REALM WAR SCREEN ═══════════════════
 function openRealmWar(){switchWarTab('realms');renderRealmWar();document.getElementById('war-screen').classList.add('open');}
 function closeRealmWar(){document.getElementById('war-screen').classList.remove('open');}
@@ -2622,6 +2889,8 @@ document.getElementById('poi-input').addEventListener('keydown',e=>{if(e.key==='
 
 // ═══════════════════ BOOT ═══════════════════
 territories.forEach(t=>drawPoly(t,false));
+territories.forEach(t=>drawBuildingMarkers(t));
+walls.forEach(w=>drawWall(w));
 updateHeader();renderDrawer();drawFog();
 setUnits(useMetric?'km':'mi');
 document.getElementById('player-name-display').textContent=playerName;
