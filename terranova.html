@@ -338,6 +338,11 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 #export-btn:active{background:rgba(139,105,20,0.3);transform:scale(0.98);}
 #export-confirm{text-align:center;font-family:var(--font-text);font-style:italic;font-size:11px;color:#6fcf97;margin-top:-12px;margin-bottom:16px;opacity:0;transition:opacity 0.4s;pointer-events:none;}
 #export-confirm.show{opacity:1;}
+.save-row{display:flex;gap:8px;margin-bottom:8px;}
+.save-row button,.save-row label{flex:1;background:rgba(30,60,90,0.18);border:1px solid rgba(100,160,220,0.35);border-radius:8px;padding:11px 8px;display:flex;align-items:center;justify-content:center;gap:7px;font-family:var(--font-body);font-weight:600;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:rgba(180,210,242,0.85);cursor:pointer;touch-action:manipulation;transition:background 0.18s;}
+.save-row button:active,.save-row label:active{background:rgba(30,60,90,0.4);transform:scale(0.98);}
+#save-confirm{text-align:center;font-family:var(--font-text);font-style:italic;font-size:11px;color:#6fcf97;margin-bottom:16px;opacity:0;transition:opacity 0.4s;pointer-events:none;}
+#save-confirm.show{opacity:1;}
 .kingdom-territory{background:rgba(20,14,5,0.7);border:1px solid rgba(201,146,10,0.15);border-radius:8px;padding:14px 16px;margin-bottom:10px;transition:border-color 0.2s;}
 .kt-top{display:flex;align-items:center;gap:14px;cursor:pointer;}
 .kt-top:active{opacity:0.85;}
@@ -790,6 +795,12 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
       </div>
       <button id="export-btn" onclick="exportGeoJSON()"><span>⬇</span> Export to GeoJSON</button>
       <div id="export-confirm">✦ Scroll saved — open in ArcGIS or QGIS ✦</div>
+      <div class="save-row">
+        <button onclick="saveFullKingdom()"><span>💾</span> Save Backup</button>
+        <label for="import-file-input"><span>⬆</span> Import Backup</label>
+        <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importKingdom(this)">
+      </div>
+      <div id="save-confirm">✦ Kingdom saved — transfer this file to your new device ✦</div>
       <div id="kingdom-list"></div>
     </div>
     <div id="discoveries-section">
@@ -2060,6 +2071,37 @@ function exportGeoJSON(){
   document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),2000);
   cfm.classList.add('show');setTimeout(()=>cfm.classList.remove('show'),3500);
   unlockAchievement('cartographer');
+}
+
+// ═══════════════════ SAVE / IMPORT ═══════════════════
+const SAVE_KEYS=['tv-territories','tv-crest','tv-fog-circles','tv-water-points','tv-conquest-log','tv-player-name','tv-realm-name','tv-total-dist','tv-achievements','tv-capital-id','tv-pois','tv-named-trails','tv-gold','tv-last-collect','tv-ledger','tv-instability','tv-known-realms','tv-game-code','tv-player-uid','tv-solo-mode','tv-terra-discovered','tv-onboarded','tv-units','tv-active-trail'];
+function saveFullKingdom(){
+  const save={_exported:new Date().toISOString(),_version:'1'};
+  SAVE_KEYS.forEach(k=>{const v=localStorage.getItem(k);if(v!==null)save[k]=v;});
+  const blob=new Blob([JSON.stringify(save,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`terranova_${(realmName||'kingdom').toLowerCase().replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  document.getElementById('save-confirm').classList.add('show');
+  setTimeout(()=>document.getElementById('save-confirm').classList.remove('show'),3500);
+}
+function importKingdom(input){
+  const file=input.files[0];if(!file)return;
+  input.value='';
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const save=JSON.parse(e.target.result);
+      if(!save['tv-territories']){alert('This doesn\'t look like a Terranova save file.');return;}
+      if(!confirm('Import this save? Your current kingdom will be replaced.'))return;
+      SAVE_KEYS.forEach(k=>{if(save[k]!=null)localStorage.setItem(k,save[k]);});
+      location.reload();
+    }catch(err){alert('Could not read save file: '+err.message);}
+  };
+  reader.readAsText(file);
 }
 
 // ═══════════════════ UNITS ═══════════════════

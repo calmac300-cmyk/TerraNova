@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
             javaScriptEnabled = true
             domStorageEnabled = true      // localStorage
             databaseEnabled = true
-            geolocationEnabled = true
+            setGeolocationEnabled(true)
             allowFileAccess = true
             mediaPlaybackRequiresUserGesture = false
         }

@@ -1,0 +1,97 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.terranova.app"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="24"
+9        android:targetSdkVersion="34" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:4:5-67
+11-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:4:22-64
+12    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+12-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:5:5-79
+12-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:5:22-76
+13    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+13-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:6:5-81
+13-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:6:22-78
+14    <uses-permission android:name="android.permission.WAKE_LOCK" />
+14-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:7:5-68
+14-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:7:22-65
+15    <uses-permission android:name="android.permission.VIBRATE" />
+15-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:8:5-66
+15-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:8:22-63
+16
+17    <permission
+17-->[androidx.core:core:1.9.0] C:\Users\calma\.gradle\caches\transforms-3\780e89c5ec44116765764e65ad1fbed3\transformed\core-1.9.0\AndroidManifest.xml:22:5-24:47
+18        android:name="com.terranova.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+18-->[androidx.core:core:1.9.0] C:\Users\calma\.gradle\caches\transforms-3\780e89c5ec44116765764e65ad1fbed3\transformed\core-1.9.0\AndroidManifest.xml:23:9-81
+19        android:protectionLevel="signature" />
+19-->[androidx.core:core:1.9.0] C:\Users\calma\.gradle\caches\transforms-3\780e89c5ec44116765764e65ad1fbed3\transformed\core-1.9.0\AndroidManifest.xml:24:9-44
+20
+21    <uses-permission android:name="com.terranova.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+21-->[androidx.core:core:1.9.0] C:\Users\calma\.gradle\caches\transforms-3\780e89c5ec44116765764e65ad1fbed3\transformed\core-1.9.0\AndroidManifest.xml:26:5-97
+21-->[androidx.core:core:1.9.0] C:\Users\calma\.gradle\caches\transforms-3\780e89c5ec44116765764e65ad1fbed3\transformed\core-1.9.0\AndroidManifest.xml:26:22-94
+22
+23    <application
+23-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:10:5-27:19
+24        android:allowBackup="true"
+24-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:11:9-35
+25        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+25-->[androidx.core:core:1.9.0] C:\Users\calma\.gradle\caches\transforms-3\780e89c5ec44116765764e65ad1fbed3\transformed\core-1.9.0\AndroidManifest.xml:28:18-86
+26        android:debuggable="true"
+27        android:extractNativeLibs="false"
+28        android:label="@string/app_name"
+28-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:12:9-41
+29        android:theme="@style/Theme.AppCompat.NoActionBar"
+29-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:13:9-59
+30        android:usesCleartextTraffic="false" >
+30-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:14:9-45
+31        <activity
+31-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:16:9-25:20
+32            android:name="com.terranova.app.MainActivity"
+32-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:17:13-41
+33            android:configChanges="orientation|screenSize|keyboardHidden"
+33-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:19:13-74
+34            android:exported="true"
+34-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:18:13-36
+35            android:windowSoftInputMode="adjustResize" >
+35-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:20:13-55
+36            <intent-filter>
+36-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:21:13-24:29
+37                <action android:name="android.intent.action.MAIN" />
+37-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:22:17-69
+37-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:22:25-66
+38
+39                <category android:name="android.intent.category.LAUNCHER" />
+39-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:23:17-77
+39-->C:\Users\calma\Documents\GitHub\TerraNova\android\app\src\main\AndroidManifest.xml:23:27-74
+40            </intent-filter>
+41        </activity>
+42
+43        <provider
+43-->[androidx.emoji2:emoji2:1.2.0] C:\Users\calma\.gradle\caches\transforms-3\56790c98da367544823fdafd5ec28fdb\transformed\emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
+44            android:name="androidx.startup.InitializationProvider"
+44-->[androidx.emoji2:emoji2:1.2.0] C:\Users\calma\.gradle\caches\transforms-3\56790c98da367544823fdafd5ec28fdb\transformed\emoji2-1.2.0\AndroidManifest.xml:25:13-67
+45            android:authorities="com.terranova.app.androidx-startup"
+45-->[androidx.emoji2:emoji2:1.2.0] C:\Users\calma\.gradle\caches\transforms-3\56790c98da367544823fdafd5ec28fdb\transformed\emoji2-1.2.0\AndroidManifest.xml:26:13-68
+46            android:exported="false" >
+46-->[androidx.emoji2:emoji2:1.2.0] C:\Users\calma\.gradle\caches\transforms-3\56790c98da367544823fdafd5ec28fdb\transformed\emoji2-1.2.0\AndroidManifest.xml:27:13-37
+47            <meta-data
+47-->[androidx.emoji2:emoji2:1.2.0] C:\Users\calma\.gradle\caches\transforms-3\56790c98da367544823fdafd5ec28fdb\transformed\emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+48                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+48-->[androidx.emoji2:emoji2:1.2.0] C:\Users\calma\.gradle\caches\transforms-3\56790c98da367544823fdafd5ec28fdb\transformed\emoji2-1.2.0\AndroidManifest.xml:30:17-75
+49                android:value="androidx.startup" />
+49-->[androidx.emoji2:emoji2:1.2.0] C:\Users\calma\.gradle\caches\transforms-3\56790c98da367544823fdafd5ec28fdb\transformed\emoji2-1.2.0\AndroidManifest.xml:31:17-49
+50            <meta-data
+50-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\calma\.gradle\caches\transforms-3\ef260a2cb6305665b7a938dfa71bb6ad\transformed\lifecycle-process-2.4.1\AndroidManifest.xml:31:13-33:52
+51                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+51-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\calma\.gradle\caches\transforms-3\ef260a2cb6305665b7a938dfa71bb6ad\transformed\lifecycle-process-2.4.1\AndroidManifest.xml:32:17-78
+52                android:value="androidx.startup" />
+52-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\calma\.gradle\caches\transforms-3\ef260a2cb6305665b7a938dfa71bb6ad\transformed\lifecycle-process-2.4.1\AndroidManifest.xml:33:17-49
+53        </provider>
+54    </application>
+55
+56</manifest>
