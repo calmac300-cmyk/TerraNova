@@ -1831,7 +1831,7 @@ function getCapturedTowns(points){
 }
 function fixOverlappingBorders(){
   if(typeof turf==='undefined'){setStatus('Map library not loaded yet — try again in a moment.','danger');return;}
-  if(territories.length<2){setStatus('Nothing to fix.','');return;}
+  if(territories.length<2){setStatus('Nothing to fix — only one province.','');return;}
   let merges=0,changed=true;
   while(changed){
     changed=false;
@@ -1842,9 +1842,10 @@ function fixOverlappingBorders(){
         try{
           const ra=[...a.points.map(p=>[p[1],p[0]])];ra.push(ra[0]);
           const rb=[...b.points.map(p=>[p[1],p[0]])];rb.push(rb[0]);
-          const inter=turf.intersect(turf.polygon([ra]),turf.polygon([rb]));
-          if(!inter||turf.area(inter)<50) continue;
-          const merged=turf.union(turf.polygon([ra]),turf.polygon([rb]));
+          const pa=turf.polygon([ra]),pb=turf.polygon([rb]);
+          const inter=turf.intersect(pa,pb);
+          if(!inter||turf.area(inter)<1) continue;
+          const merged=turf.union(pa,pb);
           let ring=merged.geometry.type==='MultiPolygon'
             ?merged.geometry.coordinates.reduce((x,y)=>x[0].length>y[0].length?x:y)[0]
             :merged.geometry.coordinates[0];
@@ -1852,11 +1853,14 @@ function fixOverlappingBorders(){
           territories[i].towns=getCapturedTowns(territories[i].points);
           territories.splice(j,1);
           merges++;changed=true;break outer;
-        }catch(e){}
+        }catch(e){console.warn('fixBorders pair error:',e);}
       }
     }
   }
-  if(merges===0){setStatus('No overlapping borders found — all clean.','');return;}
+  if(merges===0){
+    setStatus(`Checked ${territories.length} provinces — no overlapping borders detected.`,'');
+    return;
+  }
   saveTerritories();
   setStatus(`Merged ${merges} overlapping border${merges>1?'s':''} — reloading…`,'alert');
   setTimeout(()=>location.reload(),1200);
