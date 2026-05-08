@@ -123,14 +123,17 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 .build-opt-cost{font-family:var(--font-body);font-size:12px;color:var(--gold-lt);flex-shrink:0;font-weight:600;}
 #build-modal-cancel{width:100%;margin-top:8px;background:none;border:1px solid rgba(201,146,10,0.15);border-radius:6px;padding:11px;font-family:var(--font-text);font-style:italic;font-size:11px;color:rgba(242,232,204,0.35);cursor:pointer;touch-action:manipulation;}
 /* WALL MODE */
-#wall-toolbar{position:absolute;bottom:220px;left:50%;transform:translateX(-50%);z-index:210;background:rgba(20,14,5,0.95);border:1px solid rgba(139,105,20,0.5);border-radius:8px;padding:10px 14px;display:none;align-items:center;gap:8px;box-shadow:0 3px 16px rgba(0,0,0,0.6);white-space:nowrap;}
+#wall-toolbar{position:absolute;bottom:220px;left:50%;transform:translateX(-50%);z-index:210;background:rgba(20,14,5,0.95);border:1px solid rgba(139,105,20,0.5);border-radius:8px;padding:8px 12px;display:none;flex-direction:column;gap:6px;box-shadow:0 3px 16px rgba(0,0,0,0.6);min-width:260px;}
 #wall-toolbar.visible{display:flex;}
-#wall-type-toggle{font-family:var(--font-body);font-size:10px;letter-spacing:0.05em;background:rgba(201,146,10,0.1);border:1px solid rgba(201,146,10,0.35);border-radius:5px;color:var(--gold-lt);padding:5px 10px;cursor:pointer;touch-action:manipulation;}
-#wall-cost-lbl{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.45);min-width:80px;text-align:center;}
-#wall-done{background:rgba(45,90,39,0.4);border:1px solid rgba(90,128,56,0.6);border-radius:5px;color:#a8d890;font-family:var(--font-body);font-size:10px;letter-spacing:0.05em;padding:5px 12px;cursor:pointer;touch-action:manipulation;}
-#wall-cancel{background:none;border:1px solid rgba(160,60,60,0.4);border-radius:5px;color:rgba(200,100,100,0.7);font-family:var(--font-body);font-size:10px;padding:5px 10px;cursor:pointer;touch-action:manipulation;}
+#wall-toolbar-row{display:flex;align-items:center;gap:6px;justify-content:center;}
+.wall-btn{font-family:var(--font-body);font-size:10px;letter-spacing:0.05em;border-radius:5px;padding:5px 10px;cursor:pointer;touch-action:manipulation;border:1px solid rgba(201,146,10,0.35);background:rgba(201,146,10,0.08);color:var(--gold-lt);}
+.wall-btn.active{background:rgba(201,146,10,0.3);border-color:var(--gold-lt);}
+.wall-btn.green{border-color:rgba(90,128,56,0.6);background:rgba(45,90,39,0.35);color:#a8d890;}
+.wall-btn.red{border-color:rgba(160,60,60,0.4);background:none;color:rgba(200,100,100,0.7);}
+#wall-cost-lbl{font-family:var(--font-text);font-style:italic;font-size:10px;color:rgba(242,232,204,0.45);text-align:center;flex:1;}
 /* BUILDING MARKERS */
-.bldg-marker{font-size:15px;line-height:1;filter:drop-shadow(0 1px 4px rgba(0,0,0,0.95));cursor:default;user-select:none;}
+.bldg-marker{font-size:14px;line-height:22px;width:22px;height:22px;text-align:center;background:rgba(14,10,4,0.82);border:1px solid rgba(201,146,10,0.45);border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.85);cursor:default;user-select:none;transition:opacity 0.25s;}
+.bldg-hidden .bldg-marker{opacity:0;pointer-events:none;}
 /* PROVINCE SHEET BUILDINGS */
 #ps-buildings{margin-top:12px;padding-top:12px;border-top:1px solid rgba(201,146,10,0.1);}
 .ps-bldg-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;min-height:24px;}
@@ -690,10 +693,16 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 
 <!-- WALL TOOLBAR -->
 <div id="wall-toolbar">
-  <button id="wall-type-toggle" onclick="cycleWallType()">🪨 Stone</button>
-  <span id="wall-cost-lbl">0m · 0 ⚜</span>
-  <button class="scroll-btn" style="padding:5px 12px;font-size:10px" onclick="finishWall()">Seal Wall</button>
-  <button class="t-del" style="padding:5px 10px;font-size:10px" onclick="cancelWall()">✕</button>
+  <div id="wall-toolbar-row">
+    <button class="wall-btn" id="wall-draw-toggle" onclick="toggleWallDraw()">✏ Draw</button>
+    <button class="wall-btn" id="wall-type-toggle" onclick="cycleWallType()">🪨 Stone</button>
+    <button class="wall-btn" id="wall-undo-btn" onclick="undoWallPoint()">↩ Undo</button>
+  </div>
+  <div id="wall-toolbar-row">
+    <span id="wall-cost-lbl">0m · 0 ⚜</span>
+    <button class="wall-btn green" onclick="finishWall()">Seal Wall</button>
+    <button class="wall-btn red" onclick="cancelWall()">✕ Cancel</button>
+  </div>
 </div>
 
 <!-- PROVINCE DETAIL SHEET -->
@@ -807,12 +816,6 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
       </div>
       <button id="export-btn" onclick="exportGeoJSON()"><span>⬇</span> Export to GeoJSON</button>
       <div id="export-confirm">✦ Scroll saved — open in ArcGIS or QGIS ✦</div>
-      <div class="save-row">
-        <button onclick="saveFullKingdom()"><span>💾</span> Save Backup</button>
-        <label for="import-file-input"><span>⬆</span> Import Backup</label>
-        <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importKingdom(this)">
-      </div>
-      <div id="save-confirm">✦ Kingdom saved — transfer this file to your new device ✦</div>
       <div id="kingdom-list"></div>
     </div>
     <div id="discoveries-section">
@@ -834,6 +837,14 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
     <div id="trails-section">
       <h3>Named Trails</h3>
       <div id="trails-list"></div>
+    </div>
+    <div id="save-section">
+      <div class="save-row">
+        <button onclick="saveFullKingdom()"><span>💾</span> Save Backup</button>
+        <label for="import-file-input"><span>⬆</span> Import Backup</label>
+        <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importKingdom(this)">
+      </div>
+      <div id="save-confirm">✦ Kingdom saved — transfer this file to your new device ✦</div>
     </div>
   </div>
 </div>
@@ -884,6 +895,7 @@ function cycleLayer(){layerIdx=(layerIdx+1)%TILE_LAYERS.length;applyTileLayer(la
 // ═══════════════════ MAP ═══════════════════
 const map=L.map('map',{center:[43.2,-71.5],zoom:15,zoomControl:false,attributionControl:true});
 applyTileLayer(0);
+map.on('zoomend',()=>updateBldgVisibility());
 
 // ═══════════════════ CREST SYSTEM ═══════════════════
 // Heraldic palette: {fill, stroke, text, complement}
@@ -2761,12 +2773,25 @@ function cancelBuildMode(){
   if(_buildMapHandler){map.off('click',_buildMapHandler);_buildMapHandler=null;}
   _buildModeTid=null;_pendingBuildPos=null;
 }
+function nearestPtOnSeg(p,a,b){const dx=b[0]-a[0],dy=b[1]-a[1];if(!dx&&!dy)return a;const t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy)));return[a[0]+t*dx,a[1]+t*dy];}
+function snapToTrail(lat,lng){
+  const SNAP_M=30;let best=null,bestD=SNAP_M;
+  namedTrails.forEach(nt=>{
+    for(let i=0;i<nt.points.length-1;i++){
+      const s=nearestPtOnSeg([lat,lng],nt.points[i],nt.points[i+1]);
+      const d=dist([lat,lng],s);if(d<bestD){bestD=d;best=s;}
+    }
+  });
+  return best;
+}
 function onBuildMapTap(lat,lng){
   if(_buildModeTid==null) return;
   const t=territories[_buildModeTid];
   if(!validPoints(t.points)||!pointInPoly([lng,lat],t.points)){
     setStatus('Tap inside your own territory to place a building.','danger');return;
   }
+  const snapped=snapToTrail(lat,lng);
+  if(snapped){lat=snapped[0];lng=snapped[1];setStatus('📍 Snapped to road — choose your building.','alert');}
   _pendingBuildPos={lat,lng};
   openBuildPicker(_buildModeTid);
 }
@@ -2818,38 +2843,97 @@ function confirmPlaceBuilding(type,ti){
   _pendingBuildPos=null;
 }
 function drawBuildingMarkers(t){
-  // Remove existing markers for this territory
   buildingMarkerLayers=buildingMarkerLayers.filter(m=>{
     if(m._territoryId===t.id){map.removeLayer(m);return false;}return true;
   });
   (t.buildings||[]).forEach(b=>{
     if(!b.lat||!b.lng) return;
-    const icon=L.divIcon({className:'bldg-marker',html:BUILDINGS[b.type]?.icon||'?',iconSize:[24,24],iconAnchor:[12,12]});
-    const m=L.marker([b.lat,b.lng],{icon,interactive:false,zIndexOffset:600}).addTo(map);
+    const def=BUILDINGS[b.type];
+    const icon=L.divIcon({className:'bldg-marker',html:def?.icon||'?',iconSize:[22,22],iconAnchor:[11,11]});
+    const m=L.marker([b.lat,b.lng],{icon,zIndexOffset:600}).addTo(map);
+    m.bindTooltip(`${def?.icon||'?'} ${def?.label||b.type}<br><span style="font-size:10px;opacity:0.6">${t.name}</span>`,{className:'territory-tooltip',direction:'top',offset:[0,-6]});
     m._territoryId=t.id;
     buildingMarkerLayers.push(m);
   });
+  updateBldgVisibility();
 }
 function removeBuildingMarkers(){buildingMarkerLayers.forEach(m=>map.removeLayer(m));buildingMarkerLayers=[];}
+function updateBldgVisibility(){
+  const show=map.getZoom()>=13;
+  buildingMarkerLayers.forEach(m=>{const el=m.getElement();if(el)el.style.opacity=show?'1':'0';});
+}
 // ── Wall Mode ──
+let _wallTracing=false,_wallLastTracePt=null,_wallTouchMoveHandler=null;
+const WALL_TRACE_MIN_M=8;
 function enterWallMode(){
-  _wallDraftPoints=[];_wallDraftType='palisade';
+  _wallDraftPoints=[];_wallDraftType='palisade';_wallTracing=false;_wallLastTracePt=null;
   document.getElementById('wall-toolbar').classList.add('visible');
-  _wallMapHandler=function(e){onWallMapTap(e.latlng.lat,e.latlng.lng);};
+  document.getElementById('wall-draw-toggle').classList.remove('active');
+  _wallMapHandler=function(e){if(!_wallTracing) addWallPoint(e.latlng.lat,e.latlng.lng,true);};
   map.on('click',_wallMapHandler);
   updateWallToolbar();
-  setStatus('Wall mode: tap the map to draw wall points. Tap "Seal Wall" to finish.','alert');
+  setStatus('Wall mode: tap points or use ✏ Draw to trace with your finger.','alert');
 }
-function onWallMapTap(lat,lng){
+function addWallPoint(lat,lng,drawDot){
   _wallDraftPoints.push([lat,lng]);
-  // Draw/update draft dot
-  const dot=L.circleMarker([lat,lng],{radius:4,color:'#c9920a',fillColor:'#c9920a',fillOpacity:0.9,weight:1,interactive:false}).addTo(map);
-  _wallDraftDotMarkers.push(dot);
-  // Update draft polyline
+  if(drawDot){
+    const dot=L.circleMarker([lat,lng],{radius:4,color:'#c9920a',fillColor:'#c9920a',fillOpacity:0.9,weight:1,interactive:false}).addTo(map);
+    _wallDraftDotMarkers.push(dot);
+  }
   if(_wallDraftLine) map.removeLayer(_wallDraftLine);
   if(_wallDraftPoints.length>=2){
     const wt=WALL_TYPES.find(w=>w.id===_wallDraftType)||WALL_TYPES[0];
-    _wallDraftLine=L.polyline(_wallDraftPoints,{color:wt.color,weight:3,opacity:0.7,dashArray:wt.dash||undefined,interactive:false}).addTo(map);
+    _wallDraftLine=L.polyline(_wallDraftPoints,{color:wt.color,weight:3.5,opacity:0.85,dashArray:wt.dash||undefined,interactive:false}).addTo(map);
+  }
+  updateWallToolbar();
+}
+function onWallMapTap(lat,lng){addWallPoint(lat,lng,true);}
+function toggleWallDraw(){
+  _wallTracing=!_wallTracing;
+  const btn=document.getElementById('wall-draw-toggle');
+  if(_wallTracing){
+    map.dragging.disable();
+    btn.classList.add('active');btn.textContent='✏ Drawing…';
+    _wallLastTracePt=null;
+    _wallTouchMoveHandler=function(e){
+      e.preventDefault();
+      const touch=e.touches[0];
+      const rect=document.getElementById('map').getBoundingClientRect();
+      const pt=L.point(touch.clientX-rect.left,touch.clientY-rect.top);
+      const ll=map.containerPointToLatLng(pt);
+      const cur=[ll.lat,ll.lng];
+      if(_wallLastTracePt&&dist(_wallLastTracePt,cur)<WALL_TRACE_MIN_M) return;
+      _wallLastTracePt=cur;
+      addWallPoint(ll.lat,ll.lng,false);
+    };
+    document.getElementById('map').addEventListener('touchmove',_wallTouchMoveHandler,{passive:false});
+    // Desktop mouse drag
+    map.on('mousemove',_wallMouseMoveHandler=function(e){
+      if(!_wallTracing) return;
+      const cur=[e.latlng.lat,e.latlng.lng];
+      if(_wallLastTracePt&&dist(_wallLastTracePt,cur)<WALL_TRACE_MIN_M) return;
+      _wallLastTracePt=cur;
+      addWallPoint(e.latlng.lat,e.latlng.lng,false);
+    });
+    setStatus('Trace your wall with a finger — tap ✏ Drawing to stop tracing.','alert');
+  } else {
+    map.dragging.enable();
+    btn.classList.remove('active');btn.textContent='✏ Draw';
+    if(_wallTouchMoveHandler){document.getElementById('map').removeEventListener('touchmove',_wallTouchMoveHandler);_wallTouchMoveHandler=null;}
+    if(_wallMouseMoveHandler){map.off('mousemove',_wallMouseMoveHandler);_wallMouseMoveHandler=null;}
+    _wallLastTracePt=null;
+    setStatus('Trace stopped — tap ↩ to undo, Seal Wall to finish.','alert');
+  }
+}
+let _wallMouseMoveHandler=null;
+function undoWallPoint(){
+  if(!_wallDraftPoints.length) return;
+  _wallDraftPoints.pop();
+  if(_wallDraftDotMarkers.length){map.removeLayer(_wallDraftDotMarkers.pop());}
+  if(_wallDraftLine){map.removeLayer(_wallDraftLine);_wallDraftLine=null;}
+  if(_wallDraftPoints.length>=2){
+    const wt=WALL_TYPES.find(w=>w.id===_wallDraftType)||WALL_TYPES[0];
+    _wallDraftLine=L.polyline(_wallDraftPoints,{color:wt.color,weight:3.5,opacity:0.85,dashArray:wt.dash||undefined,interactive:false}).addTo(map);
   }
   updateWallToolbar();
 }
@@ -2893,9 +2977,13 @@ function finishWall(){
   cancelWall();
 }
 function cancelWall(){
+  if(_wallTracing){_wallTracing=false;map.dragging.enable();
+    if(_wallTouchMoveHandler){document.getElementById('map').removeEventListener('touchmove',_wallTouchMoveHandler);_wallTouchMoveHandler=null;}
+    if(_wallMouseMoveHandler){map.off('mousemove',_wallMouseMoveHandler);_wallMouseMoveHandler=null;}
+  }
   if(_wallDraftLine){map.removeLayer(_wallDraftLine);_wallDraftLine=null;}
   _wallDraftDotMarkers.forEach(m=>map.removeLayer(m));_wallDraftDotMarkers=[];
-  _wallDraftPoints=[];
+  _wallDraftPoints=[];_wallLastTracePt=null;
   document.getElementById('wall-toolbar').classList.remove('visible');
   if(_wallMapHandler){map.off('click',_wallMapHandler);_wallMapHandler=null;}
 }

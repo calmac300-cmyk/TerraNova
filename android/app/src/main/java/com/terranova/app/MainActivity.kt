@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.graphics.Color
 import android.os.Bundle
 import android.view.WindowManager
 import android.webkit.*
@@ -28,6 +29,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        window.statusBarColor = Color.parseColor("#0E0A04")
+        window.navigationBarColor = Color.parseColor("#0E0A04")
 
         webView = WebView(this)
         setContentView(webView)
