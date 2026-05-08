@@ -2559,27 +2559,28 @@ function takeSnapshot(){
 }
 function startMultiplayerSync(){
   if(!db||!myUid||!gameCode) return;
-  syncMyRealm();
   syncMyTerritories();
   setTimeout(takeSnapshot,5000);
   setTimeout(pruneMyFirebaseTerritories,5000);
   setMpBadge(`⚔ ${gameCode}`);
-  if(mpUnsubPlayers) mpUnsubPlayers();
-  mpUnsubPlayers=db.collection(`games/${gameCode}/players`).onSnapshot(snap=>{
-    knownRealms=snap.docs.filter(d=>d.id!==myUid).map(d=>({uid:d.id,...d.data()}));
-    localStorage.setItem('tv-known-realms',JSON.stringify(knownRealms));
-    renderLeaderboard();renderDiplomacy();
-    if(document.getElementById('war-screen').classList.contains('open')) renderRealmWar();
+  syncMyRealm().then(()=>{
+    if(mpUnsubPlayers) mpUnsubPlayers();
+    mpUnsubPlayers=db.collection(`games/${gameCode}/players`).onSnapshot(snap=>{
+      knownRealms=snap.docs.filter(d=>d.id!==myUid).map(d=>({uid:d.id,...d.data()}));
+      localStorage.setItem('tv-known-realms',JSON.stringify(knownRealms));
+      renderLeaderboard();renderDiplomacy();
+      if(document.getElementById('war-screen').classList.contains('open')) renderRealmWar();
+    });
+    if(mpUnsubTerritories) mpUnsubTerritories();
+    mpUnsubTerritories=db.collection(`games/${gameCode}/territories`).onSnapshot(snap=>{
+      renderOtherTerritories(snap.docs.filter(d=>!d.id.startsWith(myUid+'_')));
+    },err=>console.warn('Territory sync error:',err));
+    subscribeWarChat();
   });
-  if(mpUnsubTerritories) mpUnsubTerritories();
-  mpUnsubTerritories=db.collection(`games/${gameCode}/territories`).onSnapshot(snap=>{
-    renderOtherTerritories(snap.docs.filter(d=>!d.id.startsWith(myUid+'_')));
-  });
-  subscribeWarChat();
 }
 function syncMyRealm(){
-  if(!db||!myUid||!gameCode) return;
-  db.collection(`games/${gameCode}/players`).doc(myUid).set({
+  if(!db||!myUid||!gameCode) return Promise.resolve();
+  return db.collection(`games/${gameCode}/players`).doc(myUid).set({
     playerName,realmName,crest:playerCrest,instability,
     powerScore:computePowerScore(),
     provinceCount:territories.filter(t=>validPoints(t.points)).length,

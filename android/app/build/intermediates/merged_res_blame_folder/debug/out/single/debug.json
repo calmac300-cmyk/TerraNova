@@ -44,10 +44,6 @@
         "source": "com.terranova.app-main-22:/mipmap-xxxhdpi/ic_launcher_foreground.webp"
     },
     {
-        "merged": "com.terranova.app-merged_res-20:/drawable_ic_launcher_background.xml.flat",
-        "source": "com.terranova.app-main-22:/drawable/ic_launcher_background.xml"
-    },
-    {
         "merged": "com.terranova.app-merged_res-20:/mipmap-xhdpi_ic_launcher_round.webp.flat",
         "source": "com.terranova.app-main-22:/mipmap-xhdpi/ic_launcher_round.webp"
     },
