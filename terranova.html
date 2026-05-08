@@ -313,7 +313,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
 #kingdom-header::before{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin-bottom:20px;opacity:0.4;}
 #kingdom-close{position:absolute;top:0;right:0;background:none;border:1px solid rgba(201,146,10,0.3);border-radius:6px;padding:6px 12px;font-family:var(--font-body);font-size:11px;color:var(--parchment-dk);cursor:pointer;touch-action:manipulation;opacity:0.7;}
 /* Player crest in kingdom header */
-#kingdom-crest-wrap{display:flex;justify-content:center;margin-bottom:10px;cursor:pointer;position:relative;}
+#kingdom-crest-wrap{display:flex;justify-content:center;margin-top:24px;margin-bottom:10px;cursor:pointer;position:relative;}
 #kingdom-crest-wrap:hover::after{content:'Edit Crest';position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-family:var(--font-text);font-style:italic;font-size:10px;color:var(--gold);white-space:nowrap;}
 #player-name-row{display:flex;align-items:center;gap:6px;justify-content:center;margin-bottom:6px;}
 #player-name-display{font-family:var(--font-text);font-style:italic;font-size:13px;color:rgba(242,232,204,0.6);}
@@ -559,7 +559,6 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
       <button class="modal-btn" style="opacity:0.65" onclick="createGame()">✦ Create New Game</button>
       <button class="modal-btn" id="copy-code-btn" style="display:none;opacity:0.75" onclick="navigator.clipboard?.writeText(gameCode||'');setStatus('Code copied: '+gameCode,'alert');closeGameModal()">⎘ Copy Code &amp; Close</button>
       <button class="modal-btn" style="opacity:0.35;font-size:10px;margin-top:4px" onclick="playSolo()">Continue Solo</button>
-      <button class="modal-btn" style="opacity:0.2;font-size:9px;margin-top:2px;color:#e88" onclick="hardReset()">⚠ Reset All Data</button>
     </div>
   </div>
 </div>
@@ -788,7 +787,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
       <div id="achievement-grid"></div>
     </div>
     <div id="territories-section">
-      <h3>Conquered Territories</h3>
+      <h3>Conquered Territories <button onclick="fixOverlappingBorders()" style="float:right;background:none;border:1px solid rgba(201,146,10,0.3);border-radius:5px;color:rgba(201,146,10,0.7);font-family:var(--font-body);font-size:9px;letter-spacing:0.05em;padding:3px 9px;cursor:pointer;margin-top:2px">⚑ Fix Borders</button></h3>
       <div id="unit-toggle">
         <button class="unit-opt active" id="unit-mi" onclick="setUnits('mi')">Miles</button>
         <button class="unit-opt" id="unit-km" onclick="setUnits('km')">Kilometres</button>
@@ -1300,6 +1299,9 @@ function updateTownCrests(){
     const owned=territories.some(t=>pointInPoly([lo,la],t.points));
     mk.setIcon(owned?makeCrestTownIcon(label,sk):makeCastleIcon(label,sk));
   });
+  let changed=false;
+  territories.forEach(t=>{const fresh=getCapturedTowns(t.points);if(JSON.stringify(fresh)!==JSON.stringify(t.towns||[])){t.towns=fresh;changed=true;}});
+  if(changed) saveTerritories();
 }
 function fetchCastles(lat,lng){
   if(lastCastlePos&&dist(lastCastlePos,[lat,lng])<800) return;lastCastlePos=[lat,lng];
@@ -1632,10 +1634,12 @@ function saveClaim(){
   const emoji=T_EMOJIS[territories.length%T_EMOJIS.length];
   const t={id:Date.now(),name,emoji,points:pendingPoints,color,area,
     date:new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})};
+  t.towns=getCapturedTowns(t.points);
   territories.push(t);saveTerritories();drawPoly(t,true);
   carveEnemyOverlap(t);
   fetchElevation(t);logExpedition(t);checkAchievements({event:'claim',area:t.area});pushLedger('⚑',`Claimed ${t.emoji} ${name}`,null);changeInstability(5,`Claimed ${name} — realm consolidated`);
-  if(borderCloseMode){continueBorderRecording();}else{finishClaim();setStatus(`"${name}" — claimed for the realm! ✦`,'alert');}
+  const townMsg=t.towns.length?` — ${t.towns.map(tw=>tw.label).join(', ')} falls to your realm!`:'';
+  if(borderCloseMode){continueBorderRecording();}else{finishClaim();setStatus(`"${name}" claimed!${townMsg} ✦`,'alert');}
 }
 
 function saveMerge(){
@@ -1658,7 +1662,7 @@ function saveMerge(){
       newArea=turf.area(merged);
     }catch(e){newPoints=[...target.points,...pendingPoints];newArea=polyArea(newPoints);}
   }else{newPoints=[...target.points,...pendingPoints];newArea=polyArea(newPoints);}
-  territories[mergeTargetIdx]={...target,points:newPoints,area:newArea};saveTerritories();
+  territories[mergeTargetIdx]={...target,points:newPoints,area:newArea,towns:getCapturedTowns(newPoints)};saveTerritories();
   const li=polygonLayers.findIndex(l=>l.id===target.id);
   if(li>=0){map.removeLayer(polygonLayers[li].poly);if(polygonLayers[li].centroidMarker)map.removeLayer(polygonLayers[li].centroidMarker);polygonLayers.splice(li,1);}
   drawPoly(territories[mergeTargetIdx],true);
@@ -1816,9 +1820,49 @@ function provinceHasRoad(t){
     return pointInPoly([s[1],s[0]],t.points)||pointInPoly([e[1],e[0]],t.points);
   });
 }
+const TOWN_INCOME={city:1.0,townhall:0.5,town:0.3,village:0.15,park:0.05,church:0.05};
+function getCapturedTowns(points){
+  const towns=[];
+  Object.values(castleMarkers).forEach(({la,lo,sk,label})=>{
+    if(la==null||lo==null) return;
+    if(pointInPoly([lo,la],points)) towns.push({label,sk});
+  });
+  return towns;
+}
+function fixOverlappingBorders(){
+  if(typeof turf==='undefined'){setStatus('Map library not loaded yet — try again in a moment.','danger');return;}
+  if(territories.length<2){setStatus('Nothing to fix.','');return;}
+  let merges=0,changed=true;
+  while(changed){
+    changed=false;
+    outer:for(let i=0;i<territories.length;i++){
+      for(let j=i+1;j<territories.length;j++){
+        const a=territories[i],b=territories[j];
+        if(!validPoints(a.points)||!validPoints(b.points)) continue;
+        try{
+          const ra=[...a.points.map(p=>[p[1],p[0]])];ra.push(ra[0]);
+          const rb=[...b.points.map(p=>[p[1],p[0]])];rb.push(rb[0]);
+          const inter=turf.intersect(turf.polygon([ra]),turf.polygon([rb]));
+          if(!inter||turf.area(inter)<50) continue;
+          const merged=turf.union(turf.polygon([ra]),turf.polygon([rb]));
+          let ring=merged.geometry.type==='MultiPolygon'
+            ?merged.geometry.coordinates.reduce((x,y)=>x[0].length>y[0].length?x:y)[0]
+            :merged.geometry.coordinates[0];
+          territories[i]={...a,points:ring.slice(0,-1).map(c=>[c[1],c[0]]),area:turf.area(merged)};
+          territories[i].towns=getCapturedTowns(territories[i].points);
+          territories.splice(j,1);
+          merges++;changed=true;break outer;
+        }catch(e){}
+      }
+    }
+  }
+  if(merges===0){setStatus('No overlapping borders found — all clean.','');return;}
+  saveTerritories();
+  setStatus(`Merged ${merges} overlapping border${merges>1?'s':''} — reloading…`,'alert');
+  setTimeout(()=>location.reload(),1200);
+}
 function provinceIncome(t){
   if(!t.area) return 0;
-  // Base land income (~1⚜/day per km²)
   let base=t.area/1000000;
   const tm={'Coastal Plains':1.5,'Rolling Hills':1.2,'Highland':1.0,'Mountain':0.8};
   base*=(tm[t.terrain]||1.0);
@@ -1826,11 +1870,8 @@ function provinceIncome(t){
   const days=t.lastVisited?(Date.now()-t.lastVisited)/86400000:999;
   if(days>=30) base*=0.25;
   else if(days>=8) base*=0.6;
-  // Building income
-  (t.buildings||[]).forEach(b=>{
-    const def=BUILDINGS[b.type];
-    if(def) base+=def.income(t);
-  });
+  (t.towns||[]).forEach(tw=>{base+=(TOWN_INCOME[tw.sk]||0.1);});
+  (t.buildings||[]).forEach(b=>{const def=BUILDINGS[b.type];if(def) base+=def.income(t);});
   return Math.max(0,base);
 }
 function totalDailyIncome(){
@@ -2048,7 +2089,7 @@ function delT(i){
   }
   updateHeader();renderDrawer();renderKingdom();
 }
-function saveTerritories(){localStorage.setItem('tv-territories',JSON.stringify(territories));if(db&&gameCode) queueSync();updateTownCrests();updateContestedBorders();}
+function saveTerritories(){localStorage.setItem('tv-territories',JSON.stringify(territories));if(db&&gameCode){queueSync();takeSnapshot();}updateTownCrests();updateContestedBorders();}
 
 // ═══════════════════ UTILS ═══════════════════
 function dist(a,b){const R=6371000,f1=a[0]*Math.PI/180,f2=b[0]*Math.PI/180,df=(b[0]-a[0])*Math.PI/180,dl=(b[1]-a[1])*Math.PI/180;return R*2*Math.atan2(Math.sqrt(Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2),Math.sqrt(1-(Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2)));}
@@ -2376,10 +2417,25 @@ function leaveGame(){
   knownRealms=[];
   setMpBadge('');renderDiplomacy();
 }
+function takeSnapshot(){
+  if(!db||!myUid||!gameCode||!territories.length) return;
+  const today=new Date().toISOString().slice(0,10);
+  if(localStorage.getItem('tv-last-snapshot')===today) return;
+  const pal=PALETTE[playerCrest.colorIdx]||PALETTE[0];
+  const data={
+    playerName,realmName,
+    colorFill:pal.fill,colorStroke:pal.stroke,
+    territories:territories.filter(t=>validPoints(t.points)).map(t=>({name:t.name,points:t.points,area:Math.round(t.area||0)}))
+  };
+  db.collection(`games/${gameCode}/snapshots`).doc(today).set({[myUid]:data},{merge:true})
+    .then(()=>localStorage.setItem('tv-last-snapshot',today))
+    .catch(e=>console.warn('Snapshot write failed:',e));
+}
 function startMultiplayerSync(){
   if(!db||!myUid||!gameCode) return;
   syncMyRealm();
   syncMyTerritories();
+  setTimeout(takeSnapshot,5000);
   setTimeout(pruneMyFirebaseTerritories,5000);
   setMpBadge(`⚔ ${gameCode}`);
   if(mpUnsubPlayers) mpUnsubPlayers();

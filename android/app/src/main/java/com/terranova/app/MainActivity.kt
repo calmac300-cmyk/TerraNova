@@ -1,7 +1,10 @@
 package com.terranova.app
 
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.view.WindowManager
 import android.webkit.*
@@ -14,15 +17,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private var pendingGeoCallback: GeolocationPermissions.Callback? = null
     private var pendingGeoOrigin: String? = null
+    private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
 
     companion object {
         private const val APP_URL = "https://calmac300-cmyk.github.io/TerraNova/terranova.html"
         private const val LOC_REQUEST = 1001
+        private const val FILE_REQUEST = 1002
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Native screen-on fallback alongside the web Wake Lock API
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         webView = WebView(this)
@@ -30,7 +34,7 @@ class MainActivity : AppCompatActivity() {
 
         webView.settings.apply {
             javaScriptEnabled = true
-            domStorageEnabled = true      // localStorage
+            domStorageEnabled = true
             databaseEnabled = true
             setGeolocationEnabled(true)
             allowFileAccess = true
@@ -53,6 +57,21 @@ class MainActivity : AppCompatActivity() {
                     pendingGeoOrigin = origin
                     requestLocationPermission()
                 }
+            }
+
+            override fun onShowFileChooser(
+                webView: WebView,
+                callback: ValueCallback<Array<Uri>>,
+                params: FileChooserParams
+            ): Boolean {
+                fileChooserCallback?.onReceiveValue(null)
+                fileChooserCallback = callback
+                val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "application/json"
+                }
+                startActivityForResult(Intent.createChooser(intent, "Select save file"), FILE_REQUEST)
+                return true
             }
         }
 
@@ -90,6 +109,19 @@ class MainActivity : AppCompatActivity() {
             pendingGeoCallback?.invoke(pendingGeoOrigin, granted, false)
             pendingGeoCallback = null
             pendingGeoOrigin = null
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == FILE_REQUEST) {
+            val result = if (resultCode == Activity.RESULT_OK && data?.data != null) {
+                arrayOf(data.data!!)
+            } else {
+                null
+            }
+            fileChooserCallback?.onReceiveValue(result)
+            fileChooserCallback = null
         }
     }
 

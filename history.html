@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Terranova — Chronicle of Conquest</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--gold:#c9920a;--gold-lt:#e8b84b;--parchment:#f2e8cc;--bg:#0e0a04;}
+body{background:var(--bg);color:var(--parchment);font-family:'IM Fell English',serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+#header{padding:14px 20px;border-bottom:1px solid rgba(201,146,10,0.25);display:flex;align-items:center;gap:16px;flex-shrink:0;background:rgba(8,5,2,0.9);}
+#header h1{font-family:'Cinzel',serif;font-size:18px;color:var(--gold-lt);letter-spacing:1px;white-space:nowrap;}
+#code-input{background:rgba(201,146,10,0.08);border:1px solid rgba(201,146,10,0.35);border-radius:6px;padding:7px 12px;color:var(--parchment);font-family:'Cinzel',serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;width:130px;outline:none;}
+#code-input::placeholder{opacity:0.35;letter-spacing:1px;}
+#load-btn{background:rgba(201,146,10,0.12);border:1px solid rgba(201,146,10,0.4);border-radius:6px;padding:7px 16px;color:var(--gold-lt);font-family:'Cinzel',serif;font-size:12px;cursor:pointer;letter-spacing:0.5px;transition:background 0.2s;}
+#load-btn:hover{background:rgba(201,146,10,0.22);}
+#status-msg{font-style:italic;font-size:12px;color:rgba(242,232,204,0.5);margin-left:auto;}
+#map{flex:1;}
+#timeline{flex-shrink:0;background:rgba(8,5,2,0.92);border-top:1px solid rgba(201,146,10,0.2);padding:12px 20px 16px;}
+#date-label{font-family:'Cinzel',serif;font-size:13px;color:var(--gold-lt);text-align:center;margin-bottom:8px;letter-spacing:1px;min-height:20px;}
+#date-slider{width:100%;-webkit-appearance:none;appearance:none;height:3px;background:rgba(201,146,10,0.25);border-radius:2px;outline:none;cursor:pointer;}
+#date-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--gold-lt);border:2px solid var(--bg);cursor:pointer;}
+#date-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--gold-lt);border:2px solid var(--bg);cursor:pointer;}
+#legend{display:flex;gap:16px;justify-content:center;margin-top:10px;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;font-family:'Cinzel',serif;color:rgba(242,232,204,0.7);}
+.legend-swatch{width:14px;height:14px;border-radius:3px;border:1px solid rgba(255,255,255,0.2);}
+#empty-msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;font-style:italic;color:rgba(242,232,204,0.3);font-size:14px;pointer-events:none;line-height:2;}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <h1>✦ Chronicle of Conquest</h1>
+  <input id="code-input" type="text" maxlength="8" placeholder="Game code" autocomplete="off">
+  <button id="load-btn" onclick="loadChronicle()">Load</button>
+  <div id="status-msg">Enter a game code to begin</div>
+</div>
+
+<div id="map"></div>
+<div id="empty-msg">Enter your game code above<br>to view the chronicle of your realm</div>
+
+<div id="timeline">
+  <div id="date-label"></div>
+  <input id="date-slider" type="range" min="0" max="0" value="0" oninput="renderDate(+this.value)">
+  <div id="legend"></div>
+</div>
+
+<script>
+const FIREBASE_CONFIG={
+  apiKey:'AIzaSyBwg19lWL8D6HNP6uvcYg1MD39iDhZ0E8A',
+  authDomain:'town-trek.firebaseapp.com',
+  projectId:'town-trek',
+  storageBucket:'town-trek.firebasestorage.app',
+  messagingSenderId:'391881881328',
+  appId:'1:391881881328:web:c0b80922bc7efad8f1f435'
+};
+
+try{firebase.app();}catch(_){firebase.initializeApp(FIREBASE_CONFIG);}
+const db=firebase.firestore();
+
+const map=L.map('map',{center:[43.2,-71.5],zoom:13,zoomControl:true});
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  maxZoom:19,
+  attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+}).addTo(map);
+
+// Apply dark filter to map tiles
+const style=document.createElement('style');
+style.textContent='.leaflet-tile{filter:saturate(0.4) brightness(0.55) sepia(0.3);}';
+document.head.appendChild(style);
+
+let snapshots=[];
+let polyLayers=[];
+
+function setStatus(msg){document.getElementById('status-msg').textContent=msg;}
+
+async function loadChronicle(){
+  const code=document.getElementById('code-input').value.trim().toUpperCase();
+  if(code.length<4){setStatus('Enter a valid game code');return;}
+  setStatus('Loading chronicle…');
+  try{
+    const snap=await db.collection(`games/${code}/snapshots`).orderBy(firebase.firestore.FieldPath.documentId()).get();
+    if(snap.empty){setStatus('No snapshots found for this game yet');return;}
+    snapshots=snap.docs.map(d=>({date:d.id,...d.data()}));
+    document.getElementById('empty-msg').style.display='none';
+    const slider=document.getElementById('date-slider');
+    slider.min=0;slider.max=snapshots.length-1;slider.value=snapshots.length-1;
+    renderDate(snapshots.length-1);
+    setStatus(`${snapshots.length} day${snapshots.length>1?'s':''} of history loaded`);
+  }catch(e){
+    setStatus('Error loading: '+e.message);
+    console.error(e);
+  }
+}
+
+function renderDate(idx){
+  if(!snapshots.length) return;
+  const snap=snapshots[idx];
+  document.getElementById('date-label').textContent=formatDate(snap.date);
+
+  // Clear old layers
+  polyLayers.forEach(l=>map.removeLayer(l));
+  polyLayers=[];
+
+  const realmKeys=Object.keys(snap).filter(k=>k!=='date');
+  const bounds=[];
+  const legendItems=[];
+
+  realmKeys.forEach(uid=>{
+    const realm=snap[uid];
+    if(!realm||!Array.isArray(realm.territories)) return;
+    const fill=realm.colorFill||'#2d5a27';
+    const stroke=realm.colorStroke||'#4a8a38';
+    legendItems.push({name:realm.realmName||'Unknown Realm',fill,stroke});
+
+    realm.territories.forEach(t=>{
+      if(!t.points||t.points.length<3) return;
+      try{
+        const poly=L.polygon(t.points,{
+          color:stroke,
+          fillColor:fill,
+          weight:1.5,
+          fillOpacity:0.45,
+          opacity:0.8
+        }).addTo(map);
+        poly.bindTooltip(`<b>${realm.realmName||'?'}</b><br>${t.name}<br>${fmtArea(t.area)}`,{
+          className:'',sticky:true
+        });
+        polyLayers.push(poly);
+        t.points.forEach(p=>bounds.push(p));
+      }catch(e){}
+    });
+  });
+
+  if(bounds.length) map.fitBounds(L.latLngBounds(bounds),{padding:[40,40],animate:true,maxZoom:14});
+
+  // Legend
+  document.getElementById('legend').innerHTML=legendItems.map(r=>`
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:${r.fill};border-color:${r.stroke}"></div>
+      ${r.name}
+    </div>`).join('');
+}
+
+function formatDate(iso){
+  const [y,m,d]=iso.split('-');
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[+m-1]} ${+d}, ${y}`;
+}
+
+function fmtArea(m2){
+  if(!m2) return '';
+  if(m2>=1e6) return (m2/1e6).toFixed(1)+' km²';
+  if(m2>=1e4) return (m2/1e4).toFixed(1)+' ha';
+  return Math.round(m2)+' m²';
+}
+
+// Allow Enter key to load
+document.getElementById('code-input').addEventListener('keydown',e=>{if(e.key==='Enter')loadChronicle();});
+</script>
+</body>
+</html>
