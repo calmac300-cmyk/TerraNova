@@ -596,6 +596,19 @@ html,body{height:100%;overflow:hidden;background:var(--ink);}
         <button class="modal-btn" id="modal-merge" onclick="saveMerge()">Unite!</button>
       </div>
     </div>
+    <div id="claim-step-overlap" style="display:none">
+      <div class="card-title">❧ Overlapping Territory ❧</div>
+      <div class="card-sub">Your loop overlaps with <em id="overlap-province-names"></em>. How shall this land be recorded?</div>
+      <button class="province-choice-btn" onclick="doMergeOverlap()">
+        <span class="choice-icon">⚔</span>
+        <span class="choice-text"><span class="choice-title">Merge Into Province</span><span class="choice-hint">Unite all overlapping lands into one domain</span></span>
+      </button>
+      <button class="province-choice-btn" onclick="doClaimNewLandOnly()">
+        <span class="choice-icon">🏰</span>
+        <span class="choice-text"><span class="choice-title">Claim New Land Only</span><span class="choice-hint">Create a province from just the unclaimed parts</span></span>
+      </button>
+      <div id="modal-btns"><button class="modal-btn" onclick="cancelClaim()">Forsake</button></div>
+    </div>
   </div>
 </div>
 
@@ -1570,31 +1583,128 @@ function continueBorderRecording(){
   document.getElementById('btn-claim').style.display='none';
   setStatus('Province claimed — recording continues. Walk another loop to claim more. ✦','alert');
 }
+let overlapIndices=[];
+let _savedPendingPoints=null;
+function _showClaimStep(id){
+  ['claim-step1','claim-step2-new','claim-step2-expand','claim-step-overlap'].forEach(s=>document.getElementById(s).style.display=s===id?'block':'none');
+}
+function findOwnOverlaps(points){
+  if(typeof turf==='undefined'||!validPoints(points)) return [];
+  const indices=[];
+  try{
+    const rp=[...points.map(p=>[p[1],p[0]])];rp.push(rp[0]);
+    const pp=turf.polygon([rp]);
+    territories.forEach((t,i)=>{
+      if(!validPoints(t.points)) return;
+      try{
+        const rt=[...t.points.map(p=>[p[1],p[0]])];rt.push(rt[0]);
+        const inter=turf.intersect(pp,turf.polygon([rt]));
+        if(inter&&turf.area(inter)>=1) indices.push(i);
+      }catch(e){}
+    });
+  }catch(e){}
+  return indices;
+}
 function claimTerritory(){
   if(trail.length<3){setStatus('Chart more territory first.','danger');return;}
   pendingPoints=[...trail];mergeTargetIdx=null;
-  document.getElementById('claim-step1').style.display='block';
-  document.getElementById('claim-step2-new').style.display='none';
-  document.getElementById('claim-step2-expand').style.display='none';
+  overlapIndices=findOwnOverlaps(pendingPoints);
+  if(overlapIndices.length){
+    document.getElementById('overlap-province-names').textContent=overlapIndices.map(i=>territories[i].name).join(', ');
+    _showClaimStep('claim-step-overlap');
+    document.getElementById('name-modal').classList.add('open');
+    return;
+  }
+  _showClaimStep('claim-step1');
   document.getElementById('btn-expand-province').style.display=territories.length?'':'none';
   document.getElementById('name-modal').classList.add('open');
 }
 function chooseNew(){
-  document.getElementById('claim-step1').style.display='none';
-  document.getElementById('claim-step2-new').style.display='block';
+  _showClaimStep('claim-step2-new');
   document.getElementById('territory-input').value='';
   setTimeout(()=>document.getElementById('territory-input').focus(),150);
 }
 function chooseExpand(){
-  document.getElementById('claim-step1').style.display='none';
-  document.getElementById('claim-step2-expand').style.display='block';
+  _showClaimStep('claim-step2-expand');
   document.getElementById('gap-warning').style.display='none';
   mergeTargetIdx=0;buildProvincePicker();
 }
 function backToStep1(){
-  document.getElementById('claim-step1').style.display='block';
-  document.getElementById('claim-step2-new').style.display='none';
-  document.getElementById('claim-step2-expand').style.display='none';
+  if(overlapIndices.length){
+    if(_savedPendingPoints){pendingPoints=_savedPendingPoints;_savedPendingPoints=null;}
+    document.getElementById('overlap-province-names').textContent=overlapIndices.map(i=>territories[i].name).join(', ');
+    _showClaimStep('claim-step-overlap');
+  } else {
+    _showClaimStep('claim-step1');
+  }
+}
+function doMergeOverlap(){
+  document.getElementById('name-modal').classList.remove('open');
+  const sorted=[...overlapIndices].sort((a,b)=>(territories[b].area||0)-(territories[a].area||0));
+  const mainId=territories[sorted[0]].id;
+  try{
+    const rp=[...pendingPoints.map(p=>[p[1],p[0]])];rp.push(rp[0]);
+    let poly=turf.polygon([rp]);
+    sorted.forEach(i=>{
+      const rt=[...territories[i].points.map(p=>[p[1],p[0]])];rt.push(rt[0]);
+      try{poly=turf.union(poly,turf.polygon([rt]));}catch(e){}
+    });
+    let ring=poly.geometry.type==='MultiPolygon'
+      ?poly.geometry.coordinates.reduce((x,y)=>x[0].length>y[0].length?x:y)[0]
+      :poly.geometry.coordinates[0];
+    const newPts=ring.slice(0,-1).map(c=>[c[1],c[0]]);
+    const newArea=turf.area(poly);
+    // Remove all overlapping territories from map (reverse order to preserve indices)
+    [...sorted].sort((a,b)=>b-a).forEach(i=>{
+      const li=polygonLayers.findIndex(l=>l.id===territories[i].id);
+      if(li>=0){map.removeLayer(polygonLayers[li].poly);if(polygonLayers[li].centroidMarker)map.removeLayer(polygonLayers[li].centroidMarker);polygonLayers.splice(li,1);}
+    });
+    // Keep the main territory object, delete the rest
+    const mainT={...territories[sorted[0]],points:newPts,area:newArea,towns:getCapturedTowns(newPts)};
+    [...sorted].sort((a,b)=>b-a).forEach(i=>territories.splice(i,1));
+    territories.push(mainT);
+    drawPoly(mainT,true);
+    saveTerritories();carveEnemyOverlap(mainT);
+    pushLedger('⚑',`Merged into ${mainT.emoji} ${mainT.name}`,null);
+    setStatus(`Lands united into "${mainT.name}" ✦`,'alert');
+  }catch(e){
+    console.warn('doMergeOverlap:',e);
+    setStatus('Merge failed — try Fix Borders from the Kingdom screen.','danger');
+  }
+  overlapIndices=[];_savedPendingPoints=null;
+  if(borderCloseMode)continueBorderRecording();else finishClaim();
+}
+function doClaimNewLandOnly(){
+  _savedPendingPoints=pendingPoints;
+  try{
+    const rp=[...pendingPoints.map(p=>[p[1],p[0]])];rp.push(rp[0]);
+    let poly=turf.polygon([rp]);
+    overlapIndices.forEach(i=>{
+      const rt=[...territories[i].points.map(p=>[p[1],p[0]])];rt.push(rt[0]);
+      try{const d=turf.difference(poly,turf.polygon([rt]));if(d)poly=d;}catch(e){}
+    });
+    let ring=poly.geometry.type==='MultiPolygon'
+      ?poly.geometry.coordinates.reduce((a,b)=>a[0].length>b[0].length?a:b)[0]
+      :poly.geometry.coordinates[0];
+    const newPts=ring.slice(0,-1).map(c=>[c[1],c[0]]);
+    if(turf.area(poly)<4000){
+      document.getElementById('name-modal').classList.remove('open');
+      setStatus('The unclaimed portion is too small to found a province.','danger');
+      overlapIndices=[];_savedPendingPoints=null;
+      if(borderCloseMode)borderCloseMode=false;else finishClaim();
+      return;
+    }
+    pendingPoints=newPts;
+    _showClaimStep('claim-step2-new');
+    document.getElementById('territory-input').value='';
+    setTimeout(()=>document.getElementById('territory-input').focus(),150);
+  }catch(e){
+    console.warn('doClaimNewLandOnly:',e);
+    setStatus('Could not calculate new land boundary — try Fix Borders instead.','danger');
+    document.getElementById('name-modal').classList.remove('open');
+    overlapIndices=[];_savedPendingPoints=null;
+    if(borderCloseMode)borderCloseMode=false;else finishClaim();
+  }
 }
 function buildProvincePicker(){
   document.getElementById('province-picker').innerHTML=territories.map((t,i)=>`
@@ -1617,7 +1727,7 @@ function trailTouches(tpts,terrPts){
   return false;
 }
 function dSeg(p,a,b){const dx=b[0]-a[0],dy=b[1]-a[1];if(!dx&&!dy) return dist(p,a);const t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy)));return dist(p,[a[0]+t*dx,a[1]+t*dy]);}
-function cancelClaim(){pendingPoints=null;mergeTargetIdx=null;document.getElementById('name-modal').classList.remove('open');}
+function cancelClaim(){pendingPoints=null;mergeTargetIdx=null;overlapIndices=[];_savedPendingPoints=null;document.getElementById('name-modal').classList.remove('open');}
 
 function saveClaim(){
   const area=polyArea(pendingPoints);
